@@ -35,11 +35,11 @@ public class VisionPipeline extends OpenCvPipeline
     /*
      * The core values which define the location and size of the sample regions
      */
-    static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(109,98);
-    static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(181,98);
-    static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(253,98);
-    static final int REGION_WIDTH = 20;
-    static final int REGION_HEIGHT = 20;
+    static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(70,168);
+    static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(240,168);
+    static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(410,168);
+    static final int REGION_WIDTH = 170;
+    static final int REGION_HEIGHT = 120;
 
     /*
      * Points which actually define the sample region rectangles, derived from above values
@@ -81,8 +81,10 @@ public class VisionPipeline extends OpenCvPipeline
      * Working variables
      */
     Mat region1_Cb, region2_Cb, region3_Cb;
+    Mat region1_Cr, region2_Cr, region3_Cr;
     Mat YCrCb = new Mat();
     Mat Cb = new Mat();
+    Mat Cr=new Mat();
     int avg1, avg2, avg3;
 
     // Volatile since accessed by OpMode thread w/o synchronization
@@ -96,6 +98,7 @@ public class VisionPipeline extends OpenCvPipeline
     {
         Imgproc.cvtColor(input, YCrCb, Imgproc.COLOR_RGB2YCrCb);
         Core.extractChannel(YCrCb, Cb, 2);
+        Core.extractChannel(YCrCb, Cr, 1);
     }
 
     @Override
@@ -120,6 +123,10 @@ public class VisionPipeline extends OpenCvPipeline
         region1_Cb = Cb.submat(new Rect(region1_pointA, region1_pointB));
         region2_Cb = Cb.submat(new Rect(region2_pointA, region2_pointB));
         region3_Cb = Cb.submat(new Rect(region3_pointA, region3_pointB));
+
+        region1_Cr = Cr.submat(new Rect(region1_pointA, region1_pointB));
+        region2_Cr = Cr.submat(new Rect(region2_pointA, region2_pointB));
+        region3_Cr = Cr.submat(new Rect(region3_pointA, region3_pointB));
     }
 
     @Override
@@ -172,13 +179,15 @@ public class VisionPipeline extends OpenCvPipeline
          * pixel value of the 3-channel image, and referenced the value
          * at index 2 here.
          */
-        avg1 = (int) Core.mean(region1_Cb).val[0];
-        avg2 = (int) Core.mean(region2_Cb).val[0];
-        avg3 = (int) Core.mean(region3_Cb).val[0];
+        avg1 = (int) (1.1*Core.mean(region1_Cb).val[0])+(int) Core.mean(region1_Cr).val[0];
+        avg2 = (int) (1.1*Core.mean(region2_Cb).val[0])+(int) Core.mean(region2_Cr).val[0];
+        avg3 = (int) (1.1*Core.mean(region3_Cb).val[0])+(int) Core.mean(region3_Cr).val[0];
 
         tel.addData("Area 1", avg1);
         tel.addData("Area 2", avg2);
         tel.addData("Area 3", avg3);
+        tel.addData("Test", (int) Core.mean(region1_Cb).val[0]);
+        tel.addData("Spot", getAnalysis());
         tel.update();
         /*
          * Draw a rectangle showing sample region 1 on the screen.
