@@ -191,9 +191,8 @@ public class AutonDrive extends MecanumDrivetrain
         temp/=motors.length;
         return temp;
     }
-    public void movePipes(double speed, double direction, double timeout)
-    {
-        List<Double> previousAccel=new ArrayList<>();
+    public void movePipes(double speed, double direction, double timeout) {
+        /*List<Double> previousAccel=new ArrayList<>();
         double timedout= SystemClock.uptimeMillis()+(timeout*1000);
         while(previousAccel.get(previousAccel.size()-1)/previousAccel.get(0)-1<0.5&&SystemClock.uptimeMillis()<timedout)
         {
@@ -212,5 +211,6 @@ public class AutonDrive extends MecanumDrivetrain
         {
             i.setPower(0);
         }
+    }*/
     }
 }
