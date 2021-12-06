@@ -59,6 +59,7 @@ public class LessScuffedAuton extends LinearOpMode
     Controller control;
     int barcodePos;
 
+
     static final int[] ARM_POSITIONS={0, 100}; //temp values
 
 
@@ -109,7 +110,8 @@ public class LessScuffedAuton extends LinearOpMode
             }
             deposit.moveToPos(ARM_POSITIONS[0], 0.5);
             drive.turnDegrees(-87, 0.8, 5);
-            drive.moveInches(-70, 1, 0, 15);
+            //drive.moveInches(-70, 1, 0, 15);
+            drive.movePipes(1, -1, 8);
 
         }
 

@@ -35,6 +35,7 @@ public class AutonDrive extends MecanumDrivetrain
     static final double STRAFE_THRESHOLD=10;
     static final double DRIVE_COEFF=0.15;
     static final double ERROR=10;
+    static final double ACCEL_THRESHHOLD=3;
     Telemetry tel;
 
     Controller control;
@@ -191,7 +192,24 @@ public class AutonDrive extends MecanumDrivetrain
         temp/=motors.length;
         return temp;
     }
-    public void movePipes(double speed, double direction, double timeout) {
+    public void movePipes(double speed, double direction, double timeout)
+    {
+        moveInches(Math.signum(direction)*30, speed, 0, 3 );
+        double timedout=SystemClock.uptimeMillis()+(timeout)*1000;
+        while(SystemClock.uptimeMillis()<timedout&&Math.abs(imu.getLinearAcceleration().yAccel)<ACCEL_THRESHHOLD)
+        {
+            for(DcMotor i:motors)
+            {
+                i.setPower(speed*Math.signum(direction));
+            }
+        }
+
+        for(DcMotor i:motors)
+        {
+            i.setPower(0);
+        }
+
+
         /*List<Double> previousAccel=new ArrayList<>();
         double timedout= SystemClock.uptimeMillis()+(timeout*1000);
         while(previousAccel.get(previousAccel.size()-1)/previousAccel.get(0)-1<0.5&&SystemClock.uptimeMillis()<timedout)
