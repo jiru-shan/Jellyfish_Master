@@ -53,6 +53,9 @@ public class VisionTest extends LinearOpMode
                 telemetry.update();
             }
         });
+        //sam test stuff from here down
+        waitForStart();
+        switch (pipeline.getLocation)
     }
 }
 
