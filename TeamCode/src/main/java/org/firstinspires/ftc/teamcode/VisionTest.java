@@ -55,7 +55,7 @@ public class VisionTest extends LinearOpMode
         });
         //sam test stuff from here down
         waitForStart();
-        switch (pipeline.getLocation)
+        //switch (pipeline.getLocation)
     }
 }
 
