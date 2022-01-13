@@ -5,34 +5,43 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp
 public class RoboMec extends LinearOpMode {
+
+    // Testing
+    // Missing 1 Servo
 
     public void runOpMode() throws InterruptedException {
 
         // Motor controllers
         DcMotorController Controller;
 
-        // Initialize
+        // d - deposit, l - lift, c - carousel
+
+        // 9 Motors
         DcMotor leftFront;
         DcMotor leftBack;
         DcMotor rightFront;
         DcMotor rightBack;
-        DcMotor intake;
-        DcMotor armLift;
-        DcMotor armRotate;
+        DcMotor leftIntake;   // left and right with respect to top motors facing right
+        DcMotor rightIntake;
+        DcMotor lift_1;
+        DcMotor lift_2;
 
-        // Servo
+        // 12 Servos
         CRServo carousel;
-
-        // Setup
-        // Controller = hardwareMap.get(DcMotorController.class, "Controller");
-        intake = hardwareMap.dcMotor.get("intake");
-        carousel = hardwareMap.crservo.get("carousel");
-        armLift = hardwareMap.dcMotor.get("armLift");
-        armRotate = hardwareMap.dcMotor.get("armRotate");
+        Servo d_open;
+        Servo d_coverLeft;
+        Servo d_coverRight;
+        Servo d_bendLeft;
+        Servo d_bendRight;
+        Servo i_right_1;
+        Servo i_right_2;
+        Servo i_left_1;
+        Servo i_left_2;
 
         // Runtime
         ElapsedTime runtime = new ElapsedTime();
@@ -42,6 +51,36 @@ public class RoboMec extends LinearOpMode {
         leftBack = hardwareMap.dcMotor.get("leftBack");
         rightFront = hardwareMap.dcMotor.get("rightFront");
         rightBack = hardwareMap.dcMotor.get("rightBack");
+        lift_1 = hardwareMap.dcMotor.get("lift_1");
+        lift_2 = hardwareMap.dcMotor.get("lift_2");
+        leftIntake = hardwareMap.dcMotor.get("leftIntake");
+        rightIntake = hardwareMap.dcMotor.get("rightIntake");
+
+        // Servos
+        d_open = hardwareMap.servo.get("d_open");
+        d_coverLeft = hardwareMap.servo.get("d_coverLeft");
+        d_coverRight = hardwareMap.servo.get("d_coverRight");
+        d_bendLeft = hardwareMap.servo.get("d_bendLeft");
+        d_bendRight = hardwareMap.servo.get("d_bendRight");
+        i_left_1 = hardwareMap.servo.get("i_left_1");
+        i_left_2 = hardwareMap.servo.get("i_left_2");
+        i_right_1 = hardwareMap.servo.get("i_right_1");
+        i_right_2 = hardwareMap.servo.get("i_right_2");
+        carousel = hardwareMap.crservo.get("carousel");
+
+        // Intake
+        double twoSweepPower = -1;
+        double minSweepPower = 0;
+
+        // Deposit
+        double d_open_minRange = 0;
+        double d_open_maxRange = 0.3;
+        double d_cover_minRange = 0;
+        double d_cover_maxRange = 0.5;
+        double d_bend_minRange = 0;
+        double d_bend_maxRange = 0.6;
+        double i_minRange = 0;
+        double i_maxRange = 0.3;
 
         // Carousel
         double minSpinPower = 0;
@@ -49,6 +88,16 @@ public class RoboMec extends LinearOpMode {
 
         // Factor
         double normalSpeed = 1.0;
+        int target = 100;
+
+        // Reset encoders
+        lift_1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
+        lift_2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        // PID
+        double fineTune;
+        double position;
+        double goal;
 
         waitForStart();
 
@@ -61,7 +110,7 @@ public class RoboMec extends LinearOpMode {
             double y = gamepad1.right_stick_x; // Reversed
             double x = -gamepad1.left_stick_x * 1.1; // Strafing + Precision
             double rx = gamepad1.left_stick_y; // Forward/Backward
-//
+
 //            /** Denominator is the largest motor power (absolute value) or 1
 //             * This ensures all the powers maintain the same ratio, but only when
 //             * at least one is out of the range [-1, 1] **/
@@ -113,9 +162,13 @@ public class RoboMec extends LinearOpMode {
 
             // Switch to ninja mode & back
             if (gamepad1.right_bumper) {
+
                 if (normalSpeed == 1.0) {
+
                     normalSpeed = 0.5;
+
                 } else {
+
                     normalSpeed = 1.0;
                 }
             }
@@ -123,201 +176,173 @@ public class RoboMec extends LinearOpMode {
             /** Intake **/
 
             // If button "a, x, y, b" on game pad 1 is pressed, run intake
-            if (gamepad1.a) {
+            if (gamepad1.left_bumper) {
 
-                double lightSweepPower = -0.6;
-                // Run intake
-                intake.setPower(lightSweepPower);
+                leftIntake.setPower(twoSweepPower);
+
+            } else if (gamepad1.right_bumper) {
+
+                rightIntake.setPower(twoSweepPower);
+
+            } else if (gamepad1.left_trigger != 0) {
+
+                leftIntake.setPower(-twoSweepPower);
+
+            } else if (gamepad1.right_trigger != 0) {
+
+                rightIntake.setPower(-twoSweepPower);
+
             } else if (gamepad1.x) {
 
-                double oneSweepPower = -0.8;
-                intake.setPower(oneSweepPower);
-            } else if (gamepad1.y) {
+                // Raise
+                i_left_1.setPosition(i_maxRange);
+                i_left_2.setPosition(i_maxRange);
+                i_right_1.setPosition(i_maxRange);
+                i_right_2.setPosition(i_maxRange);
 
-                double twoSweepPower = -1;
-                intake.setPower(twoSweepPower);
-            } else if (gamepad1.b) {
+                i_right_1.setPosition(i_maxRange);
 
-                double twoSweepPower = -1;
-                intake.setPower(-twoSweepPower);
+            } else if (gamepad1.dpad_up && gamepad1.x) {
+
+                i_left_1.setPosition(i_minRange);
+                i_left_2.setPosition(i_minRange);
+                i_right_1.setPosition(i_minRange);
+                i_right_2.setPosition(i_minRange);
+
             } else {                               // If not pressed, stop intake
 
-                double minSweepPower = 0;
-                // Stop intake
-                intake.setPower(minSweepPower);
+                leftIntake.setPower(minSweepPower);
+                rightIntake.setPower(minSweepPower);
+                i_left_1.setPosition(i_minRange);
+                i_left_2.setPosition(i_minRange);
+                i_right_1.setPosition(i_minRange);
+                i_right_2.setPosition(i_minRange);
             }
 
             // Intake and Ex-take on Gamepad B
 
-            if (gamepad2.right_bumper) {
+            if (gamepad2.left_bumper) {
 
-                double twoSweepPower = -1;
-                intake.setPower(twoSweepPower);
-            } else if (gamepad2.left_bumper) {
+                leftIntake.setPower(twoSweepPower);
 
-                double twoSweepPower = -1;
-                intake.setPower(-twoSweepPower);
-            } else {                                // If not pressed, stop intake
+            } else if (gamepad2.right_bumper) {
 
-                double minSweepPower = 0;
-                // Stop intake
-                intake.setPower(minSweepPower);
-            }
+                rightIntake.setPower(-twoSweepPower);
 
-            /** Arm **/
+            } else if (gamepad2.left_trigger != 0) {
 
-//            double extend = 720 / 2;
-//            double retract = -720/2;
-//
-//            armLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//            int reach = armLift.getTargetPosition() + (int) extend;
-//
-//            if (gamepad2.dpad_up) {
-//
-//                // Lift arm
-//                armLift.setTargetPosition(reach);
-//                armLift.setPower(50);
-//                armLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//            } else {
-//
-//                armLift.setPower(0);
-//            }
-//
-//            // Retract Slides
-//            int retractSlides = armLift.getTargetPosition() + (int) retract;
-//
-//            if (gamepad2.dpad_down) {
-//
-//                // Lower arm
-//                armLift.setTargetPosition(retractSlides);
-//                armLift.setPower(-50);
-//                armLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//            } else {
-//
-//                armLift.setPower(0);
-//            }
-//
-//            // Motor tick count is equal to 28 times gear ratio - 15:1
-//            double MOTOR_TICK_COUNT = 420;
-//
-//            double quarterTurn = (MOTOR_TICK_COUNT / 4);
-//            armRotate.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
-//
-//            // If button "a" on game pad 2 is pressed, run arm
-//            if (gamepad2.y) {
-//
-//                // Move arm to deposit
-//                armRotate.setPower(100);
-//                armRotate.setTargetPosition((int) quarterTurn);   // Move to deposit position
-//                armRotate.setPower(0);
-//            }
-//
-//            // Retract Arm
-//            double quarterReverse = (MOTOR_TICK_COUNT / 4);
-//
-//            if (gamepad2.a) {
-//
-//                // Move arm to original position
-//                armRotate.setPower(-100);
-//                armRotate.setTargetPosition((int) quarterReverse);  // Return to original position
-//                armRotate.setPower(0);
-//            }
+                leftIntake.setPower(-twoSweepPower);
 
-            /** Lift & Rotate **/
+            } else if (gamepad2.right_trigger != 0) {
 
-            double maxLiftPower = 1;
-            double minLiftPower = 0;
-            double maxRotatePower = 0.3;
-            double minRotatePower = 0;
+                rightIntake.setPower(-twoSweepPower);
 
-            if (gamepad2.y) {
-
-                // Lift arm
-                armLift.setPower(-maxLiftPower);
-                // Rotate forward
-                armRotate.setPower(maxRotatePower);
-            } else if (gamepad2.a) {
-
-                // Lower arm
-                armLift.setPower(maxLiftPower);
-                // Rotate backward
-                armRotate.setPower(-maxRotatePower);
-            } else if (gamepad2.dpad_up){
-
-                // Rotate forward
-                armRotate.setPower(maxRotatePower);
-            } else if (gamepad2.dpad_down){
-
-                // Rotate backward
-                armRotate.setPower(-maxRotatePower);
             } else {
 
-                // Stop arm
-                armLift.setPower(minLiftPower);
-                // Stop deposit
-                armRotate.setPower(minRotatePower);
+                rightIntake.setPower(minSweepPower);
+                leftIntake.setPower(minSweepPower);
             }
 
             /** Lift **/
-//
-//            double maxLiftPower = 1;
-//            double minLiftPower = 0;
-//
-//            if (gamepad2.dpad_down) {
-//
-//                // Lift arm
-//                armLift.setPower(maxLiftPower);
-//            } else if (gamepad2.dpad_up) {
-//
-//                // Lower arm
-//                armLift.setPower(-maxLiftPower);
-//            } else {
-//
-//                // Stop arm
-//                armLift.setPower(minLiftPower);
-//            }
-//
-            /** Rotate **/
-//
-//            double maxRotatePower = 0.3;
-//            double minRotatePower = 0;
-//
-//            if (gamepad2.y) {
-//
-//                // Rotate forward
-//                armRotate.setPower(maxRotatePower);
-//            } else if (gamepad2.a) {
-//
-//                // Rotate backward
-//                armRotate.setPower(-maxRotatePower);
-//            } else {
-//
-//                // Stop
-//                armRotate.setPower(minRotatePower);
-//            }
+
+            // Motor tick count is equal to 28 times gear ratio - 15:1
+
+// If button "a" on game pad 2 is pressed, run arm
+            if (gamepad2.a) {
+
+                // Move arm to deposit
+                lift_1.setPower(0.3);
+                lift_2.setPower(0.3);
+                lift_1.setTargetPosition(target);
+                lift_2.setTargetPosition(target);
+                lift_1.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
+                lift_2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            } else if (gamepad2.dpad_up && gamepad2.a) {
+
+                // Move arm to original position
+                lift_1.setPower(0.3);
+                lift_2.setPower(0.3);
+                lift_1.setTargetPosition(0);
+                lift_2.setTargetPosition(0);
+                lift_1.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
+                lift_2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            } else {
+
+                lift_1.setPower(0);
+                lift_2.setPower(0);
+            }
+
+            /** Deposit **/
+
+            if (gamepad2.x) {
+
+                // Open
+                d_open.setPosition(d_open_maxRange);
+
+            } else if (gamepad2.dpad_up && gamepad2.x) {
+
+                // Close
+                d_open.setPosition(d_open_minRange);
+
+            } else if (gamepad2.b) {
+
+                // Open
+                d_coverLeft.setPosition(d_cover_maxRange);
+                d_coverRight.setPosition(d_cover_maxRange);
+
+            } else if (gamepad2.dpad_up && gamepad2.b) {
+
+                // Cover
+                d_coverLeft.setPosition(d_cover_minRange);
+                d_coverRight.setPosition(d_cover_minRange);
+
+            } else if (gamepad2.y) {
+
+                // Up
+                d_bendLeft.setPosition(d_bend_maxRange);
+                d_bendRight.setPosition(d_bend_maxRange);
+
+            } else if (gamepad2.dpad_up && gamepad2.y) {
+
+                // Down
+                d_bendLeft.setPosition(d_bend_minRange);
+                d_bendRight.setPosition(d_bend_minRange);
+
+            } else {
+
+                d_open.setPosition(d_open_minRange);
+                d_coverLeft.setPosition(d_cover_minRange);
+                d_coverRight.setPosition(d_cover_minRange);
+                d_bendLeft.setPosition(d_bend_minRange);
+                d_bendRight.setPosition(d_bend_minRange);
+            }
 
             /** Carousel **/
 
             // Run Servo
-            if (gamepad2.b) {
+            if (gamepad2.dpad_right) {
 
                 // Spin carousel clockwise
                 carousel.setPower(-maxSpinPower);
 
-            } else if (gamepad2.x) {
+            } else if (gamepad2.dpad_left) {
 
-                // Spin                          carousel counterclockwise
+                // Spin carousel counterclockwise
                 carousel.setPower(maxSpinPower);
             } else {
 
                 // Stop carousel
                 carousel.setPower(minSpinPower);
-
             }
+
+            // PID
+
 
             /** Sensors **/
 
-                // If there is one cube on the ramp/in the deposit, then stop intake
+            // If there is one cube on the ramp/in the deposit, then stop intake
         }
     }
 }
