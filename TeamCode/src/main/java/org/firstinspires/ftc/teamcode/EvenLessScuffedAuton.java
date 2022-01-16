@@ -35,6 +35,7 @@ public class EvenLessScuffedAuton extends LinearOpMode
         if (sensorRange1.getDistance(DistanceUnit.MM) < 10 || sensorRange2.getDistance(DistanceUnit.MM) < 10) {
             return true;
         }
+        return false;
 
     }
 }
