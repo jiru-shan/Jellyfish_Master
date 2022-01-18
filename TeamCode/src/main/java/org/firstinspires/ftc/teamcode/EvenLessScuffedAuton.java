@@ -36,6 +36,5 @@ public class EvenLessScuffedAuton extends LinearOpMode
             return true;
         }
         return false;
-
     }
 }
