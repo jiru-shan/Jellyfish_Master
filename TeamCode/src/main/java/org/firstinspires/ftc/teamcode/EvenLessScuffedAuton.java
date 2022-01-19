@@ -33,6 +33,16 @@ public class EvenLessScuffedAuton extends LinearOpMode
     Servo i_topRight;
     Servo i_bottomRight;
 
+    // Deposit servo positions
+    double d_open_minRange = 0.65;
+    double d_open_top = 0.53;
+    double d_minRange_bendLeft = 0.89;      // need to fix bend values
+    double d_maxRange_bendLeft = 0.78;
+    double d_minRange_bendRight = 0.10;
+    double d_maxRange_bendRight = 0.21;
+
+    int alliance_targetTipped = 700;
+
     @Override
     public void runOpMode() throws InterruptedException
     {
@@ -83,14 +93,14 @@ public class EvenLessScuffedAuton extends LinearOpMode
 
         while(hasBlock() == false) {
             leftFront.setPower(0.7);
-            leftRear.setPower(0.7);
+            leftBack.setPower(0.7);
             rightFront.setPower(0.7);
-            rightRear.setPower(0.7);
+            rightBack.setPower(0.7);
         }
         leftFront.setPower(0);
-        leftRear.setPower(0);
+        leftBack.setPower(0);
         rightFront.setPower(0);
-        rightRear.setPower(0);
+        rightBack.setPower(0);
         end = leftFront.getCurrentPosition();
         int distance = end - start;
         return distance;
