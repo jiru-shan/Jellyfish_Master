@@ -35,11 +35,11 @@ public class VisionPipeline extends OpenCvPipeline
     /*
      * The core values which define the location and size of the sample regions
      */
-    static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(70,168);
-    static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(240,168);
-    static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(410,168);
-    static final int REGION_WIDTH = 170;
-    static final int REGION_HEIGHT = 120;
+    static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(35,84);
+    static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(120,84);
+    static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(205,84);
+    static final int REGION_WIDTH = 85;
+    static final int REGION_HEIGHT = 60;
 
     /*
      * Points which actually define the sample region rectangles, derived from above values
@@ -217,7 +217,7 @@ public class VisionPipeline extends OpenCvPipeline
          */
         Imgproc.rectangle(
                 input, // Buffer to draw on
-                region3_pointA, // First point which defines the rectangle
+                region3_pointA, // Firswt point which defines the rectangle
                 region3_pointB, // Second point which defines the rectangle
                 BLUE, // The color the rectangle is drawn in
                 2); // Thickness of the rectangle lines

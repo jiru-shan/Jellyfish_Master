@@ -1,8 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.os.SystemClock;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -18,7 +22,7 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 public class EvenLessScuffedAuton extends LinearOpMode
 {
     DcMotorEx test;
-    private DistanceSensor sensorRange1, sensorRange2;
+    RevColorSensorV3 sensorRange1, sensorRange2;
 
     DcMotorEx leftFront, leftBack, rightBack, rightFront;
     DcMotor lift_front, lift_back, leftIntake, rightIntake;
@@ -69,18 +73,18 @@ public class EvenLessScuffedAuton extends LinearOpMode
         carousel = hardwareMap.crservo.get("carousel");
 
         test.getCurrent(CurrentUnit.AMPS);
-        sensorRange1 = hardwareMap.get(DistanceSensor.class, "sensor_range");
-        sensorRange2 = hardwareMap.get(DistanceSensor.class, "sensor_range");
+        sensorRange1 = hardwareMap.get(RevColorSensorV3.class, "colorSensor_right");
+        sensorRange2 = hardwareMap.get(RevColorSensorV3.class, "colorSensor_left");
         SampleMecanumDrive drive=new SampleMecanumDrive(hardwareMap);
         Pose2d startPose=new Pose2d(0,0,0);
         ElapsedTime time=new ElapsedTime();
         drive.setPoseEstimate(startPose);
         //TrajectorySequence traqSequence=drive.trajectorySequenceBuilder(startPose).
 
-
     }
 
     public boolean hasBlock() {
+
         if (sensorRange1.getDistance(DistanceUnit.MM) < 10 || sensorRange2.getDistance(DistanceUnit.MM) < 10) {
             return true;
         }
@@ -114,7 +118,12 @@ public class EvenLessScuffedAuton extends LinearOpMode
         lift_front.setPower(-1.0);
         lift_back.setPower(-1.0);
 
-        Thread.sleep(1000);
+        //Thread.sleep(1000);
+        double target= SystemClock.uptimeMillis()+1000;
+        while(SystemClock.uptimeMillis()<target)
+        {
+            //stall
+        }
 
         // Lift up deposit
         d_bendLeft.setPosition(d_maxRange_bendLeft);
@@ -123,14 +132,24 @@ public class EvenLessScuffedAuton extends LinearOpMode
         // Open to deposit in top level of alliance hub
         d_open.setPosition(d_open_top);
 
-        Thread.sleep(500);
+        //Thread.sleep(500);
+        target=SystemClock.uptimeMillis()+500;
+        while(SystemClock.uptimeMillis()<target)
+        {
+            //stall
+        }
 
         // Close & bend down deposit
         d_open.setPosition(d_open_minRange);
         d_bendLeft.setPosition(d_minRange_bendLeft);
         d_bendRight.setPosition(d_minRange_bendRight);
 
-        Thread.sleep(1000);
+        //Thread.sleep(1000);
+        target=SystemClock.uptimeMillis()+1000;
+        while(SystemClock.uptimeMillis()<target)
+        {
+            //stall
+        }
 
         // Retract arm to original position
         lift_front.setTargetPosition(0);
@@ -140,7 +159,13 @@ public class EvenLessScuffedAuton extends LinearOpMode
         lift_front.setPower(1.0);
         lift_back.setPower(1.0);
 
-        Thread.sleep(1000);
+       // Thread.sleep(1000);
+        target=SystemClock.uptimeMillis()+1000;
+        while(SystemClock.uptimeMillis()<target)
+        {
+            //stall
+        }
+
 
         lift_front.setPower(0);
         lift_back.setPower(0);

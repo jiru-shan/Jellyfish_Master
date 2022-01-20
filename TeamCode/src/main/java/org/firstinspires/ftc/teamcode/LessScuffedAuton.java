@@ -59,6 +59,8 @@ public class LessScuffedAuton extends LinearOpMode
     Controller control;
     int barcodePos;
 
+    SingleMotorMechanism temp;
+
 
     static final int[] ARM_POSITIONS={0, 100}; //temp values
 
@@ -70,6 +72,8 @@ public class LessScuffedAuton extends LinearOpMode
        drive=new AutonDrive(new DcMotor [] {Fl,Bl ,Fr,Br}, imu, telemetry, control);
        lift =new Lift(Slides);
        deposit=new Deposit(Arm);
+       Bl.setPower(50);
+
 
         waitForStart();
         if(opModeIsActive())
@@ -136,6 +140,8 @@ public class LessScuffedAuton extends LinearOpMode
         Arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Slides=hardwareMap.get(DcMotor.class, "armLift");
+
+        temp=new SingleMotorMechanism(Br);
 
         Sv=hardwareMap.get(CRServo.class, "carousel");
 
