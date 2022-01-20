@@ -4,11 +4,14 @@ import android.os.SystemClock;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -18,11 +21,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
-
+@Autonomous
 public class EvenLessScuffedAuton extends LinearOpMode
 {
     DcMotorEx test;
-    RevColorSensorV3 sensorRange1, sensorRange2;
+    ColorRangeSensor sensorRange1, sensorRange2;
 
     DcMotorEx leftFront, leftBack, rightBack, rightFront;
     DcMotor lift_front, lift_back, leftIntake, rightIntake;
@@ -45,6 +48,16 @@ public class EvenLessScuffedAuton extends LinearOpMode
     double d_minRange_bendRight = 0.10;
     double d_maxRange_bendRight = 0.21;
 
+    double i_minRange_topRight = 0.96;
+    double i_maxRange_topRight = 0.17;
+    double i_minRange_bottomRight = 0.04;
+    double i_maxRange_bottomRight = 0.83;
+
+    double i_minRange_topLeft = 0.1;
+    double i_maxRange_topLeft = 0.85;
+    double i_minRange_bottomLeft = 0.9;
+    double i_maxRange_bottomLeft = 0.15;
+
     int alliance_targetTipped = 700;
 
     @Override
@@ -60,6 +73,8 @@ public class EvenLessScuffedAuton extends LinearOpMode
         leftIntake = hardwareMap.dcMotor.get("leftIntake");
         rightIntake = hardwareMap.dcMotor.get("rightIntake");
 
+        leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
         // Servos
         d_open = hardwareMap.servo.get("d_open");
         d_coverLeft = hardwareMap.servo.get("d_coverLeft");
@@ -72,34 +87,64 @@ public class EvenLessScuffedAuton extends LinearOpMode
         i_bottomRight = hardwareMap.servo.get("i_bottomRight");
         carousel = hardwareMap.crservo.get("carousel");
 
-        test.getCurrent(CurrentUnit.AMPS);
-        sensorRange1 = hardwareMap.get(RevColorSensorV3.class, "colorSensor_right");
-        sensorRange2 = hardwareMap.get(RevColorSensorV3.class, "colorSensor_left");
+        sensorRange1 = hardwareMap.get(ColorRangeSensor.class, "colorSensor_right");
+        sensorRange2 = hardwareMap.get(ColorRangeSensor.class, "colorSensor_left");
+
         SampleMecanumDrive drive=new SampleMecanumDrive(hardwareMap);
         Pose2d startPose=new Pose2d(0,0,0);
         ElapsedTime time=new ElapsedTime();
         drive.setPoseEstimate(startPose);
+
+        waitForStart();
+
+        getCube();
+        //testIntakes();
+
         //TrajectorySequence traqSequence=drive.trajectorySequenceBuilder(startPose).
 
     }
 
+    public void testIntakes()
+    {
+        //i_topRight.setPosition(i_minRange_topRight);
+        //i_bottomRight.setPosition(i_minRange_bottomRight);
+        while(opModeIsActive())
+        {
+            i_topRight.setPosition(i_minRange_topRight);
+            i_bottomRight.setPosition(i_minRange_bottomRight);
+
+            double target=SystemClock.uptimeMillis()+1000;
+            while(SystemClock.uptimeMillis()<target)
+            {
+                //stall
+            }
+
+
+            i_topLeft.setPosition(i_minRange_topLeft);
+            i_bottomLeft.setPosition(i_minRange_bottomLeft);
+        }
+    }
     public boolean hasBlock() {
 
-        if (sensorRange1.getDistance(DistanceUnit.MM) < 10 || sensorRange2.getDistance(DistanceUnit.MM) < 10) {
+        if (sensorRange1.getDistance(DistanceUnit.MM) < 55 || sensorRange2.getDistance(DistanceUnit.MM) < 55) {
             return true;
         }
         return false;
     }
 
-    public int distance() {
+    public int getCube() {
         int start = leftFront.getCurrentPosition();
         int end = 0;
 
+        i_topRight.setPosition(i_minRange_topRight);
+        i_bottomRight.setPosition(i_minRange_bottomRight);
+
         while(hasBlock() == false) {
-            leftFront.setPower(0.7);
-            leftBack.setPower(0.7);
-            rightFront.setPower(0.7);
-            rightBack.setPower(0.7);
+            leftFront.setPower(-0.7);
+            leftBack.setPower(-0.7);
+            rightFront.setPower(-0.7);
+            rightBack.setPower(-0.7);
+            rightIntake.setPower(1);
         }
         leftFront.setPower(0);
         leftBack.setPower(0);
