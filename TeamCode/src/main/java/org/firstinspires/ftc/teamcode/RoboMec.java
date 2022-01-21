@@ -12,10 +12,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 @TeleOp
 public class RoboMec extends LinearOpMode {
 
-    // Anti-tip?  Capstone?
-    // Implement lift functions
-    // Encoder values for alliance and shared hubs
-
     public void runOpMode() throws InterruptedException {
 
         // Motor controllers
@@ -23,6 +19,8 @@ public class RoboMec extends LinearOpMode {
 
         // d - deposit, l - lift, c - carousel
         // left and right with respect to top motors facing right
+
+        // Left and right intake switched in configuration
 
         // 8 Motors
         DcMotor leftFront;
@@ -82,8 +80,8 @@ public class RoboMec extends LinearOpMode {
         colorSensor_right = hardwareMap.get(ColorSensor.class, "colorSensor_right");
 
         // Intake
-        double highSweepPower = 1.0;
-        double lowSweepPower = 0.8;
+        double highSweepPower = 0.8;
+        double lowSweepPower = 0.4;
 
         // minRange - intake down, deposit position closed, deposit folded down
         // maxRange - intake up, deposit position open, deposit in scoring position
@@ -94,22 +92,25 @@ public class RoboMec extends LinearOpMode {
         double d_open_top = 0.53;
         double d_open_middle = 0.49;
         double d_open_shared = 0.47;
-
-        double d_minRange_coverLeft = 0.50;
-        double d_maxRange_coverLeft = 0.20;
-        double d_minRange_coverRight = 0.52;
-        double d_maxRange_coverRight = 0.82;
-        double d_minRange_bendLeft = 0.92;      // need to fix bend values
+        double d_minRange_coverLeft = 0.55;
+        double d_maxRange_coverLeft = 0.15;
+        double d_minRange_coverRight = 0.45;
+        double d_maxRange_coverRight = 0.85;
+        double d_minRange_bendLeft = 0.96;
         double d_maxRange_bendLeft = 0.78;
-        double d_minRange_bendRight = 0.07;
-        double d_maxRange_bendRight = 0.21;
-        double i_minRange_topLeft = 0.1; //0.08
+        double d_minRange_bendRight = 0.05;
+        double d_maxRange_bendRight = 0.23;
+
+        double d_maxRange_bendLeft_middle = 0.10;   // Fix these values
+        double d_maxRange_bendRight_middle = 0.21;
+
+        double i_minRange_topLeft = 0.10;   // 0.08 
         double i_maxRange_topLeft = 0.88;
-        double i_minRange_bottomLeft = 0.91; //0.92
+        double i_minRange_bottomLeft = 0.91;   // 0.92
         double i_maxRange_bottomLeft = 0.12;
-        double i_minRange_topRight = 0.96; //0.92
+        double i_minRange_topRight = 0.96;   // 0.94
         double i_maxRange_topRight = 0.20;
-        double i_minRange_bottomRight = 0.04; //0.08
+        double i_minRange_bottomRight = 0.04;   // 0.08
         double i_maxRange_bottomRight = 0.80;
 
         // Carousel
@@ -117,8 +118,9 @@ public class RoboMec extends LinearOpMode {
 
         // Factor
         double normalSpeed = 1.0;
-        int alliance_targetTipped = 700;
-        int alliance_targetBalanced = 625;
+        int alliance_targetTipped = 550;
+        int alliance_targetBalanced = 525;   // Fix this value
+        int alliance_middle = 580;   // Fix this value
         int shared_targetClose = 120;
         int shared_targetMiddle = 200;
         int shared_targetFar = 280;
@@ -127,11 +129,6 @@ public class RoboMec extends LinearOpMode {
         lift_front.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
         lift_back.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        // Initialize deposit to position
-
-
-        waitForStart();
-
         d_open.setPosition(d_open_minRangeSemi);
         d_bendLeft.setPosition(d_minRange_bendLeft);
         d_bendRight.setPosition(d_minRange_bendRight);
@@ -139,11 +136,7 @@ public class RoboMec extends LinearOpMode {
         d_coverLeft.setPosition(d_minRange_coverLeft);
         d_coverRight.setPosition(d_minRange_coverRight);
 
-        i_topLeft.setPosition(i_maxRange_topLeft);
-        i_bottomLeft.setPosition(i_maxRange_bottomLeft);
-        i_topRight.setPosition(i_maxRange_topRight);
-        i_bottomRight.setPosition(i_maxRange_bottomRight);
-
+        waitForStart();
 
         if (isStopRequested()) return;
 
@@ -154,6 +147,8 @@ public class RoboMec extends LinearOpMode {
             d_open.setPosition(d_open_minRange);
             d_bendLeft.setPosition(d_minRange_bendLeft);
             d_bendRight.setPosition(d_minRange_bendRight);
+
+            // new Compute();
             
 //            // intuitive controls
 //            double y = gamepad1.right_stick_x; // Reversed
@@ -213,18 +208,18 @@ public class RoboMec extends LinearOpMode {
             telemetry.addData("Lift - Back:", lift_front.getCurrentPosition());
             telemetry.update();
 
-            // Switch to ninja mode & back
-            if (gamepad1.dpad_down) {
-
-                if (normalSpeed == 1.0) {
-
-                    normalSpeed = 0.5;
-
-                } else {
-
-                    normalSpeed = 1.0;
-                }
-            }
+//            // Switch to ninja mode & back
+//            if (gamepad1.dpad_down) {
+//
+//                if (normalSpeed == 1.0) {
+//
+//                    normalSpeed = 0.5;
+//
+//                } else {
+//
+//                    normalSpeed = 1.0;
+//                }
+//            }
 
             /** Combined Functions **/
 
@@ -232,7 +227,7 @@ public class RoboMec extends LinearOpMode {
             // With a button, intake should flip down, start intake, check if object present, lift up, ex-take into deposit
             // During this time, one flap of deposit should be up and one should be down
 
-            if (gamepad1.left_bumper) {
+            if (gamepad1.x || gamepad1.left_trigger != 0) {
 
                 // left intake flips down
                 i_topLeft.setPosition(i_minRange_topLeft);
@@ -248,7 +243,7 @@ public class RoboMec extends LinearOpMode {
                 if (colorSensor_left.alpha() > 500) {
 
                     // slow down intake
-                    leftIntake.setPower(0.5);
+                    leftIntake.setPower(0.1);
 
                     // intake lifts up
                     i_topLeft.setPosition(i_maxRange_topLeft);
@@ -264,7 +259,7 @@ public class RoboMec extends LinearOpMode {
                     Thread.sleep(1000);
 
                     // ex-take object into deposit
-                    leftIntake.setPower(-lowSweepPower);
+                    leftIntake.setPower(-highSweepPower);
 
                     Thread.sleep(800);
 
@@ -279,7 +274,7 @@ public class RoboMec extends LinearOpMode {
                 }
             }
 
-            if (gamepad1.right_bumper) {
+            if (gamepad1.b || gamepad1.right_trigger != 0) {
 
                 // right intake flips down
                 i_topRight.setPosition(i_minRange_topRight);
@@ -295,7 +290,7 @@ public class RoboMec extends LinearOpMode {
                 if (colorSensor_right.alpha() > 500) {
 
                     // slow down intake
-                    rightIntake.setPower(0.5);
+                    rightIntake.setPower(0.1);
 
                     // intake lifts up
                     i_topRight.setPosition(i_maxRange_topRight);
@@ -311,9 +306,9 @@ public class RoboMec extends LinearOpMode {
                     Thread.sleep(1000);
 
                     // ex-take object into deposit
-                    rightIntake.setPower(-lowSweepPower);
+                    rightIntake.setPower(-highSweepPower);
 
-                    Thread.sleep(800);
+                    Thread.sleep(500);
 
                     // stop intake
                     rightIntake.setPower(0);
@@ -328,33 +323,33 @@ public class RoboMec extends LinearOpMode {
 
             // Intake and Ex-take on Gamepad B
 
-            if (gamepad1.x) {
-
-                leftIntake.setPower(highSweepPower);
-
-            } else if (gamepad1.b) {
-
-                rightIntake.setPower(highSweepPower);
-
-            } else if (gamepad1.left_trigger != 0) {
-
-                leftIntake.setPower(-lowSweepPower);
-
-            } else if (gamepad1.right_trigger != 0) {
-
-                rightIntake.setPower(-lowSweepPower);
-
-            } else {
-
-                rightIntake.setPower(0);
-                leftIntake.setPower(0);
-            }
+//            if (gamepad1.left_bumper) {
+//
+//                leftIntake.setPower(highSweepPower);
+//
+//            } else if (gamepad1.right_bumper) {
+//
+//                rightIntake.setPower(highSweepPower);
+//
+//            } else if (gamepad1.left_trigger != 0) {
+//
+//                leftIntake.setPower(-lowSweepPower);
+//
+//            } else if (gamepad1.right_trigger != 0) {
+//
+//                rightIntake.setPower(-lowSweepPower);
+//
+//            } else {
+//
+//                rightIntake.setPower(0);
+//                leftIntake.setPower(0);
+//            }
 
             /** Lift **/
 
             // Motor tick count is equal to 384.5
 
-            if (gamepad2.dpad_left) {
+            if (gamepad2.dpad_up) {
 
                 // new Compute();
 
@@ -368,7 +363,7 @@ public class RoboMec extends LinearOpMode {
 
                 Thread.sleep(1000);
 
-            } else if (gamepad2.dpad_up) {
+            } else if (gamepad1.dpad_right) {
 
                 // new Compute();
 
@@ -382,7 +377,7 @@ public class RoboMec extends LinearOpMode {
 
                 Thread.sleep(1000);
 
-            } else if (gamepad1.a) {
+            } else if (gamepad2.dpad_down) {
 
                 // new Compute();
 
@@ -402,6 +397,15 @@ public class RoboMec extends LinearOpMode {
 
                 Thread.sleep(1000);
 
+//                // Check is deposit returns to original position
+//                if (d_open.getPosition() != d_open_minRange || d_bendLeft.getPosition() != d_minRange_bendLeft || d_bendRight.getPosition() != d_minRange_bendRight) {
+//
+//                    Thread.sleep(1000);
+//                    d_open.setPosition(d_open_minRange);
+//                    d_bendLeft.setPosition(d_minRange_bendLeft);
+//                    d_bendRight.setPosition(d_minRange_bendRight);
+//                }
+
                 // Retract arm to original position
                 lift_front.setTargetPosition(0);
                 lift_back.setTargetPosition(0);
@@ -415,7 +419,65 @@ public class RoboMec extends LinearOpMode {
                 lift_front.setPower(0);
                 lift_back.setPower(0);
 
-            } else if (gamepad2.x) {
+            } else if (gamepad2.dpad_left) {
+
+                // new Compute();
+
+                // Extend arm to deposit position
+                lift_front.setTargetPosition(-alliance_middle);
+                lift_back.setTargetPosition(-alliance_middle);
+                lift_front.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
+                lift_back.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                lift_front.setPower(-1.0);
+                lift_back.setPower(-1.0);
+
+                Thread.sleep(1000);
+
+            }
+//            else if (gamepad1.dpad_down) {
+//
+//                // new Compute();
+//
+//                // Lift up deposit
+//                d_bendLeft.setPosition(d_maxRange_bendLeft_middle);   // Fix these values
+//                d_bendRight.setPosition(d_maxRange_bendRight_middle);
+//
+//                // Open to deposit in top level of alliance hub
+//                d_open.setPosition(d_open_middle);
+//
+//                Thread.sleep(500);
+//
+//                // Close & bend down deposit
+//                d_open.setPosition(d_open_minRange);
+//                d_bendLeft.setPosition(d_minRange_bendLeft);
+//                d_bendRight.setPosition(d_minRange_bendRight);
+//
+//                Thread.sleep(1000);
+//
+//                // Check is deposit returns to original position
+//                if (d_open.getPosition() != d_open_minRange || d_bendLeft.getPosition() != d_minRange_bendLeft || d_bendRight.getPosition() != d_minRange_bendRight) {
+//
+//                    Thread.sleep(1000);
+//                    d_open.setPosition(d_open_minRange);
+//                    d_bendLeft.setPosition(d_minRange_bendLeft);
+//                    d_bendRight.setPosition(d_minRange_bendRight);
+//                }
+//
+//                // Retract arm to original position
+//                lift_front.setTargetPosition(0);
+//                lift_back.setTargetPosition(0);
+//                lift_front.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
+//                lift_back.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                lift_front.setPower(1.0);
+//                lift_back.setPower(1.0);
+//
+//                Thread.sleep(1000);
+//
+//                lift_front.setPower(0);
+//                lift_back.setPower(0);
+//
+//            }
+            else if (gamepad2.x) {
 
                 // new Compute();
 
@@ -454,7 +516,7 @@ public class RoboMec extends LinearOpMode {
 
                 Thread.sleep(1000);
 
-            } else if (gamepad2.dpad_right) {
+            } else if (gamepad2.a) {
 
                 // Lift up deposit
                 d_bendLeft.setPosition(d_maxRange_bendLeft);
@@ -471,6 +533,15 @@ public class RoboMec extends LinearOpMode {
                 d_bendRight.setPosition(d_minRange_bendRight);
 
                 Thread.sleep(1000);
+
+//                // Check is deposit returns to original position
+//                if (d_open.getPosition() != d_open_minRange || d_bendLeft.getPosition() != d_minRange_bendLeft || d_bendRight.getPosition() != d_minRange_bendRight) {
+//
+//                    Thread.sleep(1000);
+//                    d_open.setPosition(d_open_minRange);
+//                    d_bendLeft.setPosition(d_minRange_bendLeft);
+//                    d_bendRight.setPosition(d_minRange_bendRight);
+//                }
 
                 lift_front.setTargetPosition(0);
                 lift_back.setTargetPosition(0);
@@ -501,6 +572,14 @@ public class RoboMec extends LinearOpMode {
 
                 // Stop carousel
                 carousel.setPower(0);
+            }
+
+            /** Reset Encoders **/
+
+            if (gamepad2.dpad_down) {
+
+                lift_front.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
+                lift_back.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             }
         }
     }
