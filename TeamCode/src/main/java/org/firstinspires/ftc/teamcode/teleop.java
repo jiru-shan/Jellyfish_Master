@@ -210,7 +210,7 @@ public class teleop extends LinearOpMode {
 
                     leftIntakeState++;
                 }
-            }else if(rightIntakeState > 0 || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 200)) {
+            }else if((rightIntakeState > 0 || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 200)) && (leftIntakeState < 9)) {
                 leftIntakeState=10;
             }else if (leftIntakeState == 1) {
                 if(colorSensor_left.alpha() > 500) {
@@ -292,7 +292,7 @@ public class teleop extends LinearOpMode {
 
                     rightIntakeState++;
                 }
-            }else if(leftIntakeState > 0 || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 200)) {
+            }else if(leftIntakeState > 0 || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 200) && (rightIntakeState < 9)) {
                 rightIntakeState=10;
             }else if (rightIntakeState == 1) {
                 if(colorSensor_right.alpha() > 500) {
