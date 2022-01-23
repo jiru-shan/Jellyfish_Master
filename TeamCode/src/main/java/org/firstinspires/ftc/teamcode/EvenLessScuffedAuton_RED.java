@@ -2,7 +2,10 @@ package org.firstinspires.ftc.teamcode;
 
 import android.os.SystemClock;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -15,15 +18,21 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
+import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceBuilder;
 
 @Autonomous
-public class EvenLessScuffedAuton extends LinearOpMode
+@Config
+public class EvenLessScuffedAuton_RED extends LinearOpMode
 {
+    public static double TURN_ANGLE=210;
+    public static double CYCLE_TIME;
     DcMotorEx test;
     ColorRangeSensor sensorRange1, sensorRange2;
 
@@ -60,6 +69,12 @@ public class EvenLessScuffedAuton extends LinearOpMode
 
     int alliance_targetTipped = 700;
 
+    double i_hate_existence;
+
+    SampleMecanumDrive drive;
+
+
+
     @Override
     public void runOpMode() throws InterruptedException
     {
@@ -90,40 +105,84 @@ public class EvenLessScuffedAuton extends LinearOpMode
         sensorRange1 = hardwareMap.get(ColorRangeSensor.class, "colorSensor_right");
         sensorRange2 = hardwareMap.get(ColorRangeSensor.class, "colorSensor_left");
 
-        SampleMecanumDrive drive=new SampleMecanumDrive(hardwareMap);
+        drive=new SampleMecanumDrive(hardwareMap);
         Pose2d startPose=new Pose2d(0,0,0);
         ElapsedTime time=new ElapsedTime();
         drive.setPoseEstimate(startPose);
 
         waitForStart();
 
-        getCube();
-        //testIntakes();
+        //check which zone for vision
 
-        //TrajectorySequence traqSequence=drive.trajectorySequenceBuilder(startPose).
+        i_topRight.setPosition(i_minRange_topRight);
+        i_bottomRight.setPosition(i_minRange_bottomRight);
 
-    }
+            Trajectory preStart=drive.trajectoryBuilder(new Pose2d())
+                    .forward(7)
+                    .build();
+            drive.followTrajectory(preStart);
+            drive.setPoseEstimate(new Pose2d(0,0,0));
 
-    public void testIntakes()
-    {
-        //i_topRight.setPosition(i_minRange_topRight);
-        //i_bottomRight.setPosition(i_minRange_bottomRight);
-        while(opModeIsActive())
-        {
-            i_topRight.setPosition(i_minRange_topRight);
-            i_bottomRight.setPosition(i_minRange_bottomRight);
+            //place vision cube now
 
-            double target=SystemClock.uptimeMillis()+1000;
-            while(SystemClock.uptimeMillis()<target)
+
+            while(30000-time.milliseconds()>CYCLE_TIME)
             {
-                //stall
+
+                Trajectory primaryTrajectory0 = drive.trajectoryBuilder(new Pose2d())
+
+                        .lineTo(new Vector2d(-52, 0))
+                        .build();
+                Trajectory primaryTrajectory1 = drive.trajectoryBuilder(primaryTrajectory0.end())
+                        .strafeRight(5)
+                        .splineTo(new Vector2d(-57, -20), Math.toRadians(TURN_ANGLE))
+                        .build();
+                Trajectory primaryTrajectory2 = drive.trajectoryBuilder(primaryTrajectory1.end())
+                        .lineTo(new Vector2d(-75, -19))
+                        .build();
+
+
+                drive.followTrajectory(primaryTrajectory0);
+                drive.followTrajectory(primaryTrajectory1);
+                drive.followTrajectory(primaryTrajectory2);
+                getCube();
+                Trajectory returningTrajectory0 = drive.trajectoryBuilder((drive.getPoseEstimate()))
+                        .lineToLinearHeading(primaryTrajectory2.end())
+                        .build();
+                drive.followTrajectory(returningTrajectory0);
+
+                Trajectory returningTrajectory1 = drive.trajectoryBuilder(returningTrajectory0.end())
+                        .splineTo(new Vector2d(-57, -10), Math.toRadians(0))
+                        .build();
+                drive.followTrajectory(returningTrajectory1);
+
+                Trajectory returningTrajectory2 = drive.trajectoryBuilder(returningTrajectory1.end())
+                        .strafeLeft(12)
+                        .build();
+
+                drive.followTrajectory(returningTrajectory2);
+
+                drive.setPoseEstimate(new Pose2d(drive.getPoseEstimate().getX(), 0, 0));
+
+                //fix localization by aligning with color sensor on white tape
+
+                Trajectory returningTrajectory3 = drive.trajectoryBuilder(drive.getPoseEstimate())
+                        .lineTo(new Vector2d(0, 0))
+                        .build();
+                drive.followTrajectory(returningTrajectory3);
+
+                //deposit cubes
             }
 
 
-            i_topLeft.setPosition(i_minRange_topLeft);
-            i_bottomLeft.setPosition(i_minRange_bottomLeft);
-        }
+            Trajectory park=drive.trajectoryBuilder(new Pose2d())
+                    .lineTo(new Vector2d(-52, 0))
+                    .build();
+            drive.followTrajectory(park);
+
     }
+
+
     public boolean hasBlock() {
 
         if (sensorRange1.getDistance(DistanceUnit.MM) < 55 || sensorRange2.getDistance(DistanceUnit.MM) < 55) {
@@ -132,27 +191,30 @@ public class EvenLessScuffedAuton extends LinearOpMode
         return false;
     }
 
-    public int getCube() {
+    public void getCube() {
         int start = leftFront.getCurrentPosition();
         int end = 0;
 
-        i_topRight.setPosition(i_minRange_topRight);
-        i_bottomRight.setPosition(i_minRange_bottomRight);
 
+
+        drive.update();
         while(hasBlock() == false) {
-            leftFront.setPower(-0.7);
-            leftBack.setPower(-0.7);
-            rightFront.setPower(-0.7);
-            rightBack.setPower(-0.7);
+            leftFront.setPower(-0.3);
+            leftBack.setPower(-0.3);
+            rightFront.setPower(-0.3);
+            rightBack.setPower(-0.3);
             rightIntake.setPower(1);
+            drive.update();
         }
         leftFront.setPower(0);
         leftBack.setPower(0);
         rightFront.setPower(0);
         rightBack.setPower(0);
+        rightIntake.setPower(0);
         end = leftFront.getCurrentPosition();
         int distance = end - start;
-        return distance;
+        drive.update();
+        i_hate_existence= -1*1.89 * 2 * Math.PI * 1 * distance / 384.5;
     }
 
     public void lift(){
