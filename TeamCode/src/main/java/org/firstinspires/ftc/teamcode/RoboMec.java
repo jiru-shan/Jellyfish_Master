@@ -581,7 +581,6 @@ public class RoboMec extends LinearOpMode {
         /** Reset Encoders **/
 
         if (gamepad2.right_trigger != 0) {
-
             liftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
             liftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         }
