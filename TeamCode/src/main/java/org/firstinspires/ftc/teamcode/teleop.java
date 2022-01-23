@@ -185,7 +185,10 @@ public class teleop extends LinearOpMode {
             telemetry.addData("Color - Left", colorSensor_left.alpha());
             telemetry.addData("Color - Right", colorSensor_right.alpha());
             telemetry.addData("Lift - Front:", liftFront.getCurrentPosition());
-            telemetry.addData("Lift - Back:", liftBack.getCurrentPosition());
+            telemetry.addData("leftIntakeState:", leftIntakeState.toString());
+            telemetry.addData("rightIntakeState:", rightIntakeState.toString());
+            telemetry.addData("liftState:", liftState.toString());
+            telemetry.addData("listPosition:", listPosition.toString());
             telemetry.update();
 
             /** Combined Functions **/
@@ -275,7 +278,6 @@ public class teleop extends LinearOpMode {
                 d_coverLeft.setPosition(d_minRange_coverLeft);
 
                 leftIntakeState = 0;
-
             }
 
             if(rightIntakeState == 0) {
