@@ -188,170 +188,170 @@ public class teleop extends LinearOpMode {
             // During this time, one flap of deposit should be up and one should be down
 
 
-            if(leftIntakeState == 0) {
-                if(gamepad1.left_bumper) {
-                    i_topLeft.setPosition(i_minRange_topLeft);
-                    i_bottomLeft.setPosition(i_minRange_bottomLeft);
+            // if(leftIntakeState == 0) {
+            //     if(gamepad1.left_bumper) {
+            //         i_topLeft.setPosition(i_minRange_topLeft);
+            //         i_bottomLeft.setPosition(i_minRange_bottomLeft);
 
-                    leftIntake.setPower(highSweepPower);
+            //         leftIntake.setPower(highSweepPower);
 
-                    // d_open.setPosition(d_open_minRangeSemi);
+            //         // d_open.setPosition(d_open_minRangeSemi);
 
-                    leftIntakeTime.reset();
+            //         leftIntakeTime.reset();
 
-                    leftIntakeState++;
-                }
-            }else if(rightIntakeState > 0 || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 200)) {
-                leftIntakeState=10;
-            }else if (leftIntakeState == 1) {
-                if(colorSensor_left.alpha() > 500) {
-                    leftIntake.setPower(0.1);
+            //         leftIntakeState++;
+            //     }
+            // }else if(rightIntakeState > 0 || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 200)) {
+            //     leftIntakeState=10;
+            // }else if (leftIntakeState == 1) {
+            //     if(colorSensor_left.alpha() > 500) {
+            //         leftIntake.setPower(0.1);
 
-                    i_topLeft.setPosition(i_maxRange_topLeft);
-                    i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+            //         i_topLeft.setPosition(i_maxRange_topLeft);
+            //         i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
-                    leftIntakeState++;
-                }
-            }else if(rightIntakeState == 2) {
-                leftIntake.setPower(0);
+            //         leftIntakeState++;
+            //     }
+            // }else if(rightIntakeState == 2) {
+            //     leftIntake.setPower(0);
 
-                d_coverLeft.setPosition(d_maxRange_coverLeft);
-                d_coverRight.setPosition(d_minRange_coverRight);
+            //     d_coverLeft.setPosition(d_maxRange_coverLeft);
+            //     d_coverRight.setPosition(d_minRange_coverRight);
 
-                leftIntakeTime.reset();
+            //     leftIntakeTime.reset();
 
-                leftIntakeState++;
-            }else if(leftIntakeState == 3) {
-                if(leftIntakeTime.milliseconds() > 1000) {
-                    leftIntake.setPower(-highSweepPower);
+            //     leftIntakeState++;
+            // }else if(leftIntakeState == 3) {
+            //     if(leftIntakeTime.milliseconds() > 1000) {
+            //         leftIntake.setPower(-highSweepPower);
 
-                    leftIntakeTime.reset();
+            //         leftIntakeTime.reset();
 
-                    leftIntakeState++;
-                }
-            }else if(leftIntakeState == 4) {
-                if(leftIntakeTime.milliseconds() > 800) {
-                    leftIntake.setPower(0);
+            //         leftIntakeState++;
+            //     }
+            // }else if(leftIntakeState == 4) {
+            //     if(leftIntakeTime.milliseconds() > 800) {
+            //         leftIntake.setPower(0);
 
-                    d_open.setPosition(d_open_minRange);
+            //         d_open.setPosition(d_open_minRange);
 
-                    d_coverLeft.setPosition(d_minRange_coverLeft);
+            //         d_coverLeft.setPosition(d_minRange_coverLeft);
 
-                    leftIntakeState = 0;
-                    objectCaptured = true;
-                }
-            }else if(leftIntakeState == 10){
-                leftIntake.setPower(-1);
-                leftIntakeTime.reset();
-                leftIntakeState++;
-            }else if(leftIntakeState == 11) {
-                if(leftIntakeTime.milliseconds() > 800) {
-                    leftIntake.setPower(0);
+            //         leftIntakeState = 0;
+            //         objectCaptured = true;
+            //     }
+            // }else if(leftIntakeState == 10){
+            //     leftIntake.setPower(-1);
+            //     leftIntakeTime.reset();
+            //     leftIntakeState++;
+            // }else if(leftIntakeState == 11) {
+            //     if(leftIntakeTime.milliseconds() > 800) {
+            //         leftIntake.setPower(0);
 
-                    i_topLeft.setPosition(i_maxRange_topLeft);
-                    i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+            //         i_topLeft.setPosition(i_maxRange_topLeft);
+            //         i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
-                    d_open.setPosition(d_open_minRange);
+            //         d_open.setPosition(d_open_minRange);
 
-                    d_coverLeft.setPosition(d_minRange_coverLeft);
+            //         d_coverLeft.setPosition(d_minRange_coverLeft);
 
-                    leftIntakeState = 0;
-                }
-            }else {
-                leftIntake.setPower(0);
+            //         leftIntakeState = 0;
+            //     }
+            // }else {
+            //     leftIntake.setPower(0);
 
-                i_topLeft.setPosition(i_maxRange_topLeft);
-                i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+            //     i_topLeft.setPosition(i_maxRange_topLeft);
+            //     i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
-                d_open.setPosition(d_open_minRange);
+            //     d_open.setPosition(d_open_minRange);
 
-                d_coverLeft.setPosition(d_minRange_coverLeft);
+            //     d_coverLeft.setPosition(d_minRange_coverLeft);
 
-                leftIntakeState = 0;
-            }
+            //     leftIntakeState = 0;
+            // }
 
-            if(rightIntakeState == 0) {
-                if(gamepad1.right_bumper) {
-                    i_topRight.setPosition(i_minRange_topRight);
-                    i_bottomRight.setPosition(i_minRange_bottomRight);
+            // if(rightIntakeState == 0) {
+            //     if(gamepad1.right_bumper) {
+            //         i_topRight.setPosition(i_minRange_topRight);
+            //         i_bottomRight.setPosition(i_minRange_bottomRight);
 
-                    rightIntake.setPower(highSweepPower);
+            //         rightIntake.setPower(highSweepPower);
 
-                    // d_open.setPosition(d_open_minRangeSemi);
+            //         // d_open.setPosition(d_open_minRangeSemi);
 
-                    rightIntakeTime.reset();
+            //         rightIntakeTime.reset();
 
-                    rightIntakeState++;
-                }
-            }else if(leftIntakeState > 0 || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 200)) {
-                rightIntakeState=10;
-            }else if (rightIntakeState == 1) {
-                if(colorSensor_right.alpha() > 500) {
-                    rightIntake.setPower(0.1);
+            //         rightIntakeState++;
+            //     }
+            // }else if(leftIntakeState > 0 || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 200)) {
+            //     rightIntakeState=10;
+            // }else if (rightIntakeState == 1) {
+            //     if(colorSensor_right.alpha() > 500) {
+            //         rightIntake.setPower(0.1);
 
-                    i_topRight.setPosition(i_maxRange_topRight);
-                    i_bottomRight.setPosition(i_maxRange_bottomRight);
+            //         i_topRight.setPosition(i_maxRange_topRight);
+            //         i_bottomRight.setPosition(i_maxRange_bottomRight);
 
-                    rightIntakeState++;
-                }
-            }else if(rightIntakeState == 2) {
-                rightIntake.setPower(0);
+            //         rightIntakeState++;
+            //     }
+            // }else if(rightIntakeState == 2) {
+            //     rightIntake.setPower(0);
 
-                d_coverRight.setPosition(d_maxRange_coverRight);
-                d_coverRight.setPosition(d_minRange_coverRight);
+            //     d_coverRight.setPosition(d_maxRange_coverRight);
+            //     d_coverRight.setPosition(d_minRange_coverRight);
 
-                rightIntakeTime.reset();
+            //     rightIntakeTime.reset();
 
-                rightIntakeState++;
-            }else if(rightIntakeState == 3) {
-                if(rightIntakeTime.milliseconds() > 1000) {
-                    rightIntake.setPower(-highSweepPower);
+            //     rightIntakeState++;
+            // }else if(rightIntakeState == 3) {
+            //     if(rightIntakeTime.milliseconds() > 1000) {
+            //         rightIntake.setPower(-highSweepPower);
 
-                    rightIntakeTime.reset();
+            //         rightIntakeTime.reset();
 
-                    rightIntakeState++;
-                }
-            }else if(rightIntakeState == 4) {
-                if(rightIntakeTime.milliseconds() > 800) {
-                    rightIntake.setPower(0);
+            //         rightIntakeState++;
+            //     }
+            // }else if(rightIntakeState == 4) {
+            //     if(rightIntakeTime.milliseconds() > 800) {
+            //         rightIntake.setPower(0);
 
-                    d_open.setPosition(d_open_minRange);
+            //         d_open.setPosition(d_open_minRange);
 
-                    d_coverRight.setPosition(d_minRange_coverRight);
+            //         d_coverRight.setPosition(d_minRange_coverRight);
 
-                    rightIntakeState = 0;
-                    objectCaptured = true;
-                }
-            }else if(rightIntakeState == 10){
-                rightIntake.setPower(-1);
-                rightIntakeTime.reset();
-                rightIntakeState++;
-            }else if(rightIntakeState == 11) {
-                if(rightIntakeTime.milliseconds() > 800) {
-                    rightIntake.setPower(0);
+            //         rightIntakeState = 0;
+            //         objectCaptured = true;
+            //     }
+            // }else if(rightIntakeState == 10){
+            //     rightIntake.setPower(-1);
+            //     rightIntakeTime.reset();
+            //     rightIntakeState++;
+            // }else if(rightIntakeState == 11) {
+            //     if(rightIntakeTime.milliseconds() > 800) {
+            //         rightIntake.setPower(0);
 
-                    i_topRight.setPosition(i_maxRange_topRight);
-                    i_bottomRight.setPosition(i_maxRange_bottomRight);
+            //         i_topRight.setPosition(i_maxRange_topRight);
+            //         i_bottomRight.setPosition(i_maxRange_bottomRight);
 
-                    d_open.setPosition(d_open_minRange);
+            //         d_open.setPosition(d_open_minRange);
 
-                    d_coverRight.setPosition(d_minRange_coverRight);
+            //         d_coverRight.setPosition(d_minRange_coverRight);
 
-                    rightIntakeState = 0;
-                }
-            }else {
-                rightIntake.setPower(0);
+            //         rightIntakeState = 0;
+            //     }
+            // }else {
+            //     rightIntake.setPower(0);
 
-                i_topRight.setPosition(i_maxRange_topRight);
-                i_bottomRight.setPosition(i_maxRange_bottomRight);
+            //     i_topRight.setPosition(i_maxRange_topRight);
+            //     i_bottomRight.setPosition(i_maxRange_bottomRight);
 
-                d_open.setPosition(d_open_minRange);
+            //     d_open.setPosition(d_open_minRange);
 
-                d_coverRight.setPosition(d_minRange_coverRight);
+            //     d_coverRight.setPosition(d_minRange_coverRight);
 
-                rightIntakeState = 0;
+            //     rightIntakeState = 0;
 
-            }
+            // }
 
             /** Lift **/
 
