@@ -367,6 +367,8 @@ public class teleop extends LinearOpMode {
             // Motor tick count is equal to 384.5
             if(liftState == 0) {
                 if(gamepad2.a) {
+                    liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftFront.setTargetPosition(-shared_targetClose);
                     liftBack.setTargetPosition(-shared_targetClose);
                     liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -376,6 +378,8 @@ public class teleop extends LinearOpMode {
                     liftState = 12;
                     liftPosition = 1;
                 }else if(gamepad2.b) {
+                    liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftFront.setTargetPosition(-shared_targetMiddle);
                     liftBack.setTargetPosition(-shared_targetMiddle);
                     liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -385,6 +389,8 @@ public class teleop extends LinearOpMode {
                     liftState = 13;
                     liftPosition = 1;
                 }else if(gamepad2.y) {
+                    liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftFront.setTargetPosition(-shared_targetFar);
                     liftBack.setTargetPosition(-shared_targetFar);
                     liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -394,6 +400,8 @@ public class teleop extends LinearOpMode {
                     liftState = 14;
                     liftPosition = 1;
                 }else if(gamepad2.dpad_down) {
+                    liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftFront.setTargetPosition(-alliance_middle);
                     liftBack.setTargetPosition(-alliance_middle);
                     liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -403,6 +411,8 @@ public class teleop extends LinearOpMode {
                     liftState = 15;
                     liftPosition = 1;
                 }else if(gamepad2.dpad_left) {
+                    liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftFront.setTargetPosition(-alliance_targetBalanced);
                     liftBack.setTargetPosition(-alliance_targetBalanced);
                     liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -412,6 +422,8 @@ public class teleop extends LinearOpMode {
                     liftState = 16;
                     liftPosition = 1;
                 }else if(gamepad2.dpad_up) {
+                    liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftFront.setTargetPosition(-alliance_targetTipped);
                     liftBack.setTargetPosition(-alliance_targetTipped);
                     liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -468,6 +480,8 @@ public class teleop extends LinearOpMode {
 
                 if(liftPosition > 10) {
                     if(gamepad2.a) {
+                        liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                        liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                         liftFront.setTargetPosition(-shared_targetClose);
                         liftBack.setTargetPosition(-shared_targetClose);
                         liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -482,6 +496,8 @@ public class teleop extends LinearOpMode {
                         liftState = 12;
                         liftPosition = 1;
                     }else if(gamepad2.b) {
+                        liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                        liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                         liftFront.setTargetPosition(-shared_targetMiddle);
                         liftBack.setTargetPosition(-shared_targetMiddle);
                         liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -498,6 +514,8 @@ public class teleop extends LinearOpMode {
                         liftState = 13;
                         liftPosition = 1;
                     }else if(gamepad2.y) {
+                        liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                        liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                         liftFront.setTargetPosition(-shared_targetFar);
                         liftBack.setTargetPosition(-shared_targetFar);
                         liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -514,6 +532,8 @@ public class teleop extends LinearOpMode {
                         liftState = 14;
                         liftPosition = 1;
                     }else if(gamepad2.dpad_down) {
+                        liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                        liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                         liftFront.setTargetPosition(-alliance_middle);
                         liftBack.setTargetPosition(-alliance_middle);
                         liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -530,6 +550,8 @@ public class teleop extends LinearOpMode {
                         liftState = 15;
                         liftPosition = 1;
                     }else if(gamepad2.dpad_left) {
+                        liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                        liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                         liftFront.setTargetPosition(-alliance_targetBalanced);
                         liftBack.setTargetPosition(-alliance_targetBalanced);
                         liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -546,6 +568,8 @@ public class teleop extends LinearOpMode {
                         liftState = 16;
                         liftPosition = 1;
                     }else if(gamepad2.dpad_up) {
+                        liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                        liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                         liftFront.setTargetPosition(-alliance_targetTipped);
                         liftBack.setTargetPosition(-alliance_targetTipped);
                         liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -604,6 +628,8 @@ public class teleop extends LinearOpMode {
                 }
             }else if(liftState == 22) {
                 if(liftTime.milliseconds() > 500 || liftPosition > 15 /* this is risky idk if we keep it*/) {
+                    liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftFront.setTargetPosition(0);
                     liftBack.setTargetPosition(0);
                     liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
