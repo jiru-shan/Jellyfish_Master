@@ -179,17 +179,7 @@ public class teleop extends LinearOpMode {
             d_bendRight.setPosition(d_minRange_bendRight);
 
             // Show the elapsed game time & wheel power
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Motors", "leftFront (%.2f), leftBack (%.2f), rightFront (%.2f), rightBack (%.2f)",
-                    leftFrontPower, leftBackPower, rightFrontPower, rightBackPower);
-            telemetry.addData("Color - Left", colorSensor_left.alpha());
-            telemetry.addData("Color - Right", colorSensor_right.alpha());
-            telemetry.addData("Lift - Front:", liftFront.getCurrentPosition());
-            telemetry.addData("leftIntakeState:", leftIntakeState.toString());
-            telemetry.addData("rightIntakeState:", rightIntakeState.toString());
-            telemetry.addData("liftState:", liftState.toString());
-            telemetry.addData("listPosition:", listPosition.toString());
-            telemetry.update();
+
 
             /** Combined Functions **/
 
@@ -248,7 +238,7 @@ public class teleop extends LinearOpMode {
                     d_coverLeft.setPosition(d_minRange_coverLeft);
 
                     leftIntakeState = 0;
-                    objectCaptured = 1;
+                    objectCaptured = true;
                 }
             }else if(leftIntakeState == 10){
                 leftIntake.setPower(-1);
@@ -330,7 +320,7 @@ public class teleop extends LinearOpMode {
                     d_coverRight.setPosition(d_minRange_coverRight);
 
                     rightIntakeState = 0;
-                    objectCaptured = 1;
+                    objectCaptured = true;
                 }
             }else if(rightIntakeState == 10){
                 rightIntake.setPower(-1);
@@ -424,42 +414,42 @@ public class teleop extends LinearOpMode {
                 }
             }else if(liftState >=10 && liftState <20) {
                 if(liftState == 12) {
-                    if(Math.abs(liftMotor.getPosition() - shared_targetClose) < liftError) {
+                    if(Math.abs(liftFront.getCurrentPosition() - shared_targetClose) < liftError) {
                         liftPosition = 12;
                         if(gamepad2.dpad_right || gamepad2.x) {
                             liftState = 20;
                         }
                     }
                 }else if(liftState == 13) {
-                    if(Math.abs(liftMotor.getPosition() - shared_targetMiddle) < liftError) {
+                    if(Math.abs(liftFront.getCurrentPosition() - shared_targetMiddle) < liftError) {
                         liftPosition = 13;
                         if(gamepad2.dpad_right || gamepad2.x) {
                             liftState = 20;
                         }
                     }
                 }else if(liftState == 14) {
-                    if(Math.abs(liftMotor.getPosition() - shared_targetFar) < liftError) {
+                    if(Math.abs(liftFront.getCurrentPosition() - shared_targetFar) < liftError) {
                         liftPosition = 14;
                         if(gamepad2.dpad_right || gamepad2.x) {
                             liftState = 20;
                         }
                     }
                 }else if(liftState == 15) {
-                    if(Math.abs(liftMotor.getPosition() - alliance_middle) < liftError) {
+                    if(Math.abs(liftFront.getCurrentPosition() - alliance_middle) < liftError) {
                         liftPosition = 15;
                         if(gamepad2.dpad_right || gamepad2.x) {
                             liftState = 20;
                         }
                     }
                 }else if(liftState == 16) {
-                    if(Math.abs(liftMotor.getPosition() - alliance_targetBalanced) < liftError) {
+                    if(Math.abs(liftFront.getCurrentPosition() - alliance_targetBalanced) < liftError) {
                         liftPosition = 16;
                         if(gamepad2.dpad_right || gamepad2.x) {
                             liftState = 20;
                         }
                     }
                 }else if(liftState == 17) {
-                    if(Math.abs(liftMotor.getPosition() - alliance_targetTipped) < liftError) {
+                    if(Math.abs(liftFront.getCurrentPosition() - alliance_targetTipped) < liftError) {
                         liftPosition = 17;
                         if(gamepad2.dpad_right || gamepad2.x) {
                             liftState = 20;
@@ -614,7 +604,7 @@ public class teleop extends LinearOpMode {
                     liftState = 23;
                 }
             }else if(liftState == 23) {
-                if(Math.abs(liftMotor.getPosition() - 0) < liftError) {
+                if(Math.abs(liftFront.getCurrentPosition() - 0) < liftError) {
                     liftTime.reset();
                     liftState = 24;
                 }
@@ -647,6 +637,18 @@ public class teleop extends LinearOpMode {
             leftBack.setPower(leftFrontPower);
             rightFront.setPower(rightFrontPower);
             rightBack.setPower(rightBackPower);
+
+            telemetry.addData("Status", "Run Time: " + runtime.toString());
+            telemetry.addData("Motors", "leftFront (%.2f), leftBack (%.2f), rightFront (%.2f), rightBack (%.2f)",
+                    leftFrontPower, leftBackPower, rightFrontPower, rightBackPower);
+            telemetry.addData("Color - Left", colorSensor_left.alpha());
+            telemetry.addData("Color - Right", colorSensor_right.alpha());
+            telemetry.addData("Lift - Front:", liftFront.getCurrentPosition());
+            telemetry.addData("leftIntakeState:", leftIntakeState);
+            telemetry.addData("rightIntakeState:", rightIntakeState);
+            telemetry.addData("liftState:", liftState);
+            telemetry.addData("listPosition:", liftPosition);
+            telemetry.update();
 
             /** Carousel **/
 

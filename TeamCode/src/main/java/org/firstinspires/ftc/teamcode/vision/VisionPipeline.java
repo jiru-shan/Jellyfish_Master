@@ -217,7 +217,7 @@ public class VisionPipeline extends OpenCvPipeline
          */
         Imgproc.rectangle(
                 input, // Buffer to draw on
-                region3_pointA, // Firswt point which defines the rectangle
+                region3_pointA, // First point which defines the rectangle
                 region3_pointB, // Second point which defines the rectangle
                 BLUE, // The color the rectangle is drawn in
                 2); // Thickness of the rectangle lines
@@ -236,7 +236,7 @@ public class VisionPipeline extends OpenCvPipeline
         if(max == avg1) // Was it from region 1?
         {
             position = SkystonePosition.LEFT; // Record our analysis
-            pos=0;
+            pos=1;
             /*
              * Draw a solid rectangle on top of the chosen region.
              * Simply a visual aid. Serves no functional purpose.
@@ -251,7 +251,7 @@ public class VisionPipeline extends OpenCvPipeline
         else if(max == avg2) // Was it from region 2?
         {
             position = SkystonePosition.CENTER; // Record our analysis
-            pos=1;
+            pos=2;
             /*
              * Draw a solid rectangle on top of the chosen region.
              * Simply a visual aid. Serves no functional purpose.
@@ -266,7 +266,7 @@ public class VisionPipeline extends OpenCvPipeline
         else if(max == avg3) // Was it from region 3?
         {
             position = SkystonePosition.RIGHT; // Record our analysis
-            pos=2;
+            pos=3;
             /*
              * Draw a solid rectangle on top of the chosen region.
              * Simply a visual aid. Serves no functional purpose.

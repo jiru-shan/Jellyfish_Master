@@ -20,21 +20,30 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceBuilder;
+import org.firstinspires.ftc.teamcode.vision.VisionPipeline;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvWebcam;
 
 @Autonomous
 @Config
 public class EvenLessScuffedAuton_RED extends LinearOpMode
 {
     public static double TURN_ANGLE=210;
-    public static double CYCLE_TIME;
+    public static double CYCLE_TIME=4;
     DcMotorEx test;
     ColorRangeSensor sensorRange1, sensorRange2;
+
+    OpenCvWebcam camera;
+    VisionPipeline pipeline;
 
     DcMotorEx leftFront, leftBack, rightBack, rightFront;
     DcMotor lift_front, lift_back, leftIntake, rightIntake;
@@ -69,7 +78,8 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
 
     int alliance_targetTipped = 700;
 
-    double i_hate_existence;
+    int barcodePos;
+
 
     SampleMecanumDrive drive;
 
@@ -110,9 +120,10 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
         ElapsedTime time=new ElapsedTime();
         drive.setPoseEstimate(startPose);
 
+        webcamInit();
         waitForStart();
 
-        //check which zone for vision
+        barcodePos= pipeline.getAnalysis();
 
         i_topRight.setPosition(i_minRange_topRight);
         i_bottomRight.setPosition(i_minRange_bottomRight);
@@ -123,7 +134,7 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
             drive.followTrajectory(preStart);
             drive.setPoseEstimate(new Pose2d(0,0,0));
 
-            //place vision cube now
+            //place vision cube now: lift(barcodePos)
 
 
             while(30000-time.milliseconds()>CYCLE_TIME)
@@ -171,7 +182,7 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
                         .build();
                 drive.followTrajectory(returningTrajectory3);
 
-                //deposit cubes
+                lift(3);
             }
 
 
@@ -211,64 +222,86 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
         drive.update();
     }
 
-    public void lift(){
-        lift_front.setTargetPosition(-alliance_targetTipped);
-        lift_back.setTargetPosition(-alliance_targetTipped);
-        lift_front.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
-        lift_back.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        lift_front.setPower(-1.0);
-        lift_back.setPower(-1.0);
-
-        //Thread.sleep(1000);
-        double target= SystemClock.uptimeMillis()+1000;
-        while(SystemClock.uptimeMillis()<target)
+    public void lift(int level){
+        if(level==3)
         {
-            //stall
+            lift_front.setTargetPosition(-alliance_targetTipped);
+            lift_back.setTargetPosition(-alliance_targetTipped);
+            lift_front.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
+            lift_back.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            lift_front.setPower(-1.0);
+            lift_back.setPower(-1.0);
+
+            //Thread.sleep(1000);
+            double target = SystemClock.uptimeMillis() + 1000;
+            while (SystemClock.uptimeMillis() < target) {
+                //stall
+            }
+
+            // Lift up deposit
+            d_bendLeft.setPosition(d_maxRange_bendLeft);
+            d_bendRight.setPosition(d_maxRange_bendRight);
+
+            // Open to deposit in top level of alliance hub
+            d_open.setPosition(d_open_top);
+
+            //Thread.sleep(500);
+            target = SystemClock.uptimeMillis() + 500;
+            while (SystemClock.uptimeMillis() < target) {
+                //stall
+            }
+
+            // Close & bend down deposit
+            d_open.setPosition(d_open_minRange);
+            d_bendLeft.setPosition(d_minRange_bendLeft);
+            d_bendRight.setPosition(d_minRange_bendRight);
+
+            //Thread.sleep(1000);
+            target = SystemClock.uptimeMillis() + 1000;
+            while (SystemClock.uptimeMillis() < target) {
+                //stall
+            }
+
+            // Retract arm to original position
+            lift_front.setTargetPosition(0);
+            lift_back.setTargetPosition(0);
+            lift_front.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
+            lift_back.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            lift_front.setPower(1.0);
+            lift_back.setPower(1.0);
+
+            // Thread.sleep(1000);
+            target = SystemClock.uptimeMillis() + 1000;
+            while (SystemClock.uptimeMillis() < target) {
+                //stall
+            }
+
+            lift_front.setPower(0);
+            lift_back.setPower(0);
         }
+    }
 
-        // Lift up deposit
-        d_bendLeft.setPosition(d_maxRange_bendLeft);
-        d_bendRight.setPosition(d_maxRange_bendRight);
-
-        // Open to deposit in top level of alliance hub
-        d_open.setPosition(d_open_top);
-
-        //Thread.sleep(500);
-        target=SystemClock.uptimeMillis()+500;
-        while(SystemClock.uptimeMillis()<target)
+    public void webcamInit()
+    {
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam"), cameraMonitorViewId);
+        pipeline=new VisionPipeline(telemetry);
+        camera.setPipeline(pipeline);
+        camera.setMillisecondsPermissionTimeout(2500); // Timeout for obtaining permission is configurable. Set before opening.
+        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
-            //stall
-        }
+            @Override
+            public void onOpened()
+            {
+                camera.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
+            }
 
-        // Close & bend down deposit
-        d_open.setPosition(d_open_minRange);
-        d_bendLeft.setPosition(d_minRange_bendLeft);
-        d_bendRight.setPosition(d_minRange_bendRight);
-
-        //Thread.sleep(1000);
-        target=SystemClock.uptimeMillis()+1000;
-        while(SystemClock.uptimeMillis()<target)
-        {
-            //stall
-        }
-
-        // Retract arm to original position
-        lift_front.setTargetPosition(0);
-        lift_back.setTargetPosition(0);
-        lift_front.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
-        lift_back.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        lift_front.setPower(1.0);
-        lift_back.setPower(1.0);
-
-       // Thread.sleep(1000);
-        target=SystemClock.uptimeMillis()+1000;
-        while(SystemClock.uptimeMillis()<target)
-        {
-            //stall
-        }
-
-
-        lift_front.setPower(0);
-        lift_back.setPower(0);
+            @Override
+            public void onError(int errorCode)
+            {
+                telemetry.addData("Status:", "pain");
+                telemetry.update();
+            }
+        });
     }
 }
