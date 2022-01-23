@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 @Config
 public class EvenLessScuffedAuton_BLUE extends LinearOpMode
 {
-    public static double TURN_ANGLE=210;
+    public static double TURN_ANGLE=-30;
     public static double CYCLE_TIME;
     DcMotorEx test;
     ColorRangeSensor sensorRange1, sensorRange2;
@@ -106,11 +106,11 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
 
         //check which zone for vision
 
-        i_topRight.setPosition(i_minRange_topRight);
-        i_bottomRight.setPosition(i_minRange_bottomRight);
+        i_topLeft.setPosition(i_minRange_topLeft);
+        i_bottomLeft.setPosition(i_minRange_bottomLeft);
 
             Trajectory preStart=drive.trajectoryBuilder(new Pose2d())
-                    .forward(7)
+                    .back(7)
                     .build();
             drive.followTrajectory(preStart);
             drive.setPoseEstimate(new Pose2d(0,0,0));
@@ -118,33 +118,35 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
             //place vision cube now
 
 
-            while(30000-time.milliseconds()>CYCLE_TIME)
-            {
+          //  while(30000-time.milliseconds()>CYCLE_TIME)
+           // {
 
                 Trajectory primaryTrajectory0 = drive.trajectoryBuilder(new Pose2d())
 
-                        .lineTo(new Vector2d(-52, 0))
+                        .lineTo(new Vector2d(52, 0))
                         .build();
                 Trajectory primaryTrajectory1 = drive.trajectoryBuilder(primaryTrajectory0.end())
                         .strafeRight(5)
-                        .splineTo(new Vector2d(-57, -20), Math.toRadians(TURN_ANGLE))
+                        .splineTo(new Vector2d(57, -20), Math.toRadians(TURN_ANGLE))
                         .build();
                 Trajectory primaryTrajectory2 = drive.trajectoryBuilder(primaryTrajectory1.end())
-                        .lineTo(new Vector2d(-75, -19))
+                        .lineTo(new Vector2d(70, -19))
                         .build();
 
 
                 drive.followTrajectory(primaryTrajectory0);
                 drive.followTrajectory(primaryTrajectory1);
                 drive.followTrajectory(primaryTrajectory2);
+
+
                 getCube();
                 Trajectory returningTrajectory0 = drive.trajectoryBuilder((drive.getPoseEstimate()))
-                        .lineToLinearHeading(primaryTrajectory2.end())
+                        .lineTo(new Vector2d(primaryTrajectory2.end().getX(), primaryTrajectory2.end().getY()))
                         .build();
                 drive.followTrajectory(returningTrajectory0);
 
                 Trajectory returningTrajectory1 = drive.trajectoryBuilder(returningTrajectory0.end())
-                        .splineTo(new Vector2d(-57, -10), Math.toRadians(0))
+                        .splineTo(new Vector2d(57, -10), Math.toRadians(0))
                         .build();
                 drive.followTrajectory(returningTrajectory1);
 
@@ -164,11 +166,11 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
                 drive.followTrajectory(returningTrajectory3);
 
                 //deposit cubes
-            }
+         //   }
 
 
             Trajectory park=drive.trajectoryBuilder(new Pose2d())
-                    .lineTo(new Vector2d(-52, 0))
+                    .lineTo(new Vector2d(52, 0))
                     .build();
             drive.followTrajectory(park);
 
@@ -184,29 +186,22 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
     }
 
     public void getCube() {
-        int start = leftFront.getCurrentPosition();
-        int end = 0;
-
-
 
         drive.update();
         while(hasBlock() == false) {
-            leftFront.setPower(-0.3);
-            leftBack.setPower(-0.3);
-            rightFront.setPower(-0.3);
-            rightBack.setPower(-0.3);
-            rightIntake.setPower(1);
+            leftFront.setPower(0.3);
+            leftBack.setPower(0.3);
+            rightFront.setPower(0.3);
+            rightBack.setPower(0.3);
+            leftIntake.setPower(1);
             drive.update();
         }
         leftFront.setPower(0);
         leftBack.setPower(0);
         rightFront.setPower(0);
         rightBack.setPower(0);
-        rightIntake.setPower(0);
-        end = leftFront.getCurrentPosition();
-        int distance = end - start;
+        leftIntake.setPower(0);
         drive.update();
-        i_hate_existence= -1*1.89 * 2 * Math.PI * 1 * distance / 384.5;
     }
 
     public void lift(){

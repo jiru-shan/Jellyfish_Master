@@ -191,11 +191,8 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
         return false;
     }
 
-    public void getCube() {
-        int start = leftFront.getCurrentPosition();
-        int end = 0;
-
-
+    public void getCube()
+    {
 
         drive.update();
         while(hasBlock() == false) {
@@ -211,10 +208,7 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
         rightFront.setPower(0);
         rightBack.setPower(0);
         rightIntake.setPower(0);
-        end = leftFront.getCurrentPosition();
-        int distance = end - start;
         drive.update();
-        i_hate_existence= -1*1.89 * 2 * Math.PI * 1 * distance / 384.5;
     }
 
     public void lift(){

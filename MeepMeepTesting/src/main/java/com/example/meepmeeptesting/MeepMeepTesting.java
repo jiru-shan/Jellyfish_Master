@@ -8,7 +8,9 @@ import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 
 public class MeepMeepTesting
 {
+    public static double TURN_ANGLE=-30;
     public static void main(String[] args) {
+
         MeepMeep meepMeep = new MeepMeep(800);
 
         RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
@@ -16,10 +18,10 @@ public class MeepMeepTesting
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 15)
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(new Pose2d(0, 0, 0))
-                                .lineTo(new Vector2d(-30,0))
-                                .splineTo(new Vector2d(-35, -15), Math.toRadians(-15))
-                                .lineTo(new Vector2d(-55, -10))
-
+                                .lineTo(new Vector2d(52, 0))
+                                .strafeRight(5)
+                                .splineTo(new Vector2d(57, -20), Math.toRadians(TURN_ANGLE))
+                                .lineTo(new Vector2d(75, -19))
                                 .build()
                 );
 
