@@ -210,7 +210,7 @@ public class teleop extends LinearOpMode {
 
                     leftIntakeState++;
                 }
-            }else if((rightIntakeState > 0 || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 200)) && (leftIntakeState < 9)) {
+            }else if((rightIntakeState > 0 || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
                 leftIntakeState=10;
             }else if (leftIntakeState == 1) {
                 if(colorSensor_left.alpha() > 500) {
@@ -221,7 +221,7 @@ public class teleop extends LinearOpMode {
 
                     leftIntakeState++;
                 }
-            }else if(rightIntakeState == 2) {
+            }else if(leftIntakeState == 2) {
                 leftIntake.setPower(0);
 
                 d_coverLeft.setPosition(d_maxRange_coverLeft);
@@ -254,7 +254,7 @@ public class teleop extends LinearOpMode {
                 leftIntakeTime.reset();
                 leftIntakeState++;
             }else if(leftIntakeState == 11) {
-                if(leftIntakeTime.milliseconds() > 800) {
+                if(leftIntakeTime.milliseconds() > 300) {
                     leftIntake.setPower(0);
 
                     i_topLeft.setPosition(i_maxRange_topLeft);
@@ -292,7 +292,7 @@ public class teleop extends LinearOpMode {
 
                     rightIntakeState++;
                 }
-            }else if(leftIntakeState > 0 || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 200) && (rightIntakeState < 9)) {
+            }else if(leftIntakeState > 0 || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400) && (rightIntakeState < 9)) {
                 rightIntakeState=10;
             }else if (rightIntakeState == 1) {
                 if(colorSensor_right.alpha() > 500) {
@@ -306,7 +306,7 @@ public class teleop extends LinearOpMode {
             }else if(rightIntakeState == 2) {
                 rightIntake.setPower(0);
 
-                d_coverRight.setPosition(d_maxRange_coverRight);
+                d_coverLeft.setPosition(d_maxRange_coverLeft);
                 d_coverRight.setPosition(d_minRange_coverRight);
 
                 rightIntakeTime.reset();
@@ -336,7 +336,7 @@ public class teleop extends LinearOpMode {
                 rightIntakeTime.reset();
                 rightIntakeState++;
             }else if(rightIntakeState == 11) {
-                if(rightIntakeTime.milliseconds() > 800) {
+                if(rightIntakeTime.milliseconds() > 300) {
                     rightIntake.setPower(0);
 
                     i_topRight.setPosition(i_maxRange_topRight);
