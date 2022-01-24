@@ -1,10 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.os.SystemClock;
 
-import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorRangeSensor;
@@ -13,10 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import java.util.List;
-
 @TeleOp
-
 public class RoboMec extends LinearOpMode {
 
     // Motor controllers
@@ -56,7 +50,6 @@ public class RoboMec extends LinearOpMode {
 
     // Runtime
     ElapsedTime runtime = new ElapsedTime();
-    ElapsedTime timer = new ElapsedTime();
 
     public void runOpMode() throws InterruptedException {
 
@@ -111,7 +104,7 @@ public class RoboMec extends LinearOpMode {
         double d_maxRange_bendLeft_middle = 0.10;   // Fix these values
         double d_maxRange_bendRight_middle = 0.21;
 
-        double i_minRange_topLeft = 0.10;   // 0.08
+        double i_minRange_topLeft = 0.10;   // 0.08 
         double i_maxRange_topLeft = 0.88;
         double i_minRange_bottomLeft = 0.91;   // 0.92
         double i_maxRange_bottomLeft = 0.12;
@@ -125,8 +118,8 @@ public class RoboMec extends LinearOpMode {
 
         // Factor
         double normalSpeed = 1.0;
-        int alliance_targetTipped = 600;
-        int alliance_targetBalanced = 570;   // Fix this value
+        int alliance_targetTipped = 550;
+        int alliance_targetBalanced = 525;   // Fix this value
         int alliance_middle = 580;   // Fix this value
         int shared_targetClose = 120;
         int shared_targetMiddle = 200;
@@ -136,52 +129,12 @@ public class RoboMec extends LinearOpMode {
         liftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
         liftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        d_open.setPosition(d_open_minRange);
+        d_open.setPosition(d_open_minRangeSemi);
         d_bendLeft.setPosition(d_minRange_bendLeft);
         d_bendRight.setPosition(d_minRange_bendRight);
 
         d_coverLeft.setPosition(d_minRange_coverLeft);
         d_coverRight.setPosition(d_minRange_coverRight);
-
-        boolean objectCaptured = false;
-
-        int leftIntakeState = 0;
-        ElapsedTime leftIntakeTime = new ElapsedTime();
-        int rightIntakeState = 0;
-        ElapsedTime rightIntakeTime = new ElapsedTime();
-
-        /*
-        0 = not moving
-        1 = flip down + intaking
-        2 = detected cube + flip up + open flap
-        3 = transfering
-        4 = transfered + flap closed
-        */
-
-        int liftState = 0;
-        int liftPosition = 0;
-        int liftError = 15;
-        ElapsedTime liftTime = new ElapsedTime();
-
-        /*
-        0 = down
-        12 = shared close
-        13 = shared mid
-        14 = shared far
-        15 = alliance mid
-        16 = alliance bal
-        17 = aliance tip
-        20-? = retracting
-        ? = retracted
-        */
-
-        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
-
-        for (LynxModule module : allHubs) {
-            module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-        }
-
-        timer.reset();
 
         waitForStart();
 
@@ -191,7 +144,7 @@ public class RoboMec extends LinearOpMode {
         while (opModeIsActive()) {
 
             // Keep deposit in position while not in use
-//            d_open.setPosition(d_open_minRange);
+            d_open.setPosition(d_open_minRange);
             d_bendLeft.setPosition(d_minRange_bendLeft);
             d_bendRight.setPosition(d_minRange_bendRight);
 
@@ -245,14 +198,7 @@ public class RoboMec extends LinearOpMode {
             rightFront.setPower(rightFrontPower);
             rightBack.setPower(rightBackPower);
 
-            /** Carousel **/
-
-            double a = gamepad2.right_stick_y;
-            double carouselPower = (0.5 + (0.5 * a));
-            carousel.setPower(carouselPower);
-
             // Show the elapsed game time & wheel power
-            telemetry.addData("Status", "Timer: " + timer.toString());
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "leftFront (%.2f), leftBack (%.2f), rightFront (%.2f), rightBack (%.2f)",
                     leftFrontPower, leftBackPower, rightFrontPower, rightBackPower);
@@ -260,21 +206,20 @@ public class RoboMec extends LinearOpMode {
             telemetry.addData("Color - Right", colorSensor_right.alpha());
             telemetry.addData("Lift - Front:", liftFront.getCurrentPosition());
             telemetry.addData("Lift - Back:", liftBack.getCurrentPosition());
-//            telemetry.addData("Carousel: ", carousel);
             telemetry.update();
 
-
-            for (LynxModule module : allHubs) {
-                module.clearBulkCache();
-            }
-
-            // Keep deposit in position while not in use
-            d_open.setPosition(d_open_minRangeSemi);
-            d_bendLeft.setPosition(d_minRange_bendLeft);
-            d_bendRight.setPosition(d_minRange_bendRight);
-
-            // Show the elapsed game time & wheel power
-
+//            // Switch to ninja mode & back
+//            if (gamepad1.dpad_down) {
+//
+//                if (normalSpeed == 1.0) {
+//
+//                    normalSpeed = 0.5;
+//
+//                } else {
+//
+//                    normalSpeed = 1.0;
+//                }
+//            }
 
             /** Combined Functions **/
 
@@ -282,307 +227,177 @@ public class RoboMec extends LinearOpMode {
             // With a button, intake should flip down, start intake, check if object present, lift up, ex-take into deposit
             // During this time, one flap of deposit should be up and one should be down
 
-            if (leftIntakeState == 0) {
-                if (gamepad1.left_bumper) {
-                    i_topLeft.setPosition(i_minRange_topLeft);
-                    i_bottomLeft.setPosition(i_minRange_bottomLeft);
+            if (gamepad1.x || gamepad1.left_trigger != 0) {
 
-                    leftIntake.setPower(highSweepPower);
 
-                    // d_open.setPosition(d_open_minRangeSemi);
+                // left intake flips down
+                i_topLeft.setPosition(i_minRange_topLeft);
+                i_bottomLeft.setPosition(i_minRange_bottomLeft);
 
-                    leftIntakeTime.reset();
+                // left intake starts running
+                leftIntake.setPower(highSweepPower);
 
-                    leftIntakeState++;
-                }
-            } else if ((rightIntakeState > 0 || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
-                leftIntakeState = 10;
-            } else if (leftIntakeState == 1) {
+                // set deposit to semi-open position
+                d_open.setPosition(d_open_minRangeSemi);
+
+                // check if object is present by light/dark values
                 if (colorSensor_left.alpha() > 500) {
-                    leftIntake.setPower(0.25);
 
+                    // slow down intake
+                    leftIntake.setPower(0.1);
+
+                    // intake lifts up
                     i_topLeft.setPosition(i_maxRange_topLeft);
                     i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
-                    leftIntakeState++;
-                }
-            } else if (leftIntakeState == 2) {
-                leftIntake.setPower(0);
+                    // stop intake
+                    leftIntake.setPower(0);
 
-                d_coverLeft.setPosition(d_maxRange_coverLeft);
-                d_coverRight.setPosition(d_minRange_coverRight);
+                    // open left covering of deposit and close right covering of deposit
+                    d_coverLeft.setPosition(d_maxRange_coverLeft);
+                    d_coverRight.setPosition(d_minRange_coverRight);
 
-                leftIntakeTime.reset();
+                    Thread.sleep(1000);
 
-                leftIntakeState++;
-            } else if (leftIntakeState == 3) {
-                if (leftIntakeTime.milliseconds() > 1000) {
+                    // ex-take object into deposit
                     leftIntake.setPower(-highSweepPower);
 
-                    leftIntakeTime.reset();
+                    Thread.sleep(800);
 
-                    leftIntakeState++;
-                }
-            } else if (leftIntakeState == 4) {
-                if (leftIntakeTime.milliseconds() > 800) {
+                    // stop intake
                     leftIntake.setPower(0);
 
+                    // make sure deposit is closed
                     d_open.setPosition(d_open_minRange);
 
+                    // close left covering
                     d_coverLeft.setPosition(d_minRange_coverLeft);
-
-                    leftIntakeState = 0;
-                    objectCaptured = true;
                 }
-            } else if (leftIntakeState == 10) {
-                leftIntake.setPower(-1);
-                leftIntakeTime.reset();
-                leftIntakeState++;
-            } else if (leftIntakeState == 11) {
-                if (leftIntakeTime.milliseconds() > 300) {
-                    leftIntake.setPower(0);
-
-                    i_topLeft.setPosition(i_maxRange_topLeft);
-                    i_bottomLeft.setPosition(i_maxRange_bottomLeft);
-
-                    d_open.setPosition(d_open_minRange);
-
-                    d_coverLeft.setPosition(d_minRange_coverLeft);
-
-                    leftIntakeState = 0;
-                }
-            } else {
-                leftIntake.setPower(0);
-
-                i_topLeft.setPosition(i_maxRange_topLeft);
-                i_bottomLeft.setPosition(i_maxRange_bottomLeft);
-
-                d_open.setPosition(d_open_minRange);
-
-                d_coverLeft.setPosition(d_minRange_coverLeft);
-
-                leftIntakeState = 0;
             }
+        }
 
-            if (rightIntakeState == 0) {
-                if (gamepad1.right_bumper) {
-                    i_topRight.setPosition(i_minRange_topRight);
-                    i_bottomRight.setPosition(i_minRange_bottomRight);
+        if (gamepad1.b || gamepad1.right_trigger != 0) {
 
-                    rightIntake.setPower(highSweepPower);
+            // right intake flips down
+            i_topRight.setPosition(i_minRange_topRight);
+            i_bottomRight.setPosition(i_minRange_bottomRight);
 
-                    // d_open.setPosition(d_open_minRangeSemi);
+            // right intake starts running
+            rightIntake.setPower(highSweepPower);
 
-                    rightIntakeTime.reset();
+            // set deposit to semi-open position
+            d_open.setPosition(d_open_minRangeSemi);
 
-                    rightIntakeState++;
-                }
-            } else if (leftIntakeState > 0 || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400) && (rightIntakeState < 9)) {
-                rightIntakeState = 10;
-            } else if (rightIntakeState == 1) {
-                if (colorSensor_right.alpha() > 500) {
-                    rightIntake.setPower(0.25);
+            // check if object is present by light/dark values
+            if (colorSensor_right.alpha() > 500) {
 
-                    i_topRight.setPosition(i_maxRange_topRight);
-                    i_bottomRight.setPosition(i_maxRange_bottomRight);
+                // slow down intake
+                rightIntake.setPower(0.1);
 
-                    rightIntakeState++;
-                }
-            } else if (rightIntakeState == 2) {
-                rightIntake.setPower(0);
-
-                d_coverRight.setPosition(d_maxRange_coverRight);
-                d_coverLeft.setPosition(d_minRange_coverLeft);
-
-                rightIntakeTime.reset();
-
-                rightIntakeState++;
-            } else if (rightIntakeState == 3) {
-                if (rightIntakeTime.milliseconds() > 1000) {
-                    rightIntake.setPower(-highSweepPower);
-
-                    rightIntakeTime.reset();
-
-                    rightIntakeState++;
-                }
-            } else if (rightIntakeState == 4) {
-                if (rightIntakeTime.milliseconds() > 800) {
-                    rightIntake.setPower(0);
-
-                    d_open.setPosition(d_open_minRange);
-
-                    d_coverRight.setPosition(d_minRange_coverRight);
-
-                    rightIntakeState = 0;
-                    objectCaptured = true;
-                }
-            } else if (rightIntakeState == 10) {
-                rightIntake.setPower(-1);
-                rightIntakeTime.reset();
-                rightIntakeState++;
-            } else if (rightIntakeState == 11) {
-                if (rightIntakeTime.milliseconds() > 300) {
-                    rightIntake.setPower(0);
-
-                    i_topRight.setPosition(i_maxRange_topRight);
-                    i_bottomRight.setPosition(i_maxRange_bottomRight);
-
-                    d_open.setPosition(d_open_minRange);
-
-                    d_coverRight.setPosition(d_minRange_coverRight);
-
-                    rightIntakeState = 0;
-                }
-            } else {
-                rightIntake.setPower(0);
-
+                // intake lifts up
                 i_topRight.setPosition(i_maxRange_topRight);
                 i_bottomRight.setPosition(i_maxRange_bottomRight);
 
+                // stop intake
+                rightIntake.setPower(0);
+
+                // open right covering of deposit and close left covering of deposit
+                d_coverRight.setPosition(d_maxRange_coverRight);
+                d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                Thread.sleep(1000);
+
+                // ex-take object into deposit
+                rightIntake.setPower(-highSweepPower);
+
+                Thread.sleep(500);
+
+                // stop intake
+                rightIntake.setPower(0);
+
+                // make sure deposit is closed
                 d_open.setPosition(d_open_minRange);
 
+                // close right covering
                 d_coverRight.setPosition(d_minRange_coverRight);
-
-                rightIntakeState = 0;
-
             }
+        }
 
-            /** Lift **/
+        // Intake and Ex-take on Gamepad B
 
-            // Motor tick count is equal to 384.5
+//            if (gamepad1.left_bumper) {
+//
+//                leftIntake.setPower(highSweepPower);
+//
+//            } else if (gamepad1.right_bumper) {
+//
+//                rightIntake.setPower(highSweepPower);
+//
+//            } else if (gamepad1.left_trigger != 0) {
+//
+//                leftIntake.setPower(-lowSweepPower);
+//
+//            } else if (gamepad1.right_trigger != 0) {
+//
+//                rightIntake.setPower(-lowSweepPower);
+//
+//            } else {
+//
+//                rightIntake.setPower(0);
+//                leftIntake.setPower(0);
+//            }
 
-            // double a = gamepad2.right_stick_y;
-            // double b = -gamepad1.right_stick_y;
+        /** Lift **/
 
-            if (gamepad2.dpad_up) {
+        // Motor tick count is equal to 384.5
 
-                // new Compute();
+        if (gamepad2.dpad_up) {
 
-                // Extend arm to deposit position
-                liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODERS);   // Move to deposit position
-                liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODERS);
-                liftFront.setTargetPosition(-alliance_targetTipped);
-                liftBack.setTargetPosition(-alliance_targetTipped);
-                liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
-                liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            // new Compute();
 
-                timer.reset();
+            // Extend arm to deposit position
+            liftFront.setTargetPosition(-alliance_targetTipped);
+            liftBack.setTargetPosition(-alliance_targetTipped);
+            liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
+            liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            liftFront.setPower(-1.0);
+            liftBack.setPower(-1.0);
 
-                while (timer.milliseconds() <= 1000) {
-                    liftFront.setPower(-1.0);
-                    liftBack.setPower(-1.0);
+            Thread.sleep(1000);
 
-                    y = -gamepad1.right_stick_x; // Reversed
-                    x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
-                    rx = -gamepad1.left_stick_y; // Forward/Backward
+        } else if (gamepad1.dpad_right) {
 
-                    /** Denominator is the largest motor power (absolute value) or 1
-                     * This ensures all the powers maintain the same ratio, but only when
-                     * at least one is out of the range [-1, 1] **/
-                    denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-                    leftFrontPower = (y + x - rx) / denominator;
-                    leftBackPower = (y - x - rx) / denominator;
-                    rightFrontPower = (y - x + rx) / denominator;
-                    rightBackPower = (y + x + rx) / denominator;
+            // new Compute();
 
-                    leftFront.setPower(leftBackPower);
-                    leftBack.setPower(leftFrontPower);
-                    rightFront.setPower(rightFrontPower);
-                    rightBack.setPower(rightBackPower);
-                }
+            // Extend arm to deposit position
+            liftFront.setTargetPosition(-alliance_targetBalanced);
+            liftBack.setTargetPosition(-alliance_targetBalanced);
+            liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
+            liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            liftFront.setPower(-1.0);
+            liftBack.setPower(-1.0);
 
-            } else if (gamepad2.dpad_left) {
+            Thread.sleep(1000);
 
-                // new Compute();
+        } else if (gamepad2.dpad_down) {
 
-                // Extend arm to deposit position
-                liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODERS);   // Move to deposit position
-                liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODERS);
-                liftFront.setTargetPosition(-alliance_targetBalanced);
-                liftBack.setTargetPosition(-alliance_targetBalanced);
-                liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
-                liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            // new Compute();
 
-                timer.reset();
+            // Lift up deposit
+            d_bendLeft.setPosition(d_maxRange_bendLeft);
+            d_bendRight.setPosition(d_maxRange_bendRight);
 
-                while (timer.milliseconds() <= 1000) {
-                    liftFront.setPower(-1.0);
-                    liftBack.setPower(-1.0);
+            // Open to deposit in top level of alliance hub
+            d_open.setPosition(d_open_top);
 
-                    y = -gamepad1.right_stick_x; // Reversed
-                    x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
-                    rx = -gamepad1.left_stick_y; // Forward/Backward
+            Thread.sleep(500);
 
-                    /** Denominator is the largest motor power (absolute value) or 1
-                     * This ensures all the powers maintain the same ratio, but only when
-                     * at least one is out of the range [-1, 1] **/
-                    denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-                    leftFrontPower = (y + x - rx) / denominator;
-                    leftBackPower = (y - x - rx) / denominator;
-                    rightFrontPower = (y - x + rx) / denominator;
-                    rightBackPower = (y + x + rx) / denominator;
+            // Close & bend down deposit
+            d_open.setPosition(d_open_minRange);
+            d_bendLeft.setPosition(d_minRange_bendLeft);
+            d_bendRight.setPosition(d_minRange_bendRight);
 
-                    leftFront.setPower(leftBackPower);
-                    leftBack.setPower(leftFrontPower);
-                    rightFront.setPower(rightFrontPower);
-                    rightBack.setPower(rightBackPower);
-                }
-
-            } else if (gamepad2.dpad_right) {
-
-                // new Compute();
-
-                timer.reset();
-
-                while (timer.milliseconds() <= 500) {
-                    // Open to deposit in top level of alliance hub
-                    d_open.setPosition(d_open_top);
-
-                    y = -gamepad1.right_stick_x; // Reversed
-                    x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
-                    rx = -gamepad1.left_stick_y; // Forward/Backward
-
-                    /** Denominator is the largest motor power (absolute value) or 1
-                     * This ensures all the powers maintain the same ratio, but only when
-                     * at least one is out of the range [-1, 1] **/
-                    denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-                    leftFrontPower = (y + x - rx) / denominator;
-                    leftBackPower = (y - x - rx) / denominator;
-                    rightFrontPower = (y - x + rx) / denominator;
-                    rightBackPower = (y + x + rx) / denominator;
-
-                    leftFront.setPower(leftBackPower);
-                    leftBack.setPower(leftFrontPower);
-                    rightFront.setPower(rightFrontPower);
-                    rightBack.setPower(rightBackPower);
-                }
-
-                timer.reset();
-
-                while (timer.milliseconds() <= 1000) {
-                    // Close & bend down deposit
-                    d_open.setPosition(d_open_minRange);
-                    d_bendLeft.setPosition(d_minRange_bendLeft);
-                    d_bendRight.setPosition(d_minRange_bendRight);
-
-                    y = -gamepad1.right_stick_x; // Reversed
-                    x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
-                    rx = -gamepad1.left_stick_y; // Forward/Backward
-
-                    /** Denominator is the largest motor power (absolute value) or 1
-                     * This ensures all the powers maintain the same ratio, but only when
-                     * at least one is out of the range [-1, 1] **/
-                    denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-                    leftFrontPower = (y + x - rx) / denominator;
-                    leftBackPower = (y - x - rx) / denominator;
-                    rightFrontPower = (y - x + rx) / denominator;
-                    rightBackPower = (y + x + rx) / denominator;
-
-                    leftFront.setPower(leftBackPower);
-                    leftBack.setPower(leftFrontPower);
-                    rightFront.setPower(rightFrontPower);
-                    rightBack.setPower(rightBackPower);
-                }
+            Thread.sleep(1000);
 
 //                // Check is deposit returns to original position
 //                if (d_open.getPosition() != d_open_minRange || d_bendLeft.getPosition() != d_minRange_bendLeft || d_bendRight.getPosition() != d_minRange_bendRight) {
@@ -593,79 +408,34 @@ public class RoboMec extends LinearOpMode {
 //                    d_bendRight.setPosition(d_minRange_bendRight);
 //                }
 
-                // Retract arm to original position
-                liftFront.setTargetPosition(0);
-                liftBack.setTargetPosition(0);
-                liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
-                liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            // Retract arm to original position
+            liftFront.setTargetPosition(0);
+            liftBack.setTargetPosition(0);
+            liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
+            liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            liftFront.setPower(1.0);
+            liftBack.setPower(1.0);
 
-                timer.reset();
+            Thread.sleep(1000);
 
-                while (timer.milliseconds() <= 1000) {
-                    liftFront.setPower(1.0);
-                    liftBack.setPower(1.0);
+            liftFront.setPower(0);
+            liftBack.setPower(0);
 
-                    y = -gamepad1.right_stick_x; // Reversed
-                    x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
-                    rx = -gamepad1.left_stick_y; // Forward/Backward
+        } else if (gamepad2.dpad_left) {
 
-                    /** Denominator is the largest motor power (absolute value) or 1
-                     * This ensures all the powers maintain the same ratio, but only when
-                     * at least one is out of the range [-1, 1] **/
-                    denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-                    leftFrontPower = (y + x - rx) / denominator;
-                    leftBackPower = (y - x - rx) / denominator;
-                    rightFrontPower = (y - x + rx) / denominator;
-                    rightBackPower = (y + x + rx) / denominator;
+            // new Compute();
 
-                    leftFront.setPower(leftBackPower);
-                    leftBack.setPower(leftFrontPower);
-                    rightFront.setPower(rightFrontPower);
-                    rightBack.setPower(rightBackPower);
-                }
+            // Extend arm to deposit position
+            liftFront.setTargetPosition(-alliance_middle);
+            liftBack.setTargetPosition(-alliance_middle);
+            liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
+            liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            liftFront.setPower(-1.0);
+            liftBack.setPower(-1.0);
 
-                liftFront.setPower(0);
-                liftBack.setPower(0);
+            Thread.sleep(1000);
 
-            } else if (gamepad2.dpad_down) {
-
-                // new Compute();
-
-                // Extend arm to deposit position
-                liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODERS);   // Move to deposit position
-                liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODERS);
-                liftFront.setTargetPosition(-alliance_middle);
-                liftBack.setTargetPosition(-alliance_middle);
-                liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
-                liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-                timer.reset();
-
-                while (timer.milliseconds() <= 1000) {
-
-                    liftFront.setPower(-1.0);
-                    liftBack.setPower(-1.0);
-
-                    y = -gamepad1.right_stick_x; // Reversed
-                    x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
-                    rx = -gamepad1.left_stick_y; // Forward/Backward
-
-                    /** Denominator is the largest motor power (absolute value) or 1
-                     * This ensures all the powers maintain the same ratio, but only when
-                     * at least one is out of the range [-1, 1] **/
-                    denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-                    leftFrontPower = (y + x - rx) / denominator;
-                    leftBackPower = (y - x - rx) / denominator;
-                    rightFrontPower = (y - x + rx) / denominator;
-                    rightBackPower = (y + x + rx) / denominator;
-
-                    leftFront.setPower(leftBackPower);
-                    leftBack.setPower(leftFrontPower);
-                    rightFront.setPower(rightFrontPower);
-                    rightBack.setPower(rightBackPower);
-                }
-
-            }
+        }
 //            else if (gamepad1.dpad_down) {
 //
 //                // new Compute();
@@ -709,175 +479,62 @@ public class RoboMec extends LinearOpMode {
 //                lift_back.setPower(0);
 //
 //            }
-            else if (gamepad2.a) {
+        else if (gamepad2.x) {
 
-                // new Compute();
+            // new Compute();
 
-                liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODERS);   // Move to deposit position
-                liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODERS);
-                liftFront.setTargetPosition(-shared_targetClose);
-                liftBack.setTargetPosition(-shared_targetClose);
-                liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
-                liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            liftFront.setTargetPosition(-shared_targetClose);
+            liftBack.setTargetPosition(-shared_targetClose);
+            liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
+            liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            liftFront.setPower(-1.0);
+            liftBack.setPower(-1.0);
 
-                timer.reset();
+            Thread.sleep(1000);
 
-                while (timer.milliseconds() <= 1000) {
+        } else if (gamepad2.y) {
 
-                    liftFront.setPower(-1.0);
-                    liftBack.setPower(-1.0);
+            // new Compute();
 
-                    y = -gamepad1.right_stick_x; // Reversed
-                    x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
-                    rx = -gamepad1.left_stick_y; // Forward/Backward
+            liftFront.setTargetPosition(-shared_targetMiddle);
+            liftBack.setTargetPosition(-shared_targetMiddle);
+            liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
+            liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            liftFront.setPower(-1.0);
+            liftBack.setPower(-1.0);
 
-                    /** Denominator is the largest motor power (absolute value) or 1
-                     * This ensures all the powers maintain the same ratio, but only when
-                     * at least one is out of the range [-1, 1] **/
-                    denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-                    leftFrontPower = (y + x - rx) / denominator;
-                    leftBackPower = (y - x - rx) / denominator;
-                    rightFrontPower = (y - x + rx) / denominator;
-                    rightBackPower = (y + x + rx) / denominator;
+            Thread.sleep(1000);
 
-                    leftFront.setPower(leftBackPower);
-                    leftBack.setPower(leftFrontPower);
-                    rightFront.setPower(rightFrontPower);
-                    rightBack.setPower(rightBackPower);
-                }
+        } else if (gamepad2.b) {
 
-            } else if (gamepad2.b) {
+            // new Compute();
 
-                // new Compute();
+            liftFront.setTargetPosition(-shared_targetFar);
+            liftBack.setTargetPosition(-shared_targetFar);
+            liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
+            liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            liftFront.setPower(-1.0);
+            liftBack.setPower(-1.0);
 
-                liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODERS);   // Move to deposit position
-                liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODERS);
-                liftFront.setTargetPosition(-shared_targetMiddle);
-                liftBack.setTargetPosition(-shared_targetMiddle);
-                liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
-                liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            Thread.sleep(1000);
 
-                timer.reset();
+        } else if (gamepad2.a) {
 
-                while (timer.milliseconds() <= 1000) {
+            // Lift up deposit
+            d_bendLeft.setPosition(d_maxRange_bendLeft);
+            d_bendRight.setPosition(d_maxRange_bendRight);
 
-                    liftFront.setPower(-1.0);
-                    liftBack.setPower(-1.0);
+            // Open to deposit in top level of alliance hub
+            d_open.setPosition(d_open_shared);
 
-                    y = -gamepad1.right_stick_x; // Reversed
-                    x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
-                    rx = -gamepad1.left_stick_y; // Forward/Backward
+            Thread.sleep(500);
 
-                    /** Denominator is the largest motor power (absolute value) or 1
-                     * This ensures all the powers maintain the same ratio, but only when
-                     * at least one is out of the range [-1, 1] **/
-                    denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-                    leftFrontPower = (y + x - rx) / denominator;
-                    leftBackPower = (y - x - rx) / denominator;
-                    rightFrontPower = (y - x + rx) / denominator;
-                    rightBackPower = (y + x + rx) / denominator;
+            // Close & bend down deposit
+            d_open.setPosition(d_open_minRange);
+            d_bendLeft.setPosition(d_minRange_bendLeft);
+            d_bendRight.setPosition(d_minRange_bendRight);
 
-                    leftFront.setPower(leftBackPower);
-                    leftBack.setPower(leftFrontPower);
-                    rightFront.setPower(rightFrontPower);
-                    rightBack.setPower(rightBackPower);
-                }
-            } else if (gamepad2.y) {
-
-                // new Compute();
-
-                liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODERS);   // Move to deposit position
-                liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODERS);
-                liftFront.setTargetPosition(-shared_targetFar);
-                liftBack.setTargetPosition(-shared_targetFar);
-                liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
-                liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-                timer.reset();
-
-                while (timer.milliseconds() <= 1000) {
-
-                    liftFront.setPower(-1.0);
-                    liftBack.setPower(-1.0);
-
-                    y = -gamepad1.right_stick_x; // Reversed
-                    x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
-                    rx = -gamepad1.left_stick_y; // Forward/Backward
-
-                    /** Denominator is the largest motor power (absolute value) or 1
-                     * This ensures all the powers maintain the same ratio, but only when
-                     * at least one is out of the range [-1, 1] **/
-                    denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-                    leftFrontPower = (y + x - rx) / denominator;
-                    leftBackPower = (y - x - rx) / denominator;
-                    rightFrontPower = (y - x + rx) / denominator;
-                    rightBackPower = (y + x + rx) / denominator;
-
-                    leftFront.setPower(leftBackPower);
-                    leftBack.setPower(leftFrontPower);
-                    rightFront.setPower(rightFrontPower);
-                    rightBack.setPower(rightBackPower);
-                }
-
-            } else if (gamepad2.x) {
-
-                // Lift up deposit
-                d_bendLeft.setPosition(d_maxRange_bendLeft);
-                d_bendRight.setPosition(d_maxRange_bendRight);
-
-                timer.reset();
-
-                while (timer.milliseconds() <= 500) {
-
-                    // Open to deposit in top level of alliance hub
-                    d_open.setPosition(d_open_shared);
-
-                    y = -gamepad1.right_stick_x; // Reversed
-                    x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
-                    rx = -gamepad1.left_stick_y; // Forward/Backward
-
-                    /** Denominator is the largest motor power (absolute value) or 1
-                     * This ensures all the powers maintain the same ratio, but only when
-                     * at least one is out of the range [-1, 1] **/
-                    denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-                    leftFrontPower = (y + x - rx) / denominator;
-                    leftBackPower = (y - x - rx) / denominator;
-                    rightFrontPower = (y - x + rx) / denominator;
-                    rightBackPower = (y + x + rx) / denominator;
-
-                    leftFront.setPower(leftBackPower);
-                    leftBack.setPower(leftFrontPower);
-                    rightFront.setPower(rightFrontPower);
-                    rightBack.setPower(rightBackPower);
-                }
-
-                timer.reset();
-
-                while (timer.milliseconds() <= 1000) {
-
-                    // Close & bend down deposit
-                    d_open.setPosition(d_open_minRange);
-                    d_bendLeft.setPosition(d_minRange_bendLeft);
-                    d_bendRight.setPosition(d_minRange_bendRight);
-
-                    y = -gamepad1.right_stick_x; // Reversed
-                    x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
-                    rx = -gamepad1.left_stick_y; // Forward/Backward
-
-                    /** Denominator is the largest motor power (absolute value) or 1
-                     * This ensures all the powers maintain the same ratio, but only when
-                     * at least one is out of the range [-1, 1] **/
-                    denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-                    leftFrontPower = (y + x - rx) / denominator;
-                    leftBackPower = (y - x - rx) / denominator;
-                    rightFrontPower = (y - x + rx) / denominator;
-                    rightBackPower = (y + x + rx) / denominator;
-
-                    leftFront.setPower(leftBackPower);
-                    leftBack.setPower(leftFrontPower);
-                    rightFront.setPower(rightFrontPower);
-                    rightBack.setPower(rightBackPower);
-                }
+            Thread.sleep(1000);
 
 //                // Check is deposit returns to original position
 //                if (d_open.getPosition() != d_open_minRange || d_bendLeft.getPosition() != d_minRange_bendLeft || d_bendRight.getPosition() != d_minRange_bendRight) {
@@ -888,64 +545,44 @@ public class RoboMec extends LinearOpMode {
 //                    d_bendRight.setPosition(d_minRange_bendRight);
 //                }
 
-                liftFront.setTargetPosition(0);
-                liftBack.setTargetPosition(0);
-                liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
-                liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            liftFront.setTargetPosition(0);
+            liftBack.setTargetPosition(0);
+            liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
+            liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            liftFront.setPower(1.0);
+            liftBack.setPower(1.0);
 
-                timer.reset();
+            Thread.sleep(1000);
 
-                while (timer.milliseconds() <= 1000) {
+            liftFront.setPower(0);
+            liftBack.setPower(0);
+        }
 
-                    liftFront.setPower(1.0);
-                    liftBack.setPower(1.0);
+        /** Carousel **/
 
-                    y = -gamepad1.right_stick_x; // Reversed
-                    x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
-                    rx = -gamepad1.left_stick_y; // Forward/Backward
+        // Run Servo
+        if (gamepad2.right_bumper) {
 
-                    /** Denominator is the largest motor power (absolute value) or 1
-                     * This ensures all the powers maintain the same ratio, but only when
-                     * at least one is out of the range [-1, 1] **/
-                    denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-                    leftFrontPower = (y + x - rx) / denominator;
-                    leftBackPower = (y - x - rx) / denominator;
-                    rightFrontPower = (y - x + rx) / denominator;
-                    rightBackPower = (y + x + rx) / denominator;
+            // Spin carousel clockwise
+            carousel.setPower(-maxSpinPower);
 
-                    leftFront.setPower(leftBackPower);
-                    leftBack.setPower(leftFrontPower);
-                    rightFront.setPower(rightFrontPower);
-                    rightBack.setPower(rightBackPower);
-                }
+        } else if (gamepad2.left_bumper) {
 
-                liftFront.setPower(0);
-                liftBack.setPower(0);
-            }
+            // Spin carousel counterclockwise
+            carousel.setPower(maxSpinPower);
 
-            /** Carousel **/
+        } else {
 
-            if(gamepad2.left_bumper) {
+            // Stop carousel
+            carousel.setPower(0);
+        }
 
-                carousel.setPower(maxSpinPower);
+        /** Reset Encoders **/
 
-            } else if(gamepad2.right_bumper) {
+        if (gamepad2.dpad_down) {
 
-                carousel.setPower(-maxSpinPower);
-
-            } else {
-
-                carousel.setPower(0);
-
-            }
-
-            /** Reset Encoders **/
-
-            if (gamepad2.right_trigger != 0) {
-
-                liftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
-                liftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            }
+            liftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
+            liftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         }
     }
 }

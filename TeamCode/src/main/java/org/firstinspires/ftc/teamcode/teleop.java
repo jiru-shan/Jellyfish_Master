@@ -306,8 +306,8 @@ public class teleop extends LinearOpMode {
             }else if(rightIntakeState == 2) {
                 rightIntake.setPower(0);
 
-                d_coverLeft.setPosition(d_maxRange_coverLeft);
-                d_coverRight.setPosition(d_minRange_coverRight);
+                d_coverRight.setPosition(d_maxRange_coverRight);
+                d_coverLeft.setPosition(d_minRange_coverLeft);
 
                 rightIntakeTime.reset();
 
