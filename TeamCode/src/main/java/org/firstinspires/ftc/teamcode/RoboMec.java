@@ -104,7 +104,7 @@ public class RoboMec extends LinearOpMode {
         double d_maxRange_bendLeft_middle = 0.10;   // Fix these values
         double d_maxRange_bendRight_middle = 0.21;
 
-        double i_minRange_topLeft = 0.10;   // 0.08
+        double i_minRange_topLeft = 0.10;   // 0.08 
         double i_maxRange_topLeft = 0.88;
         double i_minRange_bottomLeft = 0.91;   // 0.92
         double i_maxRange_bottomLeft = 0.12;
@@ -227,7 +227,8 @@ public class RoboMec extends LinearOpMode {
             // With a button, intake should flip down, start intake, check if object present, lift up, ex-take into deposit
             // During this time, one flap of deposit should be up and one should be down
 
-            if (gamepad1.left_bumper) {
+            if (gamepad1.x || gamepad1.left_trigger != 0) {
+
 
                 // left intake flips down
                 i_topLeft.setPosition(i_minRange_topLeft);
@@ -275,7 +276,7 @@ public class RoboMec extends LinearOpMode {
             }
         }
 
-        if (gamepad1.right_bumper) {
+        if (gamepad1.b || gamepad1.right_trigger != 0) {
 
             // right intake flips down
             i_topRight.setPosition(i_minRange_topRight);
@@ -291,7 +292,7 @@ public class RoboMec extends LinearOpMode {
             if (colorSensor_right.alpha() > 500) {
 
                 // slow down intake
-                rightIntake.setPower(0.5);
+                rightIntake.setPower(0.1);
 
                 // intake lifts up
                 i_topRight.setPosition(i_maxRange_topRight);
@@ -351,8 +352,6 @@ public class RoboMec extends LinearOpMode {
         // Motor tick count is equal to 384.5
 
         if (gamepad2.dpad_up) {
-            telemetry.addData(">", "hardware issue");
-            telemetry.update();
 
             // new Compute();
 
@@ -366,7 +365,7 @@ public class RoboMec extends LinearOpMode {
 
             Thread.sleep(1000);
 
-        } else if (gamepad2.dpad_right) {
+        } else if (gamepad1.dpad_right) {
 
             // new Compute();
 
@@ -580,7 +579,8 @@ public class RoboMec extends LinearOpMode {
 
         /** Reset Encoders **/
 
-        if (gamepad2.right_trigger != 0) {
+        if (gamepad2.dpad_down) {
+
             liftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
             liftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         }
