@@ -327,7 +327,7 @@ public class RoboMec extends LinearOpMode {
 
                 leftIntakeState++;
             } else if (leftIntakeState == 3) {
-                if (leftIntakeTime.milliseconds() > 1250) {
+                if (leftIntakeTime.milliseconds() > 750 && colorSensor_left.alpha() < 500) {
                     leftIntake.setPower(-highSweepPower);
 
                     leftIntakeTime.reset();
@@ -410,7 +410,7 @@ public class RoboMec extends LinearOpMode {
 
                 rightIntakeState++;
             } else if (rightIntakeState == 3) {
-                if (rightIntakeTime.milliseconds() > 1250) {
+                if (rightIntakeTime.milliseconds() > 750  && colorSensor_right.alpha() < 500) {
                     rightIntake.setPower(-highSweepPower);
 
                     rightIntakeTime.reset();
@@ -603,7 +603,7 @@ public class RoboMec extends LinearOpMode {
 
                         leftIntakeState++;
                     } else if (leftIntakeState == 3) {
-                        if (leftIntakeTime.milliseconds() > 1250) {
+                        if (leftIntakeTime.milliseconds() > 750 && colorSensor_left.alpha() < 500) {
                             leftIntake.setPower(-highSweepPower);
 
                             leftIntakeTime.reset();
@@ -686,7 +686,7 @@ public class RoboMec extends LinearOpMode {
 
                         rightIntakeState++;
                     } else if (rightIntakeState == 3) {
-                        if (rightIntakeTime.milliseconds() > 1250) {
+                        if (rightIntakeTime.milliseconds() > 750 && colorSensor_right.alpha() < 500) {
                             rightIntake.setPower(-highSweepPower);
 
                             rightIntakeTime.reset();
@@ -797,7 +797,7 @@ public class RoboMec extends LinearOpMode {
 
                         leftIntakeState++;
                     } else if (leftIntakeState == 3) {
-                        if (leftIntakeTime.milliseconds() > 1250) {
+                        if (leftIntakeTime.milliseconds() > 750 && colorSensor_left.alpha() < 500) {
                             leftIntake.setPower(-highSweepPower);
 
                             leftIntakeTime.reset();
@@ -880,7 +880,7 @@ public class RoboMec extends LinearOpMode {
 
                         rightIntakeState++;
                     } else if (rightIntakeState == 3) {
-                        if (rightIntakeTime.milliseconds() > 1250) {
+                        if (rightIntakeTime.milliseconds() > 750  && colorSensor_right.alpha() < 500) {
                             rightIntake.setPower(-highSweepPower);
 
                             rightIntakeTime.reset();
@@ -1004,7 +1004,7 @@ public class RoboMec extends LinearOpMode {
 
                         leftIntakeState++;
                     } else if (leftIntakeState == 3) {
-                        if (leftIntakeTime.milliseconds() > 1250) {
+                        if (leftIntakeTime.milliseconds() > 750 && colorSensor_left.alpha() < 500) {
                             leftIntake.setPower(-highSweepPower);
 
                             leftIntakeTime.reset();
@@ -1087,7 +1087,7 @@ public class RoboMec extends LinearOpMode {
 
                         rightIntakeState++;
                     } else if (rightIntakeState == 3) {
-                        if (rightIntakeTime.milliseconds() > 1250) {
+                        if (rightIntakeTime.milliseconds() > 750 && colorSensor_right.alpha() < 500) {
                             rightIntake.setPower(-highSweepPower);
 
                             rightIntakeTime.reset();
@@ -1398,7 +1398,7 @@ public class RoboMec extends LinearOpMode {
 
                         leftIntakeState++;
                     } else if (leftIntakeState == 3) {
-                        if (leftIntakeTime.milliseconds() > 1250) {
+                        if (leftIntakeTime.milliseconds() > 750 && colorSensor_left.alpha() < 500) {
                             leftIntake.setPower(-highSweepPower);
 
                             leftIntakeTime.reset();
@@ -1481,7 +1481,7 @@ public class RoboMec extends LinearOpMode {
 
                         rightIntakeState++;
                     } else if (rightIntakeState == 3) {
-                        if (rightIntakeTime.milliseconds() > 1250) {
+                        if (rightIntakeTime.milliseconds() > 750 && colorSensor_right.alpha() < 500) {
                             rightIntake.setPower(-highSweepPower);
 
                             rightIntakeTime.reset();
@@ -1593,7 +1593,7 @@ public class RoboMec extends LinearOpMode {
 
                         leftIntakeState++;
                     } else if (leftIntakeState == 3) {
-                        if (leftIntakeTime.milliseconds() > 1250) {
+                        if (leftIntakeTime.milliseconds() > 750 && colorSensor_left.alpha() < 500) {
                             leftIntake.setPower(-highSweepPower);
 
                             leftIntakeTime.reset();
@@ -1676,7 +1676,7 @@ public class RoboMec extends LinearOpMode {
 
                         rightIntakeState++;
                     } else if (rightIntakeState == 3) {
-                        if (rightIntakeTime.milliseconds() > 1250) {
+                        if (rightIntakeTime.milliseconds() > 750 && colorSensor_right.alpha() < 500) {
                             rightIntake.setPower(-highSweepPower);
 
                             rightIntakeTime.reset();
@@ -1800,7 +1800,7 @@ public class RoboMec extends LinearOpMode {
 
                         leftIntakeState++;
                     } else if (leftIntakeState == 3) {
-                        if (leftIntakeTime.milliseconds() > 1250) {
+                        if (leftIntakeTime.milliseconds() > 750 && colorSensor_left.alpha() < 500) {
                             leftIntake.setPower(-highSweepPower);
 
                             leftIntakeTime.reset();
@@ -1883,7 +1883,7 @@ public class RoboMec extends LinearOpMode {
 
                         rightIntakeState++;
                     } else if (rightIntakeState == 3) {
-                        if (rightIntakeTime.milliseconds() > 1250) {
+                        if (rightIntakeTime.milliseconds() > 750  && colorSensor_right.alpha() < 500) {
                             rightIntake.setPower(-highSweepPower);
 
                             rightIntakeTime.reset();
