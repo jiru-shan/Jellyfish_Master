@@ -182,6 +182,11 @@ public class RoboMec extends LinearOpMode {
 
         timer.reset();
 
+        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         waitForStart();
 
         if (isStopRequested()) return;
@@ -238,6 +243,8 @@ public class RoboMec extends LinearOpMode {
             double leftBackPower = (y - x - rx) / denominator;
             double rightFrontPower = (y - x + rx) / denominator;
             double rightBackPower = (y + x + rx) / denominator;
+
+
 
             leftFront.setPower(leftBackPower);
             leftBack.setPower(leftFrontPower);
