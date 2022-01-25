@@ -88,7 +88,6 @@ public class RoboMec extends LinearOpMode {
 
         // Intake
         double highSweepPower = 0.8;
-        // double lowSweepPower = 0.4;
 
         // minRange - intake down, deposit position closed, deposit folded down
         // maxRange - intake up, deposit position open, deposit in scoring position
@@ -245,22 +244,26 @@ public class RoboMec extends LinearOpMode {
             rightFront.setPower(rightFrontPower);
             rightBack.setPower(rightBackPower);
 
-            /** Carousel **/
-
-            double a = gamepad2.right_stick_y;
-            double carouselPower = (0.5 + (0.5 * a));
-            carousel.setPower(carouselPower);
+//            if (leftFront.getCurrentPosition() < Math.abs(100) || leftBack.getCurrentPosition() < Math.abs(100) || rightFront.getCurrentPosition() < Math.abs(100) || rightBack.getCurrentPosition() < Math.abs(100)) {
+//                leftFront.setPower(0.5 * leftBackPower);
+//                leftBack.setPower(0.5 * leftFrontPower);
+//                rightFront.setPower(0.5 * rightFrontPower);
+//                rightBack.setPower(0.5 * rightBackPower);
+//            }
 
             // Show the elapsed game time & wheel power
             telemetry.addData("Status", "Timer: " + timer.toString());
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "leftFront (%.2f), leftBack (%.2f), rightFront (%.2f), rightBack (%.2f)",
                     leftFrontPower, leftBackPower, rightFrontPower, rightBackPower);
+            telemetry.addData("Left Front Encoders:", leftFront.getCurrentPosition());
+            telemetry.addData("Left Back Encoders: ", leftBack.getCurrentPosition());
+            telemetry.addData("Right Front Encoders: ", rightFront.getCurrentPosition());
+            telemetry.addData("Right Back Encoders: ", rightBack.getCurrentPosition());
             telemetry.addData("Color - Left", colorSensor_left.alpha());
             telemetry.addData("Color - Right", colorSensor_right.alpha());
             telemetry.addData("Lift - Front:", liftFront.getCurrentPosition());
             telemetry.addData("Lift - Back:", liftBack.getCurrentPosition());
-//            telemetry.addData("Carousel: ", carousel);
             telemetry.update();
 
 
@@ -284,6 +287,7 @@ public class RoboMec extends LinearOpMode {
 
             if (leftIntakeState == 0) {
                 if (gamepad1.left_bumper) {
+
                     i_topLeft.setPosition(i_minRange_topLeft);
                     i_bottomLeft.setPosition(i_minRange_bottomLeft);
 
@@ -295,7 +299,7 @@ public class RoboMec extends LinearOpMode {
 
                     leftIntakeState++;
                 }
-            } else if ((rightIntakeState > 0 || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
+            } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
                 leftIntakeState = 10;
             } else if (leftIntakeState == 1) {
                 if (colorSensor_left.alpha() > 500) {
@@ -316,7 +320,7 @@ public class RoboMec extends LinearOpMode {
 
                 leftIntakeState++;
             } else if (leftIntakeState == 3) {
-                if (leftIntakeTime.milliseconds() > 1000) {
+                if (leftIntakeTime.milliseconds() > 1250) {
                     leftIntake.setPower(-highSweepPower);
 
                     leftIntakeTime.reset();
@@ -339,7 +343,7 @@ public class RoboMec extends LinearOpMode {
                 leftIntakeTime.reset();
                 leftIntakeState++;
             } else if (leftIntakeState == 11) {
-                if (leftIntakeTime.milliseconds() > 300) {
+                if (leftIntakeTime.milliseconds() > 150) {
                     leftIntake.setPower(0);
 
                     i_topLeft.setPosition(i_maxRange_topLeft);
@@ -366,6 +370,7 @@ public class RoboMec extends LinearOpMode {
 
             if (rightIntakeState == 0) {
                 if (gamepad1.right_bumper) {
+
                     i_topRight.setPosition(i_minRange_topRight);
                     i_bottomRight.setPosition(i_minRange_bottomRight);
 
@@ -377,7 +382,7 @@ public class RoboMec extends LinearOpMode {
 
                     rightIntakeState++;
                 }
-            } else if (leftIntakeState > 0 || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400) && (rightIntakeState < 9)) {
+            } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
                 rightIntakeState = 10;
             } else if (rightIntakeState == 1) {
                 if (colorSensor_right.alpha() > 500) {
@@ -398,7 +403,7 @@ public class RoboMec extends LinearOpMode {
 
                 rightIntakeState++;
             } else if (rightIntakeState == 3) {
-                if (rightIntakeTime.milliseconds() > 1000) {
+                if (rightIntakeTime.milliseconds() > 1250) {
                     rightIntake.setPower(-highSweepPower);
 
                     rightIntakeTime.reset();
@@ -421,7 +426,7 @@ public class RoboMec extends LinearOpMode {
                 rightIntakeTime.reset();
                 rightIntakeState++;
             } else if (rightIntakeState == 11) {
-                if (rightIntakeTime.milliseconds() > 300) {
+                if (rightIntakeTime.milliseconds() > 150) {
                     rightIntake.setPower(0);
 
                     i_topRight.setPosition(i_maxRange_topRight);
@@ -555,6 +560,173 @@ public class RoboMec extends LinearOpMode {
                     leftBack.setPower(leftFrontPower);
                     rightFront.setPower(rightFrontPower);
                     rightBack.setPower(rightBackPower);
+
+                    if (leftIntakeState == 0) {
+                        if (gamepad1.left_bumper) {
+
+                            i_topLeft.setPosition(i_minRange_topLeft);
+                            i_bottomLeft.setPosition(i_minRange_bottomLeft);
+
+                            leftIntake.setPower(highSweepPower);
+
+                            // d_open.setPosition(d_open_minRangeSemi);
+
+                            leftIntakeTime.reset();
+
+                            leftIntakeState++;
+                        }
+                    } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
+                        leftIntakeState = 10;
+                    } else if (leftIntakeState == 1) {
+                        if (colorSensor_left.alpha() > 500) {
+                            leftIntake.setPower(0.25);
+
+                            i_topLeft.setPosition(i_maxRange_topLeft);
+                            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                            leftIntakeState++;
+                        }
+                    } else if (leftIntakeState == 2) {
+                        leftIntake.setPower(0);
+
+                        d_coverLeft.setPosition(d_maxRange_coverLeft);
+                        d_coverRight.setPosition(d_minRange_coverRight);
+
+                        leftIntakeTime.reset();
+
+                        leftIntakeState++;
+                    } else if (leftIntakeState == 3) {
+                        if (leftIntakeTime.milliseconds() > 1250) {
+                            leftIntake.setPower(-highSweepPower);
+
+                            leftIntakeTime.reset();
+
+                            leftIntakeState++;
+                        }
+                    } else if (leftIntakeState == 4) {
+                        if (leftIntakeTime.milliseconds() > 800) {
+                            leftIntake.setPower(0);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                            leftIntakeState = 0;
+                            objectCaptured = true;
+                        }
+                    } else if (leftIntakeState == 10) {
+                        leftIntake.setPower(-1);
+                        leftIntakeTime.reset();
+                        leftIntakeState++;
+                    } else if (leftIntakeState == 11) {
+                        if (leftIntakeTime.milliseconds() > 150) {
+                            leftIntake.setPower(0);
+
+                            i_topLeft.setPosition(i_maxRange_topLeft);
+                            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                            leftIntakeState = 0;
+                        }
+                    } else {
+                        leftIntake.setPower(0);
+
+                        i_topLeft.setPosition(i_maxRange_topLeft);
+                        i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                        d_open.setPosition(d_open_minRange);
+
+                        d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                        leftIntakeState = 0;
+                    }
+
+                    if (rightIntakeState == 0) {
+                        if (gamepad1.right_bumper) {
+
+                            i_topRight.setPosition(i_minRange_topRight);
+                            i_bottomRight.setPosition(i_minRange_bottomRight);
+
+                            rightIntake.setPower(highSweepPower);
+
+                            // d_open.setPosition(d_open_minRangeSemi);
+
+                            rightIntakeTime.reset();
+
+                            rightIntakeState++;
+                        }
+                    } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
+                        rightIntakeState = 10;
+                    } else if (rightIntakeState == 1) {
+                        if (colorSensor_right.alpha() > 500) {
+                            rightIntake.setPower(0.25);
+
+                            i_topRight.setPosition(i_maxRange_topRight);
+                            i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                            rightIntakeState++;
+                        }
+                    } else if (rightIntakeState == 2) {
+                        rightIntake.setPower(0);
+
+                        d_coverRight.setPosition(d_maxRange_coverRight);
+                        d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                        rightIntakeTime.reset();
+
+                        rightIntakeState++;
+                    } else if (rightIntakeState == 3) {
+                        if (rightIntakeTime.milliseconds() > 1250) {
+                            rightIntake.setPower(-highSweepPower);
+
+                            rightIntakeTime.reset();
+
+                            rightIntakeState++;
+                        }
+                    } else if (rightIntakeState == 4) {
+                        if (rightIntakeTime.milliseconds() > 800) {
+                            rightIntake.setPower(0);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverRight.setPosition(d_minRange_coverRight);
+
+                            rightIntakeState = 0;
+                            objectCaptured = true;
+                        }
+                    } else if (rightIntakeState == 10) {
+                        rightIntake.setPower(-1);
+                        rightIntakeTime.reset();
+                        rightIntakeState++;
+                    } else if (rightIntakeState == 11) {
+                        if (rightIntakeTime.milliseconds() > 150) {
+                            rightIntake.setPower(0);
+
+                            i_topRight.setPosition(i_maxRange_topRight);
+                            i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverRight.setPosition(d_minRange_coverRight);
+
+                            rightIntakeState = 0;
+                        }
+                    } else {
+                        rightIntake.setPower(0);
+
+                        i_topRight.setPosition(i_maxRange_topRight);
+                        i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                        d_open.setPosition(d_open_minRange);
+
+                        d_coverRight.setPosition(d_minRange_coverRight);
+
+                        rightIntakeState = 0;
+
+                    }
                 }
 
                 timer.reset();
@@ -582,6 +754,173 @@ public class RoboMec extends LinearOpMode {
                     leftBack.setPower(leftFrontPower);
                     rightFront.setPower(rightFrontPower);
                     rightBack.setPower(rightBackPower);
+
+                    if (leftIntakeState == 0) {
+                        if (gamepad1.left_bumper) {
+
+                            i_topLeft.setPosition(i_minRange_topLeft);
+                            i_bottomLeft.setPosition(i_minRange_bottomLeft);
+
+                            leftIntake.setPower(highSweepPower);
+
+                            // d_open.setPosition(d_open_minRangeSemi);
+
+                            leftIntakeTime.reset();
+
+                            leftIntakeState++;
+                        }
+                    } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
+                        leftIntakeState = 10;
+                    } else if (leftIntakeState == 1) {
+                        if (colorSensor_left.alpha() > 500) {
+                            leftIntake.setPower(0.25);
+
+                            i_topLeft.setPosition(i_maxRange_topLeft);
+                            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                            leftIntakeState++;
+                        }
+                    } else if (leftIntakeState == 2) {
+                        leftIntake.setPower(0);
+
+                        d_coverLeft.setPosition(d_maxRange_coverLeft);
+                        d_coverRight.setPosition(d_minRange_coverRight);
+
+                        leftIntakeTime.reset();
+
+                        leftIntakeState++;
+                    } else if (leftIntakeState == 3) {
+                        if (leftIntakeTime.milliseconds() > 1250) {
+                            leftIntake.setPower(-highSweepPower);
+
+                            leftIntakeTime.reset();
+
+                            leftIntakeState++;
+                        }
+                    } else if (leftIntakeState == 4) {
+                        if (leftIntakeTime.milliseconds() > 800) {
+                            leftIntake.setPower(0);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                            leftIntakeState = 0;
+                            objectCaptured = true;
+                        }
+                    } else if (leftIntakeState == 10) {
+                        leftIntake.setPower(-1);
+                        leftIntakeTime.reset();
+                        leftIntakeState++;
+                    } else if (leftIntakeState == 11) {
+                        if (leftIntakeTime.milliseconds() > 150) {
+                            leftIntake.setPower(0);
+
+                            i_topLeft.setPosition(i_maxRange_topLeft);
+                            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                            leftIntakeState = 0;
+                        }
+                    } else {
+                        leftIntake.setPower(0);
+
+                        i_topLeft.setPosition(i_maxRange_topLeft);
+                        i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                        d_open.setPosition(d_open_minRange);
+
+                        d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                        leftIntakeState = 0;
+                    }
+
+                    if (rightIntakeState == 0) {
+                        if (gamepad1.right_bumper) {
+
+                            i_topRight.setPosition(i_minRange_topRight);
+                            i_bottomRight.setPosition(i_minRange_bottomRight);
+
+                            rightIntake.setPower(highSweepPower);
+
+                            // d_open.setPosition(d_open_minRangeSemi);
+
+                            rightIntakeTime.reset();
+
+                            rightIntakeState++;
+                        }
+                    } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
+                        rightIntakeState = 10;
+                    } else if (rightIntakeState == 1) {
+                        if (colorSensor_right.alpha() > 500) {
+                            rightIntake.setPower(0.25);
+
+                            i_topRight.setPosition(i_maxRange_topRight);
+                            i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                            rightIntakeState++;
+                        }
+                    } else if (rightIntakeState == 2) {
+                        rightIntake.setPower(0);
+
+                        d_coverRight.setPosition(d_maxRange_coverRight);
+                        d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                        rightIntakeTime.reset();
+
+                        rightIntakeState++;
+                    } else if (rightIntakeState == 3) {
+                        if (rightIntakeTime.milliseconds() > 1250) {
+                            rightIntake.setPower(-highSweepPower);
+
+                            rightIntakeTime.reset();
+
+                            rightIntakeState++;
+                        }
+                    } else if (rightIntakeState == 4) {
+                        if (rightIntakeTime.milliseconds() > 800) {
+                            rightIntake.setPower(0);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverRight.setPosition(d_minRange_coverRight);
+
+                            rightIntakeState = 0;
+                            objectCaptured = true;
+                        }
+                    } else if (rightIntakeState == 10) {
+                        rightIntake.setPower(-1);
+                        rightIntakeTime.reset();
+                        rightIntakeState++;
+                    } else if (rightIntakeState == 11) {
+                        if (rightIntakeTime.milliseconds() > 150) {
+                            rightIntake.setPower(0);
+
+                            i_topRight.setPosition(i_maxRange_topRight);
+                            i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverRight.setPosition(d_minRange_coverRight);
+
+                            rightIntakeState = 0;
+                        }
+                    } else {
+                        rightIntake.setPower(0);
+
+                        i_topRight.setPosition(i_maxRange_topRight);
+                        i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                        d_open.setPosition(d_open_minRange);
+
+                        d_coverRight.setPosition(d_minRange_coverRight);
+
+                        rightIntakeState = 0;
+
+                    }
                 }
 
 //                // Check is deposit returns to original position
@@ -622,6 +961,173 @@ public class RoboMec extends LinearOpMode {
                     leftBack.setPower(leftFrontPower);
                     rightFront.setPower(rightFrontPower);
                     rightBack.setPower(rightBackPower);
+
+                    if (leftIntakeState == 0) {
+                        if (gamepad1.left_bumper) {
+
+                            i_topLeft.setPosition(i_minRange_topLeft);
+                            i_bottomLeft.setPosition(i_minRange_bottomLeft);
+
+                            leftIntake.setPower(highSweepPower);
+
+                            // d_open.setPosition(d_open_minRangeSemi);
+
+                            leftIntakeTime.reset();
+
+                            leftIntakeState++;
+                        }
+                    } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
+                        leftIntakeState = 10;
+                    } else if (leftIntakeState == 1) {
+                        if (colorSensor_left.alpha() > 500) {
+                            leftIntake.setPower(0.25);
+
+                            i_topLeft.setPosition(i_maxRange_topLeft);
+                            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                            leftIntakeState++;
+                        }
+                    } else if (leftIntakeState == 2) {
+                        leftIntake.setPower(0);
+
+                        d_coverLeft.setPosition(d_maxRange_coverLeft);
+                        d_coverRight.setPosition(d_minRange_coverRight);
+
+                        leftIntakeTime.reset();
+
+                        leftIntakeState++;
+                    } else if (leftIntakeState == 3) {
+                        if (leftIntakeTime.milliseconds() > 1250) {
+                            leftIntake.setPower(-highSweepPower);
+
+                            leftIntakeTime.reset();
+
+                            leftIntakeState++;
+                        }
+                    } else if (leftIntakeState == 4) {
+                        if (leftIntakeTime.milliseconds() > 800) {
+                            leftIntake.setPower(0);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                            leftIntakeState = 0;
+                            objectCaptured = true;
+                        }
+                    } else if (leftIntakeState == 10) {
+                        leftIntake.setPower(-1);
+                        leftIntakeTime.reset();
+                        leftIntakeState++;
+                    } else if (leftIntakeState == 11) {
+                        if (leftIntakeTime.milliseconds() > 150) {
+                            leftIntake.setPower(0);
+
+                            i_topLeft.setPosition(i_maxRange_topLeft);
+                            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                            leftIntakeState = 0;
+                        }
+                    } else {
+                        leftIntake.setPower(0);
+
+                        i_topLeft.setPosition(i_maxRange_topLeft);
+                        i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                        d_open.setPosition(d_open_minRange);
+
+                        d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                        leftIntakeState = 0;
+                    }
+
+                    if (rightIntakeState == 0) {
+                        if (gamepad1.right_bumper) {
+
+                            i_topRight.setPosition(i_minRange_topRight);
+                            i_bottomRight.setPosition(i_minRange_bottomRight);
+
+                            rightIntake.setPower(highSweepPower);
+
+                            // d_open.setPosition(d_open_minRangeSemi);
+
+                            rightIntakeTime.reset();
+
+                            rightIntakeState++;
+                        }
+                    } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
+                        rightIntakeState = 10;
+                    } else if (rightIntakeState == 1) {
+                        if (colorSensor_right.alpha() > 500) {
+                            rightIntake.setPower(0.25);
+
+                            i_topRight.setPosition(i_maxRange_topRight);
+                            i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                            rightIntakeState++;
+                        }
+                    } else if (rightIntakeState == 2) {
+                        rightIntake.setPower(0);
+
+                        d_coverRight.setPosition(d_maxRange_coverRight);
+                        d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                        rightIntakeTime.reset();
+
+                        rightIntakeState++;
+                    } else if (rightIntakeState == 3) {
+                        if (rightIntakeTime.milliseconds() > 1250) {
+                            rightIntake.setPower(-highSweepPower);
+
+                            rightIntakeTime.reset();
+
+                            rightIntakeState++;
+                        }
+                    } else if (rightIntakeState == 4) {
+                        if (rightIntakeTime.milliseconds() > 800) {
+                            rightIntake.setPower(0);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverRight.setPosition(d_minRange_coverRight);
+
+                            rightIntakeState = 0;
+                            objectCaptured = true;
+                        }
+                    } else if (rightIntakeState == 10) {
+                        rightIntake.setPower(-1);
+                        rightIntakeTime.reset();
+                        rightIntakeState++;
+                    } else if (rightIntakeState == 11) {
+                        if (rightIntakeTime.milliseconds() > 150) {
+                            rightIntake.setPower(0);
+
+                            i_topRight.setPosition(i_maxRange_topRight);
+                            i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverRight.setPosition(d_minRange_coverRight);
+
+                            rightIntakeState = 0;
+                        }
+                    } else {
+                        rightIntake.setPower(0);
+
+                        i_topRight.setPosition(i_maxRange_topRight);
+                        i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                        d_open.setPosition(d_open_minRange);
+
+                        d_coverRight.setPosition(d_minRange_coverRight);
+
+                        rightIntakeState = 0;
+
+                    }
                 }
 
                 liftFront.setPower(0);
@@ -849,6 +1355,173 @@ public class RoboMec extends LinearOpMode {
                     leftBack.setPower(leftFrontPower);
                     rightFront.setPower(rightFrontPower);
                     rightBack.setPower(rightBackPower);
+
+                    if (leftIntakeState == 0) {
+                        if (gamepad1.left_bumper) {
+
+                            i_topLeft.setPosition(i_minRange_topLeft);
+                            i_bottomLeft.setPosition(i_minRange_bottomLeft);
+
+                            leftIntake.setPower(highSweepPower);
+
+                            // d_open.setPosition(d_open_minRangeSemi);
+
+                            leftIntakeTime.reset();
+
+                            leftIntakeState++;
+                        }
+                    } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
+                        leftIntakeState = 10;
+                    } else if (leftIntakeState == 1) {
+                        if (colorSensor_left.alpha() > 500) {
+                            leftIntake.setPower(0.25);
+
+                            i_topLeft.setPosition(i_maxRange_topLeft);
+                            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                            leftIntakeState++;
+                        }
+                    } else if (leftIntakeState == 2) {
+                        leftIntake.setPower(0);
+
+                        d_coverLeft.setPosition(d_maxRange_coverLeft);
+                        d_coverRight.setPosition(d_minRange_coverRight);
+
+                        leftIntakeTime.reset();
+
+                        leftIntakeState++;
+                    } else if (leftIntakeState == 3) {
+                        if (leftIntakeTime.milliseconds() > 1250) {
+                            leftIntake.setPower(-highSweepPower);
+
+                            leftIntakeTime.reset();
+
+                            leftIntakeState++;
+                        }
+                    } else if (leftIntakeState == 4) {
+                        if (leftIntakeTime.milliseconds() > 800) {
+                            leftIntake.setPower(0);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                            leftIntakeState = 0;
+                            objectCaptured = true;
+                        }
+                    } else if (leftIntakeState == 10) {
+                        leftIntake.setPower(-1);
+                        leftIntakeTime.reset();
+                        leftIntakeState++;
+                    } else if (leftIntakeState == 11) {
+                        if (leftIntakeTime.milliseconds() > 150) {
+                            leftIntake.setPower(0);
+
+                            i_topLeft.setPosition(i_maxRange_topLeft);
+                            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                            leftIntakeState = 0;
+                        }
+                    } else {
+                        leftIntake.setPower(0);
+
+                        i_topLeft.setPosition(i_maxRange_topLeft);
+                        i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                        d_open.setPosition(d_open_minRange);
+
+                        d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                        leftIntakeState = 0;
+                    }
+
+                    if (rightIntakeState == 0) {
+                        if (gamepad1.right_bumper) {
+
+                            i_topRight.setPosition(i_minRange_topRight);
+                            i_bottomRight.setPosition(i_minRange_bottomRight);
+
+                            rightIntake.setPower(highSweepPower);
+
+                            // d_open.setPosition(d_open_minRangeSemi);
+
+                            rightIntakeTime.reset();
+
+                            rightIntakeState++;
+                        }
+                    } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
+                        rightIntakeState = 10;
+                    } else if (rightIntakeState == 1) {
+                        if (colorSensor_right.alpha() > 500) {
+                            rightIntake.setPower(0.25);
+
+                            i_topRight.setPosition(i_maxRange_topRight);
+                            i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                            rightIntakeState++;
+                        }
+                    } else if (rightIntakeState == 2) {
+                        rightIntake.setPower(0);
+
+                        d_coverRight.setPosition(d_maxRange_coverRight);
+                        d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                        rightIntakeTime.reset();
+
+                        rightIntakeState++;
+                    } else if (rightIntakeState == 3) {
+                        if (rightIntakeTime.milliseconds() > 1250) {
+                            rightIntake.setPower(-highSweepPower);
+
+                            rightIntakeTime.reset();
+
+                            rightIntakeState++;
+                        }
+                    } else if (rightIntakeState == 4) {
+                        if (rightIntakeTime.milliseconds() > 800) {
+                            rightIntake.setPower(0);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverRight.setPosition(d_minRange_coverRight);
+
+                            rightIntakeState = 0;
+                            objectCaptured = true;
+                        }
+                    } else if (rightIntakeState == 10) {
+                        rightIntake.setPower(-1);
+                        rightIntakeTime.reset();
+                        rightIntakeState++;
+                    } else if (rightIntakeState == 11) {
+                        if (rightIntakeTime.milliseconds() > 150) {
+                            rightIntake.setPower(0);
+
+                            i_topRight.setPosition(i_maxRange_topRight);
+                            i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverRight.setPosition(d_minRange_coverRight);
+
+                            rightIntakeState = 0;
+                        }
+                    } else {
+                        rightIntake.setPower(0);
+
+                        i_topRight.setPosition(i_maxRange_topRight);
+                        i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                        d_open.setPosition(d_open_minRange);
+
+                        d_coverRight.setPosition(d_minRange_coverRight);
+
+                        rightIntakeState = 0;
+
+                    }
                 }
 
                 timer.reset();
@@ -877,6 +1550,173 @@ public class RoboMec extends LinearOpMode {
                     leftBack.setPower(leftFrontPower);
                     rightFront.setPower(rightFrontPower);
                     rightBack.setPower(rightBackPower);
+
+                    if (leftIntakeState == 0) {
+                        if (gamepad1.left_bumper) {
+
+                            i_topLeft.setPosition(i_minRange_topLeft);
+                            i_bottomLeft.setPosition(i_minRange_bottomLeft);
+
+                            leftIntake.setPower(highSweepPower);
+
+                            // d_open.setPosition(d_open_minRangeSemi);
+
+                            leftIntakeTime.reset();
+
+                            leftIntakeState++;
+                        }
+                    } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
+                        leftIntakeState = 10;
+                    } else if (leftIntakeState == 1) {
+                        if (colorSensor_left.alpha() > 500) {
+                            leftIntake.setPower(0.25);
+
+                            i_topLeft.setPosition(i_maxRange_topLeft);
+                            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                            leftIntakeState++;
+                        }
+                    } else if (leftIntakeState == 2) {
+                        leftIntake.setPower(0);
+
+                        d_coverLeft.setPosition(d_maxRange_coverLeft);
+                        d_coverRight.setPosition(d_minRange_coverRight);
+
+                        leftIntakeTime.reset();
+
+                        leftIntakeState++;
+                    } else if (leftIntakeState == 3) {
+                        if (leftIntakeTime.milliseconds() > 1250) {
+                            leftIntake.setPower(-highSweepPower);
+
+                            leftIntakeTime.reset();
+
+                            leftIntakeState++;
+                        }
+                    } else if (leftIntakeState == 4) {
+                        if (leftIntakeTime.milliseconds() > 800) {
+                            leftIntake.setPower(0);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                            leftIntakeState = 0;
+                            objectCaptured = true;
+                        }
+                    } else if (leftIntakeState == 10) {
+                        leftIntake.setPower(-1);
+                        leftIntakeTime.reset();
+                        leftIntakeState++;
+                    } else if (leftIntakeState == 11) {
+                        if (leftIntakeTime.milliseconds() > 150) {
+                            leftIntake.setPower(0);
+
+                            i_topLeft.setPosition(i_maxRange_topLeft);
+                            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                            leftIntakeState = 0;
+                        }
+                    } else {
+                        leftIntake.setPower(0);
+
+                        i_topLeft.setPosition(i_maxRange_topLeft);
+                        i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                        d_open.setPosition(d_open_minRange);
+
+                        d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                        leftIntakeState = 0;
+                    }
+
+                    if (rightIntakeState == 0) {
+                        if (gamepad1.right_bumper) {
+
+                            i_topRight.setPosition(i_minRange_topRight);
+                            i_bottomRight.setPosition(i_minRange_bottomRight);
+
+                            rightIntake.setPower(highSweepPower);
+
+                            // d_open.setPosition(d_open_minRangeSemi);
+
+                            rightIntakeTime.reset();
+
+                            rightIntakeState++;
+                        }
+                    } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
+                        rightIntakeState = 10;
+                    } else if (rightIntakeState == 1) {
+                        if (colorSensor_right.alpha() > 500) {
+                            rightIntake.setPower(0.25);
+
+                            i_topRight.setPosition(i_maxRange_topRight);
+                            i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                            rightIntakeState++;
+                        }
+                    } else if (rightIntakeState == 2) {
+                        rightIntake.setPower(0);
+
+                        d_coverRight.setPosition(d_maxRange_coverRight);
+                        d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                        rightIntakeTime.reset();
+
+                        rightIntakeState++;
+                    } else if (rightIntakeState == 3) {
+                        if (rightIntakeTime.milliseconds() > 1250) {
+                            rightIntake.setPower(-highSweepPower);
+
+                            rightIntakeTime.reset();
+
+                            rightIntakeState++;
+                        }
+                    } else if (rightIntakeState == 4) {
+                        if (rightIntakeTime.milliseconds() > 800) {
+                            rightIntake.setPower(0);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverRight.setPosition(d_minRange_coverRight);
+
+                            rightIntakeState = 0;
+                            objectCaptured = true;
+                        }
+                    } else if (rightIntakeState == 10) {
+                        rightIntake.setPower(-1);
+                        rightIntakeTime.reset();
+                        rightIntakeState++;
+                    } else if (rightIntakeState == 11) {
+                        if (rightIntakeTime.milliseconds() > 150) {
+                            rightIntake.setPower(0);
+
+                            i_topRight.setPosition(i_maxRange_topRight);
+                            i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverRight.setPosition(d_minRange_coverRight);
+
+                            rightIntakeState = 0;
+                        }
+                    } else {
+                        rightIntake.setPower(0);
+
+                        i_topRight.setPosition(i_maxRange_topRight);
+                        i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                        d_open.setPosition(d_open_minRange);
+
+                        d_coverRight.setPosition(d_minRange_coverRight);
+
+                        rightIntakeState = 0;
+
+                    }
                 }
 
 //                // Check is deposit returns to original position
@@ -917,6 +1757,173 @@ public class RoboMec extends LinearOpMode {
                     leftBack.setPower(leftFrontPower);
                     rightFront.setPower(rightFrontPower);
                     rightBack.setPower(rightBackPower);
+
+                    if (leftIntakeState == 0) {
+                        if (gamepad1.left_bumper) {
+
+                            i_topLeft.setPosition(i_minRange_topLeft);
+                            i_bottomLeft.setPosition(i_minRange_bottomLeft);
+
+                            leftIntake.setPower(highSweepPower);
+
+                            // d_open.setPosition(d_open_minRangeSemi);
+
+                            leftIntakeTime.reset();
+
+                            leftIntakeState++;
+                        }
+                    } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
+                        leftIntakeState = 10;
+                    } else if (leftIntakeState == 1) {
+                        if (colorSensor_left.alpha() > 500) {
+                            leftIntake.setPower(0.25);
+
+                            i_topLeft.setPosition(i_maxRange_topLeft);
+                            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                            leftIntakeState++;
+                        }
+                    } else if (leftIntakeState == 2) {
+                        leftIntake.setPower(0);
+
+                        d_coverLeft.setPosition(d_maxRange_coverLeft);
+                        d_coverRight.setPosition(d_minRange_coverRight);
+
+                        leftIntakeTime.reset();
+
+                        leftIntakeState++;
+                    } else if (leftIntakeState == 3) {
+                        if (leftIntakeTime.milliseconds() > 1250) {
+                            leftIntake.setPower(-highSweepPower);
+
+                            leftIntakeTime.reset();
+
+                            leftIntakeState++;
+                        }
+                    } else if (leftIntakeState == 4) {
+                        if (leftIntakeTime.milliseconds() > 800) {
+                            leftIntake.setPower(0);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                            leftIntakeState = 0;
+                            objectCaptured = true;
+                        }
+                    } else if (leftIntakeState == 10) {
+                        leftIntake.setPower(-1);
+                        leftIntakeTime.reset();
+                        leftIntakeState++;
+                    } else if (leftIntakeState == 11) {
+                        if (leftIntakeTime.milliseconds() > 150) {
+                            leftIntake.setPower(0);
+
+                            i_topLeft.setPosition(i_maxRange_topLeft);
+                            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                            leftIntakeState = 0;
+                        }
+                    } else {
+                        leftIntake.setPower(0);
+
+                        i_topLeft.setPosition(i_maxRange_topLeft);
+                        i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                        d_open.setPosition(d_open_minRange);
+
+                        d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                        leftIntakeState = 0;
+                    }
+
+                    if (rightIntakeState == 0) {
+                        if (gamepad1.right_bumper) {
+
+                            i_topRight.setPosition(i_minRange_topRight);
+                            i_bottomRight.setPosition(i_minRange_bottomRight);
+
+                            rightIntake.setPower(highSweepPower);
+
+                            // d_open.setPosition(d_open_minRangeSemi);
+
+                            rightIntakeTime.reset();
+
+                            rightIntakeState++;
+                        }
+                    } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
+                        rightIntakeState = 10;
+                    } else if (rightIntakeState == 1) {
+                        if (colorSensor_right.alpha() > 500) {
+                            rightIntake.setPower(0.25);
+
+                            i_topRight.setPosition(i_maxRange_topRight);
+                            i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                            rightIntakeState++;
+                        }
+                    } else if (rightIntakeState == 2) {
+                        rightIntake.setPower(0);
+
+                        d_coverRight.setPosition(d_maxRange_coverRight);
+                        d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                        rightIntakeTime.reset();
+
+                        rightIntakeState++;
+                    } else if (rightIntakeState == 3) {
+                        if (rightIntakeTime.milliseconds() > 1250) {
+                            rightIntake.setPower(-highSweepPower);
+
+                            rightIntakeTime.reset();
+
+                            rightIntakeState++;
+                        }
+                    } else if (rightIntakeState == 4) {
+                        if (rightIntakeTime.milliseconds() > 800) {
+                            rightIntake.setPower(0);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverRight.setPosition(d_minRange_coverRight);
+
+                            rightIntakeState = 0;
+                            objectCaptured = true;
+                        }
+                    } else if (rightIntakeState == 10) {
+                        rightIntake.setPower(-1);
+                        rightIntakeTime.reset();
+                        rightIntakeState++;
+                    } else if (rightIntakeState == 11) {
+                        if (rightIntakeTime.milliseconds() > 150) {
+                            rightIntake.setPower(0);
+
+                            i_topRight.setPosition(i_maxRange_topRight);
+                            i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverRight.setPosition(d_minRange_coverRight);
+
+                            rightIntakeState = 0;
+                        }
+                    } else {
+                        rightIntake.setPower(0);
+
+                        i_topRight.setPosition(i_maxRange_topRight);
+                        i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                        d_open.setPosition(d_open_minRange);
+
+                        d_coverRight.setPosition(d_minRange_coverRight);
+
+                        rightIntakeState = 0;
+
+                    }
                 }
 
                 liftFront.setPower(0);
@@ -925,13 +1932,19 @@ public class RoboMec extends LinearOpMode {
 
             /** Carousel **/
 
-            if(gamepad2.left_bumper) {
+            float a = gamepad2.left_trigger;
+            float b = gamepad2.right_trigger;
 
-                carousel.setPower(maxSpinPower);
 
-            } else if(gamepad2.right_bumper) {
+            // right - rotate clockwise & left - rotate counterclockwise
+            if (gamepad2.right_trigger != 0) {
+//                telemetry.addData(">", "test");
+//                telemetry.update();
+                carousel.setPower(0.7 + 0.3 * b);
 
-                carousel.setPower(-maxSpinPower);
+            } else if (gamepad2.left_trigger != 0) {
+
+                carousel.setPower(-(0.7 + 0.3 * a));
 
             } else {
 
@@ -939,9 +1952,11 @@ public class RoboMec extends LinearOpMode {
 
             }
 
+            telemetry.addData("Carousel: ", gamepad2.right_trigger);
+
             /** Reset Encoders **/
 
-            if (gamepad2.right_trigger != 0) {
+            if (gamepad2.left_bumper) {
 
                 liftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
                 liftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
