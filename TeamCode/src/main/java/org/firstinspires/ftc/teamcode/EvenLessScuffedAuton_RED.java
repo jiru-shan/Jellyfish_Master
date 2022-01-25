@@ -6,44 +6,27 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
-import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorRangeSensor;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
-import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceBuilder;
-import org.firstinspires.ftc.teamcode.vision.VisionPipeline;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvWebcam;
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDriveCancelable;
 
 @Autonomous
 @Config
 public class EvenLessScuffedAuton_RED extends LinearOpMode
 {
-    public static double TURN_ANGLE=210;
-    public static double CYCLE_TIME=4;
     DcMotorEx test;
-    ColorRangeSensor sensorRange1, sensorRange2;
-
-    OpenCvWebcam camera;
-    VisionPipeline pipeline;
+    ColorRangeSensor sensorRange1, sensorRange2, driveLeft, driveRight;
 
     DcMotorEx leftFront, leftBack, rightBack, rightFront;
     DcMotor lift_front, lift_back, leftIntake, rightIntake;
@@ -76,18 +59,32 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
     double i_minRange_bottomLeft = 0.9;
     double i_maxRange_bottomLeft = 0.15;
 
+    double CYCLE_TIME=4;
+
+    enum IntakeState {GETTING,
+        RETURNING,
+    }
+
+    enum LiftState
+    {
+        LING,
+        RETURNING,
+        DONE
+    }
+
     int alliance_targetTipped = 700;
 
-    int barcodePos;
+    double i_hate_existence;
 
+    SampleMecanumDriveCancelable drive;
 
-    SampleMecanumDrive drive;
-
-
+    Trajectory goingTrajectory;
+    Trajectory returningTrajectory;
+    IntakeState state;
+    //LiftState lstate;
 
     @Override
-    public void runOpMode() throws InterruptedException
-    {
+    public void runOpMode() throws InterruptedException {
         // Motors
         leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
         leftBack = hardwareMap.get(DcMotorEx.class, "leftBack");
@@ -114,87 +111,156 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
 
         sensorRange1 = hardwareMap.get(ColorRangeSensor.class, "colorSensor_right");
         sensorRange2 = hardwareMap.get(ColorRangeSensor.class, "colorSensor_left");
+        driveLeft=hardwareMap.get(ColorRangeSensor.class, "driveSensor1");
+        driveRight=hardwareMap.get(ColorRangeSensor.class, "driveSensor2");
 
-        drive=new SampleMecanumDrive(hardwareMap);
-        Pose2d startPose=new Pose2d(0,0,0);
-        ElapsedTime time=new ElapsedTime();
+        drive = new SampleMecanumDriveCancelable(hardwareMap);
+        Pose2d startPose = new Pose2d(0, 0, 0);
+        ElapsedTime time = new ElapsedTime();
         drive.setPoseEstimate(startPose);
 
-        webcamInit();
+
         waitForStart();
 
-        barcodePos= pipeline.getAnalysis();
+        lowerIntakes();
+        Trajectory prepreTrajectory=drive.trajectoryBuilder(startPose)
+                .forward(7)
+                .build();
+        drive.followTrajectory(prepreTrajectory);
+        drive.setPoseEstimate(new Pose2d(0,0,Math.toRadians(0)));
 
+
+        while(30-time.seconds()>CYCLE_TIME)
+        {
+        double pathChange=0;
+        Trajectory preTrajectory = drive.trajectoryBuilder(startPose)
+                .lineToSplineHeading(new Pose2d(-49, -1,Math.toRadians(5)))
+                .build();
+        drive.followTrajectory(preTrajectory);
+        state=IntakeState.GETTING;
+        goingTrajectory=drive.trajectoryBuilder(preTrajectory.end())
+                .lineToSplineHeading(new Pose2d(-71, -3.25, Math.toRadians(10)), SampleMecanumDrive.getVelocityConstraint(40,
+                        DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .build();
+
+        drive.followTrajectoryAsync(goingTrajectory);
+        pathChange=1;
+        while(!hasBlock()&&pathChange<3)
+        {
+            switch(state)
+            {
+                case GETTING:
+                    if(!drive.isBusy())
+                    {
+
+                        state=IntakeState.RETURNING;
+                        returningTrajectory= drive.trajectoryBuilder(goingTrajectory.end())
+                                .lineToSplineHeading(new Pose2d(-49, -1, Math.toRadians(5)))
+                                .build();
+                        drive.followTrajectoryAsync(returningTrajectory);
+                    }
+                    break;
+                case RETURNING:
+                    if(!drive.isBusy())
+                    {
+                        state=IntakeState.GETTING;
+                        goingTrajectory=drive.trajectoryBuilder(returningTrajectory.end())
+                                .lineToSplineHeading(new Pose2d(-71-2*pathChange, -3.25-pathChange, Math.toRadians(10+(2.5*pathChange))), SampleMecanumDrive.getVelocityConstraint(40,
+                                        DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                                .build();
+                        drive.followTrajectory(goingTrajectory);
+                        pathChange++;
+                    }
+                    break;
+            }
+            drive.update();
+            rightIntake.setPower(1);
+        }
+        double target=SystemClock.uptimeMillis()+300;
+        while(SystemClock.uptimeMillis()<target)
+        {
+            rightIntake.setPower(1);
+            drive.update();
+        }
+        drive.cancelFollowing();
+        rightIntake.setPower(0);
+        raiseIntakes();
+
+        returningTrajectory=drive.trajectoryBuilder(drive.getPoseEstimate())
+                .lineToSplineHeading(new Pose2d(-42, -1, Math.toRadians(0)))
+                .build();
+        drive.followTrajectory(returningTrajectory);
+
+        Trajectory maldTrajectory=drive.trajectoryBuilder(returningTrajectory.end())
+                .strafeLeft(10, SampleMecanumDrive.getVelocityConstraint(40,
+                        DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .build();
+        drive.followTrajectory(maldTrajectory);
+
+        drive.setPoseEstimate(new Pose2d(drive.getPoseEstimate().getX(), 0, 0));
+
+        //lstate=LiftState.LING;
+        Trajectory lineTrajectory=drive.trajectoryBuilder(drive.getPoseEstimate())
+                .lineToSplineHeading(startPose)
+                .build();
+        drive.followTrajectory(lineTrajectory);
+        /*while(lstate!=LiftState.DONE)
+        {
+
+            switch(lstate)
+            {
+                case LING:
+                    if(onColor()||!drive.isBusy())
+                    {
+                        telemetry.addData(">", "?");
+                        telemetry.update();
+                        lstate=LiftState.RETURNING;
+                        drive.cancelFollowing();
+                        drive.setPoseEstimate(new Pose2d(-46, 0, 0));
+                        Trajectory returnTrajectory=drive.trajectoryBuilder(drive.getPoseEstimate())
+                                .lineTo(new Vector2d(0,0))
+                                .build();
+                        drive.followTrajectoryAsync(returnTrajectory);
+                    }
+                    break;
+                case RETURNING:
+                    if(!drive.isBusy())
+                    {
+                        //lift();
+                        lstate=LiftState.DONE;
+                    }
+                    break;
+                case DONE:
+                    break;
+            }
+*/
+        }
+    }
+    public void lowerIntakes()
+    {
         i_topRight.setPosition(i_minRange_topRight);
         i_bottomRight.setPosition(i_minRange_bottomRight);
-
-            Trajectory preStart=drive.trajectoryBuilder(new Pose2d())
-                    .forward(7)
-                    .build();
-            drive.followTrajectory(preStart);
-            drive.setPoseEstimate(new Pose2d(0,0,0));
-
-            //place vision cube now: lift(barcodePos)
-
-
-            while(30000-time.milliseconds()>CYCLE_TIME)
-            {
-
-                Trajectory primaryTrajectory0 = drive.trajectoryBuilder(new Pose2d())
-
-                        .lineTo(new Vector2d(-52, 0))
-                        .build();
-                Trajectory primaryTrajectory1 = drive.trajectoryBuilder(primaryTrajectory0.end())
-                        .strafeRight(5)
-                        .splineTo(new Vector2d(-57, -20), Math.toRadians(TURN_ANGLE))
-                        .build();
-                Trajectory primaryTrajectory2 = drive.trajectoryBuilder(primaryTrajectory1.end())
-                        .lineTo(new Vector2d(-75, -19))
-                        .build();
-
-
-                drive.followTrajectory(primaryTrajectory0);
-                drive.followTrajectory(primaryTrajectory1);
-                drive.followTrajectory(primaryTrajectory2);
-                getCube();
-                Trajectory returningTrajectory0 = drive.trajectoryBuilder((drive.getPoseEstimate()))
-                        .lineToLinearHeading(primaryTrajectory2.end())
-                        .build();
-                drive.followTrajectory(returningTrajectory0);
-
-                Trajectory returningTrajectory1 = drive.trajectoryBuilder(returningTrajectory0.end())
-                        .splineTo(new Vector2d(-57, -10), Math.toRadians(0))
-                        .build();
-                drive.followTrajectory(returningTrajectory1);
-
-                Trajectory returningTrajectory2 = drive.trajectoryBuilder(returningTrajectory1.end())
-                        .strafeLeft(12)
-                        .build();
-
-                drive.followTrajectory(returningTrajectory2);
-
-                drive.setPoseEstimate(new Pose2d(drive.getPoseEstimate().getX(), 0, 0));
-
-                //fix localization by aligning with color sensor on white tape
-
-                Trajectory returningTrajectory3 = drive.trajectoryBuilder(drive.getPoseEstimate())
-                        .lineTo(new Vector2d(0, 0))
-                        .build();
-                drive.followTrajectory(returningTrajectory3);
-
-                lift(3);
-            }
-
-
-            Trajectory park=drive.trajectoryBuilder(new Pose2d())
-                    .lineTo(new Vector2d(-52, 0))
-                    .build();
-            drive.followTrajectory(park);
-
+    }
+    public void raiseIntakes()
+    {
+        i_topRight.setPosition(i_maxRange_topRight);
+        i_bottomRight.setPosition(i_maxRange_bottomRight);
+    }
+    public boolean onColor()
+    {
+        if(rgbAvg(driveLeft)>215||rgbAvg(driveRight)>215)
+        {
+            return true;
+        }
+        return false;
+    }
+    public double rgbAvg(ColorRangeSensor pain)
+    {
+        return (pain.green()+pain.blue()+pain.red())/3;
     }
 
-
-    public boolean hasBlock() {
+    public boolean hasBlock()
+    {
 
         if (sensorRange1.getDistance(DistanceUnit.MM) < 55 || sensorRange2.getDistance(DistanceUnit.MM) < 55) {
             return true;
@@ -202,106 +268,65 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
         return false;
     }
 
-    public void getCube()
-    {
 
-        drive.update();
-        while(hasBlock() == false) {
-            leftFront.setPower(-0.3);
-            leftBack.setPower(-0.3);
-            rightFront.setPower(-0.3);
-            rightBack.setPower(-0.3);
-            rightIntake.setPower(1);
-            drive.update();
-        }
-        leftFront.setPower(0);
-        leftBack.setPower(0);
-        rightFront.setPower(0);
-        rightBack.setPower(0);
-        rightIntake.setPower(0);
-        drive.update();
-    }
+    public void lift(){
+        lift_front.setTargetPosition(-alliance_targetTipped);
+        lift_back.setTargetPosition(-alliance_targetTipped);
+        lift_front.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
+        lift_back.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        lift_front.setPower(-1.0);
+        lift_back.setPower(-1.0);
 
-    public void lift(int level){
-        if(level==3)
+        //Thread.sleep(1000);
+        double target= SystemClock.uptimeMillis()+1000;
+        while(SystemClock.uptimeMillis()<target)
         {
-            lift_front.setTargetPosition(-alliance_targetTipped);
-            lift_back.setTargetPosition(-alliance_targetTipped);
-            lift_front.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
-            lift_back.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            lift_front.setPower(-1.0);
-            lift_back.setPower(-1.0);
-
-            //Thread.sleep(1000);
-            double target = SystemClock.uptimeMillis() + 1000;
-            while (SystemClock.uptimeMillis() < target) {
-                //stall
-            }
-
-            // Lift up deposit
-            d_bendLeft.setPosition(d_maxRange_bendLeft);
-            d_bendRight.setPosition(d_maxRange_bendRight);
-
-            // Open to deposit in top level of alliance hub
-            d_open.setPosition(d_open_top);
-
-            //Thread.sleep(500);
-            target = SystemClock.uptimeMillis() + 500;
-            while (SystemClock.uptimeMillis() < target) {
-                //stall
-            }
-
-            // Close & bend down deposit
-            d_open.setPosition(d_open_minRange);
-            d_bendLeft.setPosition(d_minRange_bendLeft);
-            d_bendRight.setPosition(d_minRange_bendRight);
-
-            //Thread.sleep(1000);
-            target = SystemClock.uptimeMillis() + 1000;
-            while (SystemClock.uptimeMillis() < target) {
-                //stall
-            }
-
-            // Retract arm to original position
-            lift_front.setTargetPosition(0);
-            lift_back.setTargetPosition(0);
-            lift_front.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
-            lift_back.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            lift_front.setPower(1.0);
-            lift_back.setPower(1.0);
-
-            // Thread.sleep(1000);
-            target = SystemClock.uptimeMillis() + 1000;
-            while (SystemClock.uptimeMillis() < target) {
-                //stall
-            }
-
-            lift_front.setPower(0);
-            lift_back.setPower(0);
+            //stall
         }
-    }
 
-    public void webcamInit()
-    {
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam"), cameraMonitorViewId);
-        pipeline=new VisionPipeline(telemetry);
-        camera.setPipeline(pipeline);
-        camera.setMillisecondsPermissionTimeout(2500); // Timeout for obtaining permission is configurable. Set before opening.
-        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        // Lift up deposit
+        d_bendLeft.setPosition(d_maxRange_bendLeft);
+        d_bendRight.setPosition(d_maxRange_bendRight);
+
+        // Open to deposit in top level of alliance hub
+        d_open.setPosition(d_open_top);
+
+        //Thread.sleep(500);
+        target=SystemClock.uptimeMillis()+500;
+        while(SystemClock.uptimeMillis()<target)
         {
-            @Override
-            public void onOpened()
-            {
-                camera.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
-            }
+            //stall
+        }
 
-            @Override
-            public void onError(int errorCode)
-            {
-                telemetry.addData("Status:", "pain");
-                telemetry.update();
-            }
-        });
+        // Close & bend down deposit
+        d_open.setPosition(d_open_minRange);
+        d_bendLeft.setPosition(d_minRange_bendLeft);
+        d_bendRight.setPosition(d_minRange_bendRight);
+
+        //Thread.sleep(1000);
+        target=SystemClock.uptimeMillis()+1000;
+        while(SystemClock.uptimeMillis()<target)
+        {
+            //stall
+        }
+
+        // Retract arm to original position
+        lift_front.setTargetPosition(0);
+        lift_back.setTargetPosition(0);
+        lift_front.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
+        lift_back.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        lift_front.setPower(1.0);
+        lift_back.setPower(1.0);
+
+        // Thread.sleep(1000);
+        target=SystemClock.uptimeMillis()+1000;
+        while(SystemClock.uptimeMillis()<target)
+        {
+            //stall
+        }
+
+
+        lift_front.setPower(0);
+        lift_back.setPower(0);
     }
 }

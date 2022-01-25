@@ -18,13 +18,16 @@ public class MeepMeepTesting
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 15)
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(new Pose2d(0, 0, 0))
-                                .lineTo(new Vector2d(52, 0))
-                                .strafeRight(5)
-                                .splineTo(new Vector2d(57, -20), Math.toRadians(TURN_ANGLE))
-                                .lineTo(new Vector2d(75, -19))
+                                //.setReversed(true)
+                                //.lineToConstantHeading(new Vector2d(-42, -1))
+                                //.splineTo(new Vector2d(-42, -1), Math.toRadians(5))
+                                .lineToSplineHeading(new Pose2d(-42, -1,Math.toRadians(5)))
+                                .lineToSplineHeading(new Pose2d(-60, -3.25, Math.toRadians(10)))
+                                //.setReversed(true)
+                                .lineToSplineHeading(new Pose2d(-42, -1, Math.toRadians(5)))
+                                //.lineToConstantHeading(new Vector2d(42, -1))
                                 .build()
                 );
-
         meepMeep.setBackground(MeepMeep.Background.FIELD_FREIGHTFRENZY_ADI_DARK)
                 .setDarkMode(true)
                 .setBackgroundAlpha(0.95f)
