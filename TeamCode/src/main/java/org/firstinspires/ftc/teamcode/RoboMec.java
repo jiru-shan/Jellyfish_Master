@@ -316,6 +316,9 @@ public class RoboMec extends LinearOpMode {
                     i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
                     leftIntakeState++;
+                }else {
+                    i_topLeft.setPosition(i_minRange_topLeft);
+                    i_bottomLeft.setPosition(i_minRange_bottomLeft);
                 }
             } else if (leftIntakeState == 2) {
                 leftIntake.setPower(0);
@@ -399,6 +402,9 @@ public class RoboMec extends LinearOpMode {
                     i_bottomRight.setPosition(i_maxRange_bottomRight);
 
                     rightIntakeState++;
+                }else {
+                    i_topRight.setPosition(i_minRange_topRight);
+                    i_bottomRight.setPosition(i_minRange_bottomRight);
                 }
             } else if (rightIntakeState == 2) {
                 rightIntake.setPower(0);
@@ -570,7 +576,6 @@ public class RoboMec extends LinearOpMode {
 
                     if (leftIntakeState == 0) {
                         if (gamepad1.left_bumper) {
-
                             i_topLeft.setPosition(i_minRange_topLeft);
                             i_bottomLeft.setPosition(i_minRange_bottomLeft);
 
@@ -592,6 +597,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
                             leftIntakeState++;
+                        }else {
+                            i_topLeft.setPosition(i_minRange_topLeft);
+                            i_bottomLeft.setPosition(i_minRange_bottomLeft);
                         }
                     } else if (leftIntakeState == 2) {
                         leftIntake.setPower(0);
@@ -675,6 +683,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomRight.setPosition(i_maxRange_bottomRight);
 
                             rightIntakeState++;
+                        }else {
+                            i_topRight.setPosition(i_minRange_topRight);
+                            i_bottomRight.setPosition(i_minRange_bottomRight);
                         }
                     } else if (rightIntakeState == 2) {
                         rightIntake.setPower(0);
@@ -786,6 +797,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
                             leftIntakeState++;
+                        }else {
+                            i_topLeft.setPosition(i_minRange_topLeft);
+                            i_bottomLeft.setPosition(i_minRange_bottomLeft);
                         }
                     } else if (leftIntakeState == 2) {
                         leftIntake.setPower(0);
@@ -869,6 +883,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomRight.setPosition(i_maxRange_bottomRight);
 
                             rightIntakeState++;
+                        }else {
+                            i_topRight.setPosition(i_minRange_topRight);
+                            i_bottomRight.setPosition(i_minRange_bottomRight);
                         }
                     } else if (rightIntakeState == 2) {
                         rightIntake.setPower(0);
@@ -993,6 +1010,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
                             leftIntakeState++;
+                        }else {
+                            i_topLeft.setPosition(i_minRange_topLeft);
+                            i_bottomLeft.setPosition(i_minRange_bottomLeft);
                         }
                     } else if (leftIntakeState == 2) {
                         leftIntake.setPower(0);
@@ -1076,6 +1096,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomRight.setPosition(i_maxRange_bottomRight);
 
                             rightIntakeState++;
+                        }else {
+                            i_topRight.setPosition(i_minRange_topRight);
+                            i_bottomRight.setPosition(i_minRange_bottomRight);
                         }
                     } else if (rightIntakeState == 2) {
                         rightIntake.setPower(0);
@@ -1387,6 +1410,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
                             leftIntakeState++;
+                        }else {
+                            i_topLeft.setPosition(i_minRange_topLeft);
+                            i_bottomLeft.setPosition(i_minRange_bottomLeft);
                         }
                     } else if (leftIntakeState == 2) {
                         leftIntake.setPower(0);
@@ -1470,6 +1496,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomRight.setPosition(i_maxRange_bottomRight);
 
                             rightIntakeState++;
+                        }else {
+                            i_topRight.setPosition(i_minRange_topRight);
+                            i_bottomRight.setPosition(i_minRange_bottomRight);
                         }
                     } else if (rightIntakeState == 2) {
                         rightIntake.setPower(0);
@@ -1582,6 +1611,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
                             leftIntakeState++;
+                        }else {
+                            i_topLeft.setPosition(i_minRange_topLeft);
+                            i_bottomLeft.setPosition(i_minRange_bottomLeft);
                         }
                     } else if (leftIntakeState == 2) {
                         leftIntake.setPower(0);
@@ -1665,6 +1697,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomRight.setPosition(i_maxRange_bottomRight);
 
                             rightIntakeState++;
+                        }else {
+                            i_topRight.setPosition(i_minRange_topRight);
+                            i_bottomRight.setPosition(i_minRange_bottomRight);
                         }
                     } else if (rightIntakeState == 2) {
                         rightIntake.setPower(0);
@@ -1789,6 +1824,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
                             leftIntakeState++;
+                        }else {
+                            i_topLeft.setPosition(i_minRange_topLeft);
+                            i_bottomLeft.setPosition(i_minRange_bottomLeft);
                         }
                     } else if (leftIntakeState == 2) {
                         leftIntake.setPower(0);
@@ -1872,6 +1910,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomRight.setPosition(i_maxRange_bottomRight);
 
                             rightIntakeState++;
+                        }else {
+                            i_topRight.setPosition(i_minRange_topRight);
+                            i_bottomRight.setPosition(i_minRange_bottomRight);
                         }
                     } else if (rightIntakeState == 2) {
                         rightIntake.setPower(0);
