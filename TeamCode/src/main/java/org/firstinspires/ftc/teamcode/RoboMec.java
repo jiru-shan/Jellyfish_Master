@@ -309,7 +309,7 @@ public class RoboMec extends LinearOpMode {
             } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
                 leftIntakeState = 10;
             } else if (leftIntakeState == 1) {
-                if (colorSensor_left.alpha() > 500) {
+                if (colorSensor_left.alpha() > 600) {
                     leftIntake.setPower(0.25);
 
                     i_topLeft.setPosition(i_maxRange_topLeft);
@@ -395,7 +395,7 @@ public class RoboMec extends LinearOpMode {
             } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
                 rightIntakeState = 10;
             } else if (rightIntakeState == 1) {
-                if (colorSensor_right.alpha() > 500) {
+                if (colorSensor_right.alpha() > 600) {
                     rightIntake.setPower(0.25);
 
                     i_topRight.setPosition(i_maxRange_topRight);
@@ -560,7 +560,7 @@ public class RoboMec extends LinearOpMode {
                         } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
                             leftIntakeState = 10;
                         } else if (leftIntakeState == 1) {
-                            if (colorSensor_left.alpha() > 500) {
+                            if (colorSensor_left.alpha() > 600) {
                                 leftIntake.setPower(0.25);
 
                                 i_topLeft.setPosition(i_maxRange_topLeft);
@@ -643,7 +643,7 @@ public class RoboMec extends LinearOpMode {
                         } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
                             rightIntakeState = 10;
                         } else if (rightIntakeState == 1) {
-                            if (colorSensor_right.alpha() > 500) {
+                            if (colorSensor_right.alpha() > 600) {
                                 rightIntake.setPower(0.25);
 
                                 i_topRight.setPosition(i_maxRange_topRight);
@@ -754,7 +754,7 @@ public class RoboMec extends LinearOpMode {
                         } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
                             leftIntakeState = 10;
                         } else if (leftIntakeState == 1) {
-                            if (colorSensor_left.alpha() > 500) {
+                            if (colorSensor_left.alpha() > 600) {
                                 leftIntake.setPower(0.25);
 
                                 i_topLeft.setPosition(i_maxRange_topLeft);
@@ -837,7 +837,7 @@ public class RoboMec extends LinearOpMode {
                         } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
                             rightIntakeState = 10;
                         } else if (rightIntakeState == 1) {
-                            if (colorSensor_right.alpha() > 500) {
+                            if (colorSensor_right.alpha() > 600) {
                                 rightIntake.setPower(0.25);
 
                                 i_topRight.setPosition(i_maxRange_topRight);
@@ -961,7 +961,7 @@ public class RoboMec extends LinearOpMode {
                         } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
                             leftIntakeState = 10;
                         } else if (leftIntakeState == 1) {
-                            if (colorSensor_left.alpha() > 500) {
+                            if (colorSensor_left.alpha() > 600) {
                                 leftIntake.setPower(0.25);
 
                                 i_topLeft.setPosition(i_maxRange_topLeft);
@@ -1044,7 +1044,7 @@ public class RoboMec extends LinearOpMode {
                         } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
                             rightIntakeState = 10;
                         } else if (rightIntakeState == 1) {
-                            if (colorSensor_right.alpha() > 500) {
+                            if (colorSensor_right.alpha() > 600) {
                                 rightIntake.setPower(0.25);
 
                                 i_topRight.setPosition(i_maxRange_topRight);
@@ -1236,7 +1236,7 @@ public class RoboMec extends LinearOpMode {
                     } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
                         leftIntakeState = 10;
                     } else if (leftIntakeState == 1) {
-                        if (colorSensor_left.alpha() > 500) {
+                        if (colorSensor_left.alpha() > 600) {
                             leftIntake.setPower(0.25);
 
                             i_topLeft.setPosition(i_maxRange_topLeft);
@@ -1322,7 +1322,7 @@ public class RoboMec extends LinearOpMode {
                     } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
                         rightIntakeState = 10;
                     } else if (rightIntakeState == 1) {
-                        if (colorSensor_right.alpha() > 500) {
+                        if (colorSensor_right.alpha() > 600) {
                             rightIntake.setPower(0.25);
 
                             i_topRight.setPosition(i_maxRange_topRight);
@@ -1436,7 +1436,7 @@ public class RoboMec extends LinearOpMode {
                     } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
                         leftIntakeState = 10;
                     } else if (leftIntakeState == 1) {
-                        if (colorSensor_left.alpha() > 500) {
+                        if (colorSensor_left.alpha() > 600) {
                             leftIntake.setPower(0.25);
 
                             i_topLeft.setPosition(i_maxRange_topLeft);
@@ -1522,7 +1522,7 @@ public class RoboMec extends LinearOpMode {
                     } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
                         rightIntakeState = 10;
                     } else if (rightIntakeState == 1) {
-                        if (colorSensor_right.alpha() > 500) {
+                        if (colorSensor_right.alpha() > 600) {
                             rightIntake.setPower(0.25);
 
                             i_topRight.setPosition(i_maxRange_topRight);
@@ -1649,7 +1649,7 @@ public class RoboMec extends LinearOpMode {
                     } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
                         leftIntakeState = 10;
                     } else if (leftIntakeState == 1) {
-                        if (colorSensor_left.alpha() > 500) {
+                        if (colorSensor_left.alpha() > 600) {
                             leftIntake.setPower(0.25);
 
                             i_topLeft.setPosition(i_maxRange_topLeft);
@@ -1735,7 +1735,7 @@ public class RoboMec extends LinearOpMode {
                     } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
                         rightIntakeState = 10;
                     } else if (rightIntakeState == 1) {
-                        if (colorSensor_right.alpha() > 500) {
+                        if (colorSensor_right.alpha() > 600) {
                             rightIntake.setPower(0.25);
 
                             i_topRight.setPosition(i_maxRange_topRight);
@@ -2049,7 +2049,7 @@ public class RoboMec extends LinearOpMode {
                     } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
                         leftIntakeState = 10;
                     } else if (leftIntakeState == 1) {
-                        if (colorSensor_left.alpha() > 500) {
+                        if (colorSensor_left.alpha() > 600) {
                             leftIntake.setPower(0.25);
 
                             i_topLeft.setPosition(i_maxRange_topLeft);
@@ -2135,7 +2135,7 @@ public class RoboMec extends LinearOpMode {
                     } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
                         rightIntakeState = 10;
                     } else if (rightIntakeState == 1) {
-                        if (colorSensor_right.alpha() > 500) {
+                        if (colorSensor_right.alpha() > 600) {
                             rightIntake.setPower(0.25);
 
                             i_topRight.setPosition(i_maxRange_topRight);
@@ -2250,7 +2250,7 @@ public class RoboMec extends LinearOpMode {
                     } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
                         leftIntakeState = 10;
                     } else if (leftIntakeState == 1) {
-                        if (colorSensor_left.alpha() > 500) {
+                        if (colorSensor_left.alpha() > 600) {
                             leftIntake.setPower(0.25);
 
                             i_topLeft.setPosition(i_maxRange_topLeft);
@@ -2336,7 +2336,7 @@ public class RoboMec extends LinearOpMode {
                     } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
                         rightIntakeState = 10;
                     } else if (rightIntakeState == 1) {
-                        if (colorSensor_right.alpha() > 500) {
+                        if (colorSensor_right.alpha() > 600) {
                             rightIntake.setPower(0.25);
 
                             i_topRight.setPosition(i_maxRange_topRight);
@@ -2463,7 +2463,7 @@ public class RoboMec extends LinearOpMode {
                     } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
                         leftIntakeState = 10;
                     } else if (leftIntakeState == 1) {
-                        if (colorSensor_left.alpha() > 500) {
+                        if (colorSensor_left.alpha() > 600) {
                             leftIntake.setPower(0.25);
 
                             i_topLeft.setPosition(i_maxRange_topLeft);
@@ -2549,7 +2549,7 @@ public class RoboMec extends LinearOpMode {
                     } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
                         rightIntakeState = 10;
                     } else if (rightIntakeState == 1) {
-                        if (colorSensor_right.alpha() > 500) {
+                        if (colorSensor_right.alpha() > 600) {
                             rightIntake.setPower(0.25);
 
                             i_topRight.setPosition(i_maxRange_topRight);
