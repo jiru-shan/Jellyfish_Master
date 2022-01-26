@@ -52,6 +52,7 @@ public class RoboBoss extends LinearOpMode {
     // Runtime
     ElapsedTime runtime = new ElapsedTime();
     ElapsedTime timer = new ElapsedTime();
+    ElapsedTime depositTimer = new ElapsedTime();
 
     LiftState liftState = LiftState.LIFT_EMPTY;
 
@@ -189,6 +190,7 @@ public class RoboBoss extends LinearOpMode {
 
         // Initialize Timers
         timer.reset();
+        depositTimer.reset();
 
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -553,10 +555,13 @@ public class RoboBoss extends LinearOpMode {
 
                 case LIFT_DEPOSITING:
                     if (gamepad2.dpad_down || gamepad2.a) {
-
+                        
+                        depositTimer.reset();
                         d_open.setPosition(d_open_top);
 
-                        while(d_open.getPosition() != d_open_minRange) {
+                        while(depositTimer.milliseconds() <= 500) {
+                            
+                            d_open.setPosition(d_open_minRange);
 
                             // Keep lift in place while depositing
                             liftFront.setPower(-1.0);
@@ -827,7 +832,7 @@ public class RoboBoss extends LinearOpMode {
         }
 
         /** Lift - Shared Hub **/
-        
+
 
         /** Carousel **/
 
@@ -837,7 +842,8 @@ public class RoboBoss extends LinearOpMode {
 
         // right - rotate clockwise & left - rotate counterclockwise
         if (gamepad2.right_trigger != 0) {
-        
+//                telemetry.addData(">", "test");
+//                telemetry.update();
             carousel.setPower(0.7 * b);
 
         } else if (gamepad2.left_trigger != 0) {
