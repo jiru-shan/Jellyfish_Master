@@ -121,9 +121,9 @@ public class teleop extends LinearOpMode {
 
         // Factor
         double normalSpeed = 1.0;
-        int alliance_targetTipped = 550;
-        int alliance_targetBalanced = 525;   // Fix this value
-        int alliance_middle = 580;   // Fix this value
+        int alliance_targetTipped = 625;
+        int alliance_targetBalanced = 575;   // Fix this value
+        int alliance_middle = 550;   // Fix this value
         int shared_targetClose = 120;
         int shared_targetMiddle = 200;
         int shared_targetFar = 280;
@@ -152,7 +152,7 @@ public class teleop extends LinearOpMode {
         ElapsedTime rightIntakeTime = new ElapsedTime();
         double intakeCaptureDistance = 1.0;
         double intakeEjectDistance = 4.0; 
-        int intakeFlipUpTime = 100;
+        int intakeFlipUpTime = 250;
         /*
         0 = not moving
         1 = flip down + intaking
