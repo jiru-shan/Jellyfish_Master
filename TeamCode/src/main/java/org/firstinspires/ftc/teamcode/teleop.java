@@ -132,6 +132,11 @@ public class teleop extends LinearOpMode {
         liftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
         liftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         d_open.setPosition(d_open_minRangeSemi);
         d_bendLeft.setPosition(d_minRange_bendLeft);
         d_bendRight.setPosition(d_minRange_bendRight);
@@ -145,6 +150,9 @@ public class teleop extends LinearOpMode {
         ElapsedTime leftIntakeTime = new ElapsedTime();
         int rightIntakeState = 0;
         ElapsedTime rightIntakeTime = new ElapsedTime();
+        double intakeCaptureDistance = 1.0;
+        double intakeEjectDistance = 4.0; 
+        int intakeFlipUpTime = 100;
         /*
         0 = not moving
         1 = flip down + intaking
@@ -154,7 +162,8 @@ public class teleop extends LinearOpMode {
         */
         int liftState = 0;
         int liftPosition = 0;
-        int liftError = 15;
+        int liftExtendError = 10;
+        int liftRetractError = 0;
         ElapsedTime liftTime = new ElapsedTime();
         /*
         0 = down
@@ -190,8 +199,6 @@ public class teleop extends LinearOpMode {
             d_bendLeft.setPosition(d_minRange_bendLeft);
             d_bendRight.setPosition(d_minRange_bendRight);
 
-            // Show the elapsed game time & wheel power
-
 
             /** Combined Functions **/
 
@@ -202,22 +209,24 @@ public class teleop extends LinearOpMode {
 
             if (leftIntakeState == 0) {
                 if (gamepad1.left_bumper) {
-
                     i_topLeft.setPosition(i_minRange_topLeft);
                     i_bottomLeft.setPosition(i_minRange_bottomLeft);
 
                     leftIntake.setPower(highSweepPower);
 
-                    // d_open.setPosition(d_open_minRangeSemi);
+                    d_open.setPosition(d_open_minRangeSemi);
 
                     leftIntakeTime.reset();
 
                     leftIntakeState++;
+                }else {
+                    i_topLeft.setPosition(i_maxRange_topLeft);
+                    i_bottomLeft.setPosition(i_maxRange_bottomLeft);
                 }
             } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
                 leftIntakeState = 10;
             } else if (leftIntakeState == 1) {
-                if (colorSensor_left.alpha() > 500) {
+                if (colorSensor_left.getDistance(DistanceUnit.CM) < intakeCaptureDistance) {
                     leftIntake.setPower(0.25);
 
                     i_topLeft.setPosition(i_maxRange_topLeft);
@@ -238,7 +247,7 @@ public class teleop extends LinearOpMode {
 
                 leftIntakeState++;
             } else if (leftIntakeState == 3) {
-                if (leftIntakeTime.milliseconds() > 750 && colorSensor_left.alpha() < 90) {
+                if (leftIntakeTime.milliseconds() > intakeFlipUpTime) {
                     leftIntake.setPower(-highSweepPower);
 
                     leftIntakeTime.reset();
@@ -246,7 +255,7 @@ public class teleop extends LinearOpMode {
                     leftIntakeState++;
                 }
             } else if (leftIntakeState == 4) {
-                if (leftIntakeTime.milliseconds() > 800) {
+                if (colorSensor_left.getDistance(DistanceUnit.CM) > intakeEjectDistance {
                     leftIntake.setPower(0);
 
                     d_open.setPosition(d_open_minRange);
@@ -261,13 +270,13 @@ public class teleop extends LinearOpMode {
                 leftIntakeTime.reset();
                 leftIntakeState++;
             } else if (leftIntakeState == 11) {
-                if (leftIntakeTime.milliseconds() > 150) {
+                if (leftIntakeTime.milliseconds() > 50) {
                     leftIntake.setPower(0);
 
                     i_topLeft.setPosition(i_maxRange_topLeft);
                     i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
-                    d_open.setPosition(d_open_minRange);
+                    d_open.setPosition(d_open_minRangeSemi);
 
                     d_coverLeft.setPosition(d_minRange_coverLeft);
 
@@ -279,7 +288,7 @@ public class teleop extends LinearOpMode {
                 i_topLeft.setPosition(i_maxRange_topLeft);
                 i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
-                d_open.setPosition(d_open_minRange);
+                d_open.setPosition(d_open_minRangeSemi);
 
                 d_coverLeft.setPosition(d_minRange_coverLeft);
 
@@ -294,16 +303,19 @@ public class teleop extends LinearOpMode {
 
                     rightIntake.setPower(highSweepPower);
 
-                    // d_open.setPosition(d_open_minRangeSemi);
+                    d_open.setPosition(d_open_minRangeSemi);
 
                     rightIntakeTime.reset();
 
                     rightIntakeState++;
+                }else {
+                    i_topRight.setPosition(i_maxRange_topRight);
+                    i_bottomRight.setPosition(i_maxRange_bottomRight);
                 }
             } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
                 rightIntakeState = 10;
             } else if (rightIntakeState == 1) {
-                if (colorSensor_right.alpha() > 500) {
+                if (colorSensor_right.getDistance(DistanceUnit.CM) < intakeCaptureDistance) {
                     rightIntake.setPower(0.25);
 
                     i_topRight.setPosition(i_maxRange_topRight);
@@ -324,7 +336,7 @@ public class teleop extends LinearOpMode {
 
                 rightIntakeState++;
             } else if (rightIntakeState == 3) {
-                if (rightIntakeTime.milliseconds() > 750  && colorSensor_right.alpha() < 90) {
+                if (rightIntakeTime.milliseconds() > intakeFlipUPTime) {
                     rightIntake.setPower(-highSweepPower);
 
                     rightIntakeTime.reset();
@@ -332,7 +344,7 @@ public class teleop extends LinearOpMode {
                     rightIntakeState++;
                 }
             } else if (rightIntakeState == 4) {
-                if (rightIntakeTime.milliseconds() > 800) {
+                if (colorSensor_right.getDistance(DistanceUnit.CM) > intakeEjectDistance) {
                     rightIntake.setPower(0);
 
                     d_open.setPosition(d_open_minRange);
@@ -347,13 +359,13 @@ public class teleop extends LinearOpMode {
                 rightIntakeTime.reset();
                 rightIntakeState++;
             } else if (rightIntakeState == 11) {
-                if (rightIntakeTime.milliseconds() > 150) {
+                if (rightIntakeTime.milliseconds() > 50) {
                     rightIntake.setPower(0);
 
                     i_topRight.setPosition(i_maxRange_topRight);
                     i_bottomRight.setPosition(i_maxRange_bottomRight);
 
-                    d_open.setPosition(d_open_minRange);
+                    d_open.setPosition(d_open_minRangeSemi);
 
                     d_coverRight.setPosition(d_minRange_coverRight);
 
@@ -365,7 +377,7 @@ public class teleop extends LinearOpMode {
                 i_topRight.setPosition(i_maxRange_topRight);
                 i_bottomRight.setPosition(i_maxRange_bottomRight);
 
-                d_open.setPosition(d_open_minRange);
+                d_open.setPosition(d_open_minRangeSemi);
 
                 d_coverRight.setPosition(d_minRange_coverRight);
 
@@ -377,68 +389,70 @@ public class teleop extends LinearOpMode {
 
             // Motor tick count is equal to 384.5
             if(liftState == 0) {
-                if(gamepad2.a) {
+                if(!objectCaptured) {
+                    // continue;
+                }else if(gamepad2.a && (liftFront.getTargetPosition() != -shared_targetClose)) {
                     liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftFront.setTargetPosition(-shared_targetClose);
                     liftBack.setTargetPosition(-shared_targetClose);
-                    liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftFront.setPower(-1.0);
                     liftBack.setPower(-1.0);
                     liftState = 12;
                     liftPosition = 1;
-                }else if(gamepad2.b) {
+                }else if(gamepad2.b && (liftFront.getTargetPosition() != -shared_targetMiddle)) {
                     liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftFront.setTargetPosition(-shared_targetMiddle);
                     liftBack.setTargetPosition(-shared_targetMiddle);
-                    liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftFront.setPower(-1.0);
                     liftBack.setPower(-1.0);
                     liftState = 13;
                     liftPosition = 1;
-                }else if(gamepad2.y) {
+                }else if(gamepad2.y && (liftFront.getTargetPosition() != -shared_targetFar)) {
                     liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftFront.setTargetPosition(-shared_targetFar);
                     liftBack.setTargetPosition(-shared_targetFar);
-                    liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftFront.setPower(-1.0);
                     liftBack.setPower(-1.0);
                     liftState = 14;
                     liftPosition = 1;
-                }else if(gamepad2.dpad_down) {
+                }else if(gamepad2.dpad_down && (liftFront.getTargetPosition() != -alliance_middle)) {
                     liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftFront.setTargetPosition(-alliance_middle);
                     liftBack.setTargetPosition(-alliance_middle);
-                    liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftFront.setPower(-1.0);
                     liftBack.setPower(-1.0);
                     liftState = 15;
                     liftPosition = 1;
-                }else if(gamepad2.dpad_left) {
+                }else if(gamepad2.dpad_left && (liftFront.getTargetPosition() != -alliance_targetBalanced)) {
                     liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftFront.setTargetPosition(-alliance_targetBalanced);
                     liftBack.setTargetPosition(-alliance_targetBalanced);
-                    liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftFront.setPower(-1.0);
                     liftBack.setPower(-1.0);
                     liftState = 16;
                     liftPosition = 1;
-                }else if(gamepad2.dpad_up) {
+                }else if(gamepad2.dpad_up && (liftFront.getTargetPosition() != -alliance_targetTipped)) {
                     liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftFront.setTargetPosition(-alliance_targetTipped);
                     liftBack.setTargetPosition(-alliance_targetTipped);
-                    liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftFront.setPower(-1.0);
                     liftBack.setPower(-1.0);
                     liftState = 17;
@@ -446,42 +460,42 @@ public class teleop extends LinearOpMode {
                 }
             }else if(liftState >=10 && liftState <20) {
                 if(liftState == 12) {
-                    if(Math.abs(liftFront.getCurrentPosition() - shared_targetClose) < liftError) {
+                    if(Math.abs(liftFront.getCurrentPosition() - shared_targetClose) < liftExtendError) {
                         liftPosition = 12;
                         if(gamepad2.dpad_right || gamepad2.x) {
                             liftState = 20;
                         }
                     }
                 }else if(liftState == 13) {
-                    if(Math.abs(liftFront.getCurrentPosition() - shared_targetMiddle) < liftError) {
+                    if(Math.abs(liftFront.getCurrentPosition() - shared_targetMiddle) < liftExtendError) {
                         liftPosition = 13;
                         if(gamepad2.dpad_right || gamepad2.x) {
                             liftState = 20;
                         }
                     }
                 }else if(liftState == 14) {
-                    if(Math.abs(liftFront.getCurrentPosition() - shared_targetFar) < liftError) {
+                    if(Math.abs(liftFront.getCurrentPosition() - shared_targetFar) < liftExtendError) {
                         liftPosition = 14;
                         if(gamepad2.dpad_right || gamepad2.x) {
                             liftState = 20;
                         }
                     }
                 }else if(liftState == 15) {
-                    if(Math.abs(liftFront.getCurrentPosition() - alliance_middle) < liftError) {
+                    if(Math.abs(liftFront.getCurrentPosition() - alliance_middle) < liftExtendError) {
                         liftPosition = 15;
                         if(gamepad2.dpad_right || gamepad2.x) {
                             liftState = 20;
                         }
                     }
                 }else if(liftState == 16) {
-                    if(Math.abs(liftFront.getCurrentPosition() - alliance_targetBalanced) < liftError) {
+                    if(Math.abs(liftFront.getCurrentPosition() - alliance_targetBalanced) < liftExtendError) {
                         liftPosition = 16;
                         if(gamepad2.dpad_right || gamepad2.x) {
                             liftState = 20;
                         }
                     }
                 }else if(liftState == 17) {
-                    if(Math.abs(liftFront.getCurrentPosition() - alliance_targetTipped) < liftError) {
+                    if(Math.abs(liftFront.getCurrentPosition() - alliance_targetTipped) < liftExtendError) {
                         liftPosition = 17;
                         if(gamepad2.dpad_right || gamepad2.x) {
                             liftState = 20;
@@ -489,114 +503,112 @@ public class teleop extends LinearOpMode {
                     }
                 }
 
-                if(liftPosition > 10) {
-                    if(gamepad2.a) {
-                        liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                        liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                        liftFront.setTargetPosition(-shared_targetClose);
-                        liftBack.setTargetPosition(-shared_targetClose);
-                        liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        if(liftPosition > 12) {
-                            liftFront.setPower(1.0);
-                            liftBack.setPower(1.0);
-                        }else {
-                            liftFront.setPower(-1.0);
-                            liftBack.setPower(-1.0);
-                        }
-                        liftState = 12;
-                        liftPosition = 1;
-                    }else if(gamepad2.b) {
-                        liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                        liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                        liftFront.setTargetPosition(-shared_targetMiddle);
-                        liftBack.setTargetPosition(-shared_targetMiddle);
-                        liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                if(gamepad2.a && (liftFront.getTargetPosition() != (-shared_targetClose))) {
+                    liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    liftFront.setTargetPosition(-shared_targetClose);
+                    liftBack.setTargetPosition(-shared_targetClose);
+                    liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    if(liftFront.getCurrentPosition() < (-shared_targetClose)) {
+                        liftFront.setPower(1.0);
+                        liftBack.setPower(1.0);
+                    }else {
                         liftFront.setPower(-1.0);
                         liftBack.setPower(-1.0);
-                        if(liftPosition > 13) {
-                            liftFront.setPower(1.0);
-                            liftBack.setPower(1.0);
-                        }else {
-                            liftFront.setPower(-1.0);
-                            liftBack.setPower(-1.0);
-                        }
-                        liftState = 13;
-                        liftPosition = 1;
-                    }else if(gamepad2.y) {
-                        liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                        liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                        liftFront.setTargetPosition(-shared_targetFar);
-                        liftBack.setTargetPosition(-shared_targetFar);
-                        liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        liftFront.setPower(-1.0);
-                        liftBack.setPower(-1.0);
-                        if(liftPosition > 14) {
-                            liftFront.setPower(1.0);
-                            liftBack.setPower(1.0);
-                        }else {
-                            liftFront.setPower(-1.0);
-                            liftBack.setPower(-1.0);
-                        }
-                        liftState = 14;
-                        liftPosition = 1;
-                    }else if(gamepad2.dpad_down) {
-                        liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                        liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                        liftFront.setTargetPosition(-alliance_middle);
-                        liftBack.setTargetPosition(-alliance_middle);
-                        liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        liftFront.setPower(-1.0);
-                        liftBack.setPower(-1.0);
-                        if(liftPosition > 15) {
-                            liftFront.setPower(1.0);
-                            liftBack.setPower(1.0);
-                        }else {
-                            liftFront.setPower(-1.0);
-                            liftBack.setPower(-1.0);
-                        }
-                        liftState = 15;
-                        liftPosition = 1;
-                    }else if(gamepad2.dpad_left) {
-                        liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                        liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                        liftFront.setTargetPosition(-alliance_targetBalanced);
-                        liftBack.setTargetPosition(-alliance_targetBalanced);
-                        liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        liftFront.setPower(-1.0);
-                        liftBack.setPower(-1.0);
-                        if(liftPosition > 16) {
-                            liftFront.setPower(1.0);
-                            liftBack.setPower(1.0);
-                        }else {
-                            liftFront.setPower(-1.0);
-                            liftBack.setPower(-1.0);
-                        }
-                        liftState = 16;
-                        liftPosition = 1;
-                    }else if(gamepad2.dpad_up) {
-                        liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                        liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                        liftFront.setTargetPosition(-alliance_targetTipped);
-                        liftBack.setTargetPosition(-alliance_targetTipped);
-                        liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        liftFront.setPower(-1.0);
-                        liftBack.setPower(-1.0);
-                        if(liftPosition > 17) {
-                            liftFront.setPower(1.0);
-                            liftBack.setPower(1.0);
-                        }else {
-                            liftFront.setPower(-1.0);
-                            liftBack.setPower(-1.0);
-                        }
-                        liftState = 17;
-                        liftPosition = 1;
                     }
+                    liftState = 12;
+                    liftPosition = 1;
+                }else if(gamepad2.b && (liftFront.getTargetPosition() != (-shared_targetMiddle))) {
+                    liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    liftFront.setTargetPosition(-shared_targetMiddle);
+                    liftBack.setTargetPosition(-shared_targetMiddle);
+                    liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    liftFront.setPower(-1.0);
+                    liftBack.setPower(-1.0);
+                    if(liftFront.getCurrentPosition() < (-shared_targetMiddle)) {
+                        liftFront.setPower(1.0);
+                        liftBack.setPower(1.0);
+                    }else {
+                        liftFront.setPower(-1.0);
+                        liftBack.setPower(-1.0);
+                    }
+                    liftState = 13;
+                    liftPosition = 1;
+                }else if(gamepad2.y && (liftFront.getTargetPosition() != (-shared_targetFar))) {
+                    liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    liftFront.setTargetPosition(-shared_targetFar);
+                    liftBack.setTargetPosition(-shared_targetFar);
+                    liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    liftFront.setPower(-1.0);
+                    liftBack.setPower(-1.0);
+                    if(liftFront.getCurrentPosition() < (-shared_targetFar)) {
+                        liftFront.setPower(1.0);
+                        liftBack.setPower(1.0);
+                    }else {
+                        liftFront.setPower(-1.0);
+                        liftBack.setPower(-1.0);
+                    }
+                    liftState = 14;
+                    liftPosition = 1;
+                }else if(gamepad2.dpad_down && (liftFront.getTargetPosition() != (-alliance_middle))) {
+                    liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    liftFront.setTargetPosition(-alliance_middle);
+                    liftBack.setTargetPosition(-alliance_middle);
+                    liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    liftFront.setPower(-1.0);
+                    liftBack.setPower(-1.0);
+                    if(liftFront.getCurrentPosition() < (-alliance_middle)) {
+                        liftFront.setPower(1.0);
+                        liftBack.setPower(1.0);
+                    }else {
+                        liftFront.setPower(-1.0);
+                        liftBack.setPower(-1.0);
+                    }
+                    liftState = 15;
+                    liftPosition = 1;
+                }else if(gamepad2.dpad_left && (liftFront.getTargetPosition() != (-alliance_targetBalanced))) {
+                    liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    liftFront.setTargetPosition(-alliance_targetBalanced);
+                    liftBack.setTargetPosition(-alliance_targetBalanced);
+                    liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    liftFront.setPower(-1.0);
+                    liftBack.setPower(-1.0);
+                    if(liftFront.getCurrentPosition() < (-alliance_targetBalanced)) {
+                        liftFront.setPower(1.0);
+                        liftBack.setPower(1.0);
+                    }else {
+                        liftFront.setPower(-1.0);
+                        liftBack.setPower(-1.0);
+                    }
+                    liftState = 16;
+                    liftPosition = 1;
+                }else if(gamepad2.dpad_up && (liftFront.getTargetPosition() != (-alliance_targetTipped))) {
+                    liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    liftFront.setTargetPosition(-alliance_targetTipped);
+                    liftBack.setTargetPosition(-alliance_targetTipped);
+                    liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    liftFront.setPower(-1.0);
+                    liftBack.setPower(-1.0);
+                    if(liftFront.getCurrentPosition() < (-alliance_targetTipped)) {
+                        liftFront.setPower(1.0);
+                        liftBack.setPower(1.0);
+                    }else {
+                        liftFront.setPower(-1.0);
+                        liftBack.setPower(-1.0);
+                    }
+                    liftState = 17;
+                    liftPosition = 1;
                 }
             }else if(liftState == 20) {
                 //moving the deposit to correct angle and depositing
@@ -629,16 +641,18 @@ public class teleop extends LinearOpMode {
                 liftTime.reset();
                 liftState = 21;
             }else if(liftState == 21) {
-                if(liftTime.milliseconds() > 600) {
+                if(liftTime.milliseconds() > 600 || (d_bendLeft.getPosition() == d_minRange_bendLeft)) {
                     d_open.setPosition(d_open_minRange);
                     d_bendLeft.setPosition(d_minRange_bendLeft);
                     d_bendRight.setPosition(d_minRange_bendRight);
+
+                    objectCaptured = false;
 
                     liftTime.reset();
                     liftState = 22;
                 }
             }else if(liftState == 22) {
-                if(liftTime.milliseconds() > 500 || liftPosition > 15 /* this is risky idk if we keep it*/) {
+                if(liftTime.milliseconds() > 500 /* || liftPosition > 15 */) { // this do be risky idk
                     liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftFront.setTargetPosition(0);
@@ -650,14 +664,7 @@ public class teleop extends LinearOpMode {
                     liftState = 23;
                 }
             }else if(liftState == 23) {
-                if(Math.abs(liftFront.getCurrentPosition() - 0) < liftError) {
-                    liftTime.reset();
-                    liftState = 24;
-                }
-            }else if(liftState == 24) {
-                if(liftTime.milliseconds() > 150) {
-                    liftFront.setPower(0);
-                    liftBack.setPower(0);
+                if(Math.abs(liftFront.getCurrentPosition() - 0) < liftRetractError) {
                     liftPosition = 0;
                     liftState = 0;
                 }
@@ -684,37 +691,34 @@ public class teleop extends LinearOpMode {
             rightFront.setPower(rightFrontPower);
             rightBack.setPower(rightBackPower);
 
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Motors", "leftFront (%.2f), leftBack (%.2f), rightFront (%.2f), rightBack (%.2f)",
-                    leftFrontPower, leftBackPower, rightFrontPower, rightBackPower);
-            telemetry.addData("Color - Left", colorSensor_left.alpha());
-            telemetry.addData("Color - Right", colorSensor_right.alpha());
-            telemetry.addData("Lift - Front:", liftFront.getCurrentPosition());
-            telemetry.addData("leftIntakeState:", leftIntakeState);
-            telemetry.addData("rightIntakeState:", rightIntakeState);
-            telemetry.addData("liftState:", liftState);
-            telemetry.addData("listPosition:", liftPosition);
-            telemetry.update();
-
             /** Carousel **/
 
-            // Run Servo
-            if (gamepad2.right_bumper) {
-                // Spin carousel clockwise
-                carousel.setPower(-maxSpinPower);
-            } else if (gamepad2.left_bumper) {
-                // Spin carousel counterclockwise
-                carousel.setPower(maxSpinPower);
-            } else {
-                // Stop carousel
-                carousel.setPower(0);
-            }
+            float a = gamepad2.left_trigger;
+            float b = gamepad2.right_trigger;
+
+            carousel.setPower(b-a);
 
             /** Reset Encoders **/
 
-            if (gamepad2.right_trigger != 0) {
+            if (gamepad2.left_bumper) {
                 liftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
-            }liftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                liftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            }
+
+            telemetry.addData("Status", "Run Time: " + runtime.toString());
+            telemetry.addData("Motors", "leftFront (%.2f), leftBack (%.2f), rightFront (%.2f), rightBack (%.2f)",
+                    leftFrontPower, leftBackPower, rightFrontPower, rightBackPower);
+            telemetry.addData("Left Front Encoders:", leftFront.getCurrentPosition());
+            telemetry.addData("Left Back Encoders: ", leftBack.getCurrentPosition());
+            telemetry.addData("Right Front Encoders: ", rightFront.getCurrentPosition());
+            telemetry.addData("Right Back Encoders: ", rightBack.getCurrentPosition());
+            telemetry.addData("Color - Left", colorSensor_left.getDistance(DistanceUnit.CM));
+            telemetry.addData("Color - Right", colorSensor_right.getDistance(DistanceUnit.CM));
+            telemetry.addData("Lift - Front:", liftFront.getCurrentPosition());
+            telemetry.addData("Lift - Back:", liftBack.getCurrentPosition());
+            telemetry.addData("Carousel: ", carousel.getPower());
+            telemetry.update();
+
         }
     }
 }
