@@ -555,13 +555,14 @@ public class RoboBoss extends LinearOpMode {
 
                 case LIFT_DEPOSITING:
                     if (gamepad2.dpad_down || gamepad2.a) {
-                        
-                        depositTimer.reset();
+
                         d_open.setPosition(d_open_top);
 
+                        depositTimer.reset();
+
                         while(depositTimer.milliseconds() <= 500) {
-                            
-                            d_open.setPosition(d_open_minRange);
+
+                            d_open.setPosition(d_open_top);
 
                             // Keep lift in place while depositing
                             liftFront.setPower(-1.0);
@@ -585,6 +586,8 @@ public class RoboBoss extends LinearOpMode {
                             rightFront.setPower(rightFrontPower);
                             rightBack.setPower(rightBackPower);
                         }
+
+                        d_open.setPosition(d_open_minRange);
 
                         // Set lift state to released
                         liftState = LiftState.LIFT_RELEASED;
