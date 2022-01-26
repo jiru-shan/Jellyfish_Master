@@ -316,6 +316,9 @@ public class RoboMec extends LinearOpMode {
                     i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
                     leftIntakeState++;
+                }else {
+                    i_topLeft.setPosition(i_minRange_topLeft);
+                    i_bottomLeft.setPosition(i_minRange_bottomLeft);
                 }
             } else if (leftIntakeState == 2) {
                 leftIntake.setPower(0);
@@ -327,7 +330,7 @@ public class RoboMec extends LinearOpMode {
 
                 leftIntakeState++;
             } else if (leftIntakeState == 3) {
-                if (leftIntakeTime.milliseconds() > 1250) {
+                if (leftIntakeTime.milliseconds() > 750 && colorSensor_left.alpha() < 90) {
                     leftIntake.setPower(-highSweepPower);
 
                     leftIntakeTime.reset();
@@ -399,6 +402,9 @@ public class RoboMec extends LinearOpMode {
                     i_bottomRight.setPosition(i_maxRange_bottomRight);
 
                     rightIntakeState++;
+                }else {
+                    i_topRight.setPosition(i_minRange_topRight);
+                    i_bottomRight.setPosition(i_minRange_bottomRight);
                 }
             } else if (rightIntakeState == 2) {
                 rightIntake.setPower(0);
@@ -410,7 +416,7 @@ public class RoboMec extends LinearOpMode {
 
                 rightIntakeState++;
             } else if (rightIntakeState == 3) {
-                if (rightIntakeTime.milliseconds() > 1250) {
+                if (rightIntakeTime.milliseconds() > 750  && colorSensor_right.alpha() < 90) {
                     rightIntake.setPower(-highSweepPower);
 
                     rightIntakeTime.reset();
@@ -465,6 +471,651 @@ public class RoboMec extends LinearOpMode {
 
             // double a = gamepad2.right_stick_y;
             // double b = -gamepad1.right_stick_y;
+            
+            int liftState = 0;
+            ElapsedTime liftTime = new ElapsedTime();
+
+            if (liftState == 0) {
+                if (gamepad1.dpad_left) {
+
+                    liftFront.setPower(-1.0);
+                    liftBack.setPower(-1.0);
+                    liftFront.setTargetPosition(alliance_targetBalanced);
+                    liftBack.setTargetPosition(alliance_targetBalanced);
+
+                    liftState++;
+                }
+            } else if (liftState == 1) {
+                if (liftFront.getCurrentPosition() <= 570) {
+                    
+                    liftFront.setPower(-1.0);
+                    liftBack.setPower(-1.0);
+                    liftFront.setTargetPosition(alliance_targetBalanced);
+                    liftBack.setTargetPosition(alliance_targetBalanced);
+
+                    liftState++;
+                }
+            } else if (liftState == 2) {
+                if (liftFront.getCurrentPosition() <= 570) {
+
+                    liftFront.setPower(-1.0);
+                    liftBack.setPower(-1.0);
+                    liftFront.setTargetPosition(alliance_targetBalanced);
+                    liftBack.setTargetPosition(alliance_targetBalanced);
+
+                    liftState++;
+                }
+            } else if (liftState == 3) {
+                if (liftFront.getCurrentPosition() <= 570) {
+
+                    liftFront.setPower(-1.0);
+                    liftBack.setPower(-1.0);
+                    liftFront.setTargetPosition(alliance_targetBalanced);
+                    liftBack.setTargetPosition(alliance_targetBalanced);
+                }
+            } else {
+
+                if (gamepad2.dpad_right) {
+
+                    // new Compute();
+
+                    timer.reset();
+
+                    while (timer.milliseconds() <= 500) {
+                        // Open to deposit in top level of alliance hub
+                        d_open.setPosition(d_open_top);
+
+                        y = -gamepad1.right_stick_x; // Reversed
+                        x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
+                        rx = -gamepad1.left_stick_y; // Forward/Backward
+
+                        /** Denominator is the largest motor power (absolute value) or 1
+                         * This ensures all the powers maintain the same ratio, but only when
+                         * at least one is out of the range [-1, 1] **/
+                        denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+                        leftFrontPower = (y + x - rx) / denominator;
+                        leftBackPower = (y - x - rx) / denominator;
+                        rightFrontPower = (y - x + rx) / denominator;
+                        rightBackPower = (y + x + rx) / denominator;
+
+                        leftFront.setPower(leftBackPower);
+                        leftBack.setPower(leftFrontPower);
+                        rightFront.setPower(rightFrontPower);
+                        rightBack.setPower(rightBackPower);
+
+                        if (leftIntakeState == 0) {
+                            if (gamepad1.left_bumper) {
+
+                                i_topLeft.setPosition(i_minRange_topLeft);
+                                i_bottomLeft.setPosition(i_minRange_bottomLeft);
+
+                                leftIntake.setPower(highSweepPower);
+
+                                // d_open.setPosition(d_open_minRangeSemi);
+
+                                leftIntakeTime.reset();
+
+                                leftIntakeState++;
+                            }
+                        } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
+                            leftIntakeState = 10;
+                        } else if (leftIntakeState == 1) {
+                            if (colorSensor_left.alpha() > 500) {
+                                leftIntake.setPower(0.25);
+
+                                i_topLeft.setPosition(i_maxRange_topLeft);
+                                i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                                leftIntakeState++;
+                            }
+                        } else if (leftIntakeState == 2) {
+                            leftIntake.setPower(0);
+
+                            d_coverLeft.setPosition(d_maxRange_coverLeft);
+                            d_coverRight.setPosition(d_minRange_coverRight);
+
+                            leftIntakeTime.reset();
+
+                            leftIntakeState++;
+                        } else if (leftIntakeState == 3) {
+                            if (leftIntakeTime.milliseconds() > 1250) {
+                                leftIntake.setPower(-highSweepPower);
+
+                                leftIntakeTime.reset();
+
+                                leftIntakeState++;
+                            }
+                        } else if (leftIntakeState == 4) {
+                            if (leftIntakeTime.milliseconds() > 800) {
+                                leftIntake.setPower(0);
+
+                                d_open.setPosition(d_open_minRange);
+
+                                d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                                leftIntakeState = 0;
+                                objectCaptured = true;
+                            }
+                        } else if (leftIntakeState == 10) {
+                            leftIntake.setPower(-1);
+                            leftIntakeTime.reset();
+                            leftIntakeState++;
+                        } else if (leftIntakeState == 11) {
+                            if (leftIntakeTime.milliseconds() > 150) {
+                                leftIntake.setPower(0);
+
+                                i_topLeft.setPosition(i_maxRange_topLeft);
+                                i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                                d_open.setPosition(d_open_minRange);
+
+                                d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                                leftIntakeState = 0;
+                            }
+                        } else {
+                            leftIntake.setPower(0);
+
+                            i_topLeft.setPosition(i_maxRange_topLeft);
+                            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                            leftIntakeState = 0;
+                        }
+
+                        if (rightIntakeState == 0) {
+                            if (gamepad1.right_bumper) {
+
+                                i_topRight.setPosition(i_minRange_topRight);
+                                i_bottomRight.setPosition(i_minRange_bottomRight);
+
+                                rightIntake.setPower(highSweepPower);
+
+                                // d_open.setPosition(d_open_minRangeSemi);
+
+                                rightIntakeTime.reset();
+
+                                rightIntakeState++;
+                            }
+                        } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
+                            rightIntakeState = 10;
+                        } else if (rightIntakeState == 1) {
+                            if (colorSensor_right.alpha() > 500) {
+                                rightIntake.setPower(0.25);
+
+                                i_topRight.setPosition(i_maxRange_topRight);
+                                i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                                rightIntakeState++;
+                            }
+                        } else if (rightIntakeState == 2) {
+                            rightIntake.setPower(0);
+
+                            d_coverRight.setPosition(d_maxRange_coverRight);
+                            d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                            rightIntakeTime.reset();
+
+                            rightIntakeState++;
+                        } else if (rightIntakeState == 3) {
+                            if (rightIntakeTime.milliseconds() > 1250) {
+                                rightIntake.setPower(-highSweepPower);
+
+                                rightIntakeTime.reset();
+
+                                rightIntakeState++;
+                            }
+                        } else if (rightIntakeState == 4) {
+                            if (rightIntakeTime.milliseconds() > 800) {
+                                rightIntake.setPower(0);
+
+                                d_open.setPosition(d_open_minRange);
+
+                                d_coverRight.setPosition(d_minRange_coverRight);
+
+                                rightIntakeState = 0;
+                                objectCaptured = true;
+                            }
+                        } else if (rightIntakeState == 10) {
+                            rightIntake.setPower(-1);
+                            rightIntakeTime.reset();
+                            rightIntakeState++;
+                        } else if (rightIntakeState == 11) {
+                            if (rightIntakeTime.milliseconds() > 150) {
+                                rightIntake.setPower(0);
+
+                                i_topRight.setPosition(i_maxRange_topRight);
+                                i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                                d_open.setPosition(d_open_minRange);
+
+                                d_coverRight.setPosition(d_minRange_coverRight);
+
+                                rightIntakeState = 0;
+                            }
+                        } else {
+                            rightIntake.setPower(0);
+
+                            i_topRight.setPosition(i_maxRange_topRight);
+                            i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverRight.setPosition(d_minRange_coverRight);
+
+                            rightIntakeState = 0;
+
+                        }
+                    }
+
+                    timer.reset();
+
+                    while (timer.milliseconds() <= 1000) {
+                        // Close & bend down deposit
+                        d_open.setPosition(d_open_minRange);
+                        d_bendLeft.setPosition(d_minRange_bendLeft);
+                        d_bendRight.setPosition(d_minRange_bendRight);
+
+                        y = -gamepad1.right_stick_x; // Reversed
+                        x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
+                        rx = -gamepad1.left_stick_y; // Forward/Backward
+
+                        /** Denominator is the largest motor power (absolute value) or 1
+                         * This ensures all the powers maintain the same ratio, but only when
+                         * at least one is out of the range [-1, 1] **/
+                        denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+                        leftFrontPower = (y + x - rx) / denominator;
+                        leftBackPower = (y - x - rx) / denominator;
+                        rightFrontPower = (y - x + rx) / denominator;
+                        rightBackPower = (y + x + rx) / denominator;
+
+                        leftFront.setPower(leftBackPower);
+                        leftBack.setPower(leftFrontPower);
+                        rightFront.setPower(rightFrontPower);
+                        rightBack.setPower(rightBackPower);
+
+                        if (leftIntakeState == 0) {
+                            if (gamepad1.left_bumper) {
+
+                                i_topLeft.setPosition(i_minRange_topLeft);
+                                i_bottomLeft.setPosition(i_minRange_bottomLeft);
+
+                                leftIntake.setPower(highSweepPower);
+
+                                // d_open.setPosition(d_open_minRangeSemi);
+
+                                leftIntakeTime.reset();
+
+                                leftIntakeState++;
+                            }
+                        } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
+                            leftIntakeState = 10;
+                        } else if (leftIntakeState == 1) {
+                            if (colorSensor_left.alpha() > 500) {
+                                leftIntake.setPower(0.25);
+
+                                i_topLeft.setPosition(i_maxRange_topLeft);
+                                i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                                leftIntakeState++;
+                            }
+                        } else if (leftIntakeState == 2) {
+                            leftIntake.setPower(0);
+
+                            d_coverLeft.setPosition(d_maxRange_coverLeft);
+                            d_coverRight.setPosition(d_minRange_coverRight);
+
+                            leftIntakeTime.reset();
+
+                            leftIntakeState++;
+                        } else if (leftIntakeState == 3) {
+                            if (leftIntakeTime.milliseconds() > 1250) {
+                                leftIntake.setPower(-highSweepPower);
+
+                                leftIntakeTime.reset();
+
+                                leftIntakeState++;
+                            }
+                        } else if (leftIntakeState == 4) {
+                            if (leftIntakeTime.milliseconds() > 800) {
+                                leftIntake.setPower(0);
+
+                                d_open.setPosition(d_open_minRange);
+
+                                d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                                leftIntakeState = 0;
+                                objectCaptured = true;
+                            }
+                        } else if (leftIntakeState == 10) {
+                            leftIntake.setPower(-1);
+                            leftIntakeTime.reset();
+                            leftIntakeState++;
+                        } else if (leftIntakeState == 11) {
+                            if (leftIntakeTime.milliseconds() > 150) {
+                                leftIntake.setPower(0);
+
+                                i_topLeft.setPosition(i_maxRange_topLeft);
+                                i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                                d_open.setPosition(d_open_minRange);
+
+                                d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                                leftIntakeState = 0;
+                            }
+                        } else {
+                            leftIntake.setPower(0);
+
+                            i_topLeft.setPosition(i_maxRange_topLeft);
+                            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                            leftIntakeState = 0;
+                        }
+
+                        if (rightIntakeState == 0) {
+                            if (gamepad1.right_bumper) {
+
+                                i_topRight.setPosition(i_minRange_topRight);
+                                i_bottomRight.setPosition(i_minRange_bottomRight);
+
+                                rightIntake.setPower(highSweepPower);
+
+                                // d_open.setPosition(d_open_minRangeSemi);
+
+                                rightIntakeTime.reset();
+
+                                rightIntakeState++;
+                            }
+                        } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
+                            rightIntakeState = 10;
+                        } else if (rightIntakeState == 1) {
+                            if (colorSensor_right.alpha() > 500) {
+                                rightIntake.setPower(0.25);
+
+                                i_topRight.setPosition(i_maxRange_topRight);
+                                i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                                rightIntakeState++;
+                            }
+                        } else if (rightIntakeState == 2) {
+                            rightIntake.setPower(0);
+
+                            d_coverRight.setPosition(d_maxRange_coverRight);
+                            d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                            rightIntakeTime.reset();
+
+                            rightIntakeState++;
+                        } else if (rightIntakeState == 3) {
+                            if (rightIntakeTime.milliseconds() > 1250) {
+                                rightIntake.setPower(-highSweepPower);
+
+                                rightIntakeTime.reset();
+
+                                rightIntakeState++;
+                            }
+                        } else if (rightIntakeState == 4) {
+                            if (rightIntakeTime.milliseconds() > 800) {
+                                rightIntake.setPower(0);
+
+                                d_open.setPosition(d_open_minRange);
+
+                                d_coverRight.setPosition(d_minRange_coverRight);
+
+                                rightIntakeState = 0;
+                                objectCaptured = true;
+                            }
+                        } else if (rightIntakeState == 10) {
+                            rightIntake.setPower(-1);
+                            rightIntakeTime.reset();
+                            rightIntakeState++;
+                        } else if (rightIntakeState == 11) {
+                            if (rightIntakeTime.milliseconds() > 150) {
+                                rightIntake.setPower(0);
+
+                                i_topRight.setPosition(i_maxRange_topRight);
+                                i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                                d_open.setPosition(d_open_minRange);
+
+                                d_coverRight.setPosition(d_minRange_coverRight);
+
+                                rightIntakeState = 0;
+                            }
+                        } else {
+                            rightIntake.setPower(0);
+
+                            i_topRight.setPosition(i_maxRange_topRight);
+                            i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverRight.setPosition(d_minRange_coverRight);
+
+                            rightIntakeState = 0;
+
+                        }
+                    }
+
+//                // Check is deposit returns to original position
+//                if (d_open.getPosition() != d_open_minRange || d_bendLeft.getPosition() != d_minRange_bendLeft || d_bendRight.getPosition() != d_minRange_bendRight) {
+//
+//                    Thread.sleep(1000);
+//                    d_open.setPosition(d_open_minRange);
+//                    d_bendLeft.setPosition(d_minRange_bendLeft);
+//                    d_bendRight.setPosition(d_minRange_bendRight);
+//                }
+
+                    // Retract arm to original position
+                    liftFront.setTargetPosition(0);
+                    liftBack.setTargetPosition(0);
+                    liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
+                    liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+                    timer.reset();
+
+                    while (timer.milliseconds() <= 1000) {
+                        liftFront.setPower(1.0);
+                        liftBack.setPower(1.0);
+
+                        y = -gamepad1.right_stick_x; // Reversed
+                        x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
+                        rx = -gamepad1.left_stick_y; // Forward/Backward
+
+                        /** Denominator is the largest motor power (absolute value) or 1
+                         * This ensures all the powers maintain the same ratio, but only when
+                         * at least one is out of the range [-1, 1] **/
+                        denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+                        leftFrontPower = (y + x - rx) / denominator;
+                        leftBackPower = (y - x - rx) / denominator;
+                        rightFrontPower = (y - x + rx) / denominator;
+                        rightBackPower = (y + x + rx) / denominator;
+
+                        leftFront.setPower(leftBackPower);
+                        leftBack.setPower(leftFrontPower);
+                        rightFront.setPower(rightFrontPower);
+                        rightBack.setPower(rightBackPower);
+
+                        if (leftIntakeState == 0) {
+                            if (gamepad1.left_bumper) {
+
+                                i_topLeft.setPosition(i_minRange_topLeft);
+                                i_bottomLeft.setPosition(i_minRange_bottomLeft);
+
+                                leftIntake.setPower(highSweepPower);
+
+                                // d_open.setPosition(d_open_minRangeSemi);
+
+                                leftIntakeTime.reset();
+
+                                leftIntakeState++;
+                            }
+                        } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
+                            leftIntakeState = 10;
+                        } else if (leftIntakeState == 1) {
+                            if (colorSensor_left.alpha() > 500) {
+                                leftIntake.setPower(0.25);
+
+                                i_topLeft.setPosition(i_maxRange_topLeft);
+                                i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                                leftIntakeState++;
+                            }
+                        } else if (leftIntakeState == 2) {
+                            leftIntake.setPower(0);
+
+                            d_coverLeft.setPosition(d_maxRange_coverLeft);
+                            d_coverRight.setPosition(d_minRange_coverRight);
+
+                            leftIntakeTime.reset();
+
+                            leftIntakeState++;
+                        } else if (leftIntakeState == 3) {
+                            if (leftIntakeTime.milliseconds() > 1250) {
+                                leftIntake.setPower(-highSweepPower);
+
+                                leftIntakeTime.reset();
+
+                                leftIntakeState++;
+                            }
+                        } else if (leftIntakeState == 4) {
+                            if (leftIntakeTime.milliseconds() > 800) {
+                                leftIntake.setPower(0);
+
+                                d_open.setPosition(d_open_minRange);
+
+                                d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                                leftIntakeState = 0;
+                                objectCaptured = true;
+                            }
+                        } else if (leftIntakeState == 10) {
+                            leftIntake.setPower(-1);
+                            leftIntakeTime.reset();
+                            leftIntakeState++;
+                        } else if (leftIntakeState == 11) {
+                            if (leftIntakeTime.milliseconds() > 150) {
+                                leftIntake.setPower(0);
+
+                                i_topLeft.setPosition(i_maxRange_topLeft);
+                                i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                                d_open.setPosition(d_open_minRange);
+
+                                d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                                leftIntakeState = 0;
+                            }
+                        } else {
+                            leftIntake.setPower(0);
+
+                            i_topLeft.setPosition(i_maxRange_topLeft);
+                            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                            leftIntakeState = 0;
+                        }
+
+                        if (rightIntakeState == 0) {
+                            if (gamepad1.right_bumper) {
+
+                                i_topRight.setPosition(i_minRange_topRight);
+                                i_bottomRight.setPosition(i_minRange_bottomRight);
+
+                                rightIntake.setPower(highSweepPower);
+
+                                // d_open.setPosition(d_open_minRangeSemi);
+
+                                rightIntakeTime.reset();
+
+                                rightIntakeState++;
+                            }
+                        } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
+                            rightIntakeState = 10;
+                        } else if (rightIntakeState == 1) {
+                            if (colorSensor_right.alpha() > 500) {
+                                rightIntake.setPower(0.25);
+
+                                i_topRight.setPosition(i_maxRange_topRight);
+                                i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                                rightIntakeState++;
+                            }
+                        } else if (rightIntakeState == 2) {
+                            rightIntake.setPower(0);
+
+                            d_coverRight.setPosition(d_maxRange_coverRight);
+                            d_coverLeft.setPosition(d_minRange_coverLeft);
+
+                            rightIntakeTime.reset();
+
+                            rightIntakeState++;
+                        } else if (rightIntakeState == 3) {
+                            if (rightIntakeTime.milliseconds() > 1250) {
+                                rightIntake.setPower(-highSweepPower);
+
+                                rightIntakeTime.reset();
+
+                                rightIntakeState++;
+                            }
+                        } else if (rightIntakeState == 4) {
+                            if (rightIntakeTime.milliseconds() > 800) {
+                                rightIntake.setPower(0);
+
+                                d_open.setPosition(d_open_minRange);
+
+                                d_coverRight.setPosition(d_minRange_coverRight);
+
+                                rightIntakeState = 0;
+                                objectCaptured = true;
+                            }
+                        } else if (rightIntakeState == 10) {
+                            rightIntake.setPower(-1);
+                            rightIntakeTime.reset();
+                            rightIntakeState++;
+                        } else if (rightIntakeState == 11) {
+                            if (rightIntakeTime.milliseconds() > 150) {
+                                rightIntake.setPower(0);
+
+                                i_topRight.setPosition(i_maxRange_topRight);
+                                i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                                d_open.setPosition(d_open_minRange);
+
+                                d_coverRight.setPosition(d_minRange_coverRight);
+
+                                rightIntakeState = 0;
+                            }
+                        } else {
+                            rightIntake.setPower(0);
+
+                            i_topRight.setPosition(i_maxRange_topRight);
+                            i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                            d_open.setPosition(d_open_minRange);
+
+                            d_coverRight.setPosition(d_minRange_coverRight);
+
+                            rightIntakeState = 0;
+
+                        }
+                    }
+
+                    liftFront.setPower(0);
+                    liftBack.setPower(0);
+                }
+            }
 
             if (gamepad2.dpad_up) {
 
@@ -540,7 +1191,8 @@ public class RoboMec extends LinearOpMode {
                     rightBack.setPower(rightBackPower);
                 }
 
-            } else if (gamepad2.dpad_right) {
+            } 
+            else if (gamepad2.dpad_right) {
 
                 // new Compute();
 
@@ -570,7 +1222,6 @@ public class RoboMec extends LinearOpMode {
 
                     if (leftIntakeState == 0) {
                         if (gamepad1.left_bumper) {
-
                             i_topLeft.setPosition(i_minRange_topLeft);
                             i_bottomLeft.setPosition(i_minRange_bottomLeft);
 
@@ -592,6 +1243,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
                             leftIntakeState++;
+                        }else {
+                            i_topLeft.setPosition(i_minRange_topLeft);
+                            i_bottomLeft.setPosition(i_minRange_bottomLeft);
                         }
                     } else if (leftIntakeState == 2) {
                         leftIntake.setPower(0);
@@ -603,7 +1257,7 @@ public class RoboMec extends LinearOpMode {
 
                         leftIntakeState++;
                     } else if (leftIntakeState == 3) {
-                        if (leftIntakeTime.milliseconds() > 1250) {
+                        if (leftIntakeTime.milliseconds() > 750 && colorSensor_left.alpha() < 90) {
                             leftIntake.setPower(-highSweepPower);
 
                             leftIntakeTime.reset();
@@ -675,6 +1329,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomRight.setPosition(i_maxRange_bottomRight);
 
                             rightIntakeState++;
+                        }else {
+                            i_topRight.setPosition(i_minRange_topRight);
+                            i_bottomRight.setPosition(i_minRange_bottomRight);
                         }
                     } else if (rightIntakeState == 2) {
                         rightIntake.setPower(0);
@@ -686,7 +1343,7 @@ public class RoboMec extends LinearOpMode {
 
                         rightIntakeState++;
                     } else if (rightIntakeState == 3) {
-                        if (rightIntakeTime.milliseconds() > 1250) {
+                        if (rightIntakeTime.milliseconds() > 750 && colorSensor_right.alpha() < 90) {
                             rightIntake.setPower(-highSweepPower);
 
                             rightIntakeTime.reset();
@@ -786,6 +1443,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
                             leftIntakeState++;
+                        }else {
+                            i_topLeft.setPosition(i_minRange_topLeft);
+                            i_bottomLeft.setPosition(i_minRange_bottomLeft);
                         }
                     } else if (leftIntakeState == 2) {
                         leftIntake.setPower(0);
@@ -797,7 +1457,7 @@ public class RoboMec extends LinearOpMode {
 
                         leftIntakeState++;
                     } else if (leftIntakeState == 3) {
-                        if (leftIntakeTime.milliseconds() > 1250) {
+                        if (leftIntakeTime.milliseconds() > 750 && colorSensor_left.alpha() < 90) {
                             leftIntake.setPower(-highSweepPower);
 
                             leftIntakeTime.reset();
@@ -869,6 +1529,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomRight.setPosition(i_maxRange_bottomRight);
 
                             rightIntakeState++;
+                        }else {
+                            i_topRight.setPosition(i_minRange_topRight);
+                            i_bottomRight.setPosition(i_minRange_bottomRight);
                         }
                     } else if (rightIntakeState == 2) {
                         rightIntake.setPower(0);
@@ -880,7 +1543,7 @@ public class RoboMec extends LinearOpMode {
 
                         rightIntakeState++;
                     } else if (rightIntakeState == 3) {
-                        if (rightIntakeTime.milliseconds() > 1250) {
+                        if (rightIntakeTime.milliseconds() > 750  && colorSensor_right.alpha() < 90) {
                             rightIntake.setPower(-highSweepPower);
 
                             rightIntakeTime.reset();
@@ -993,6 +1656,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
                             leftIntakeState++;
+                        }else {
+                            i_topLeft.setPosition(i_minRange_topLeft);
+                            i_bottomLeft.setPosition(i_minRange_bottomLeft);
                         }
                     } else if (leftIntakeState == 2) {
                         leftIntake.setPower(0);
@@ -1004,7 +1670,7 @@ public class RoboMec extends LinearOpMode {
 
                         leftIntakeState++;
                     } else if (leftIntakeState == 3) {
-                        if (leftIntakeTime.milliseconds() > 1250) {
+                        if (leftIntakeTime.milliseconds() > 750 && colorSensor_left.alpha() < 90) {
                             leftIntake.setPower(-highSweepPower);
 
                             leftIntakeTime.reset();
@@ -1076,6 +1742,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomRight.setPosition(i_maxRange_bottomRight);
 
                             rightIntakeState++;
+                        }else {
+                            i_topRight.setPosition(i_minRange_topRight);
+                            i_bottomRight.setPosition(i_minRange_bottomRight);
                         }
                     } else if (rightIntakeState == 2) {
                         rightIntake.setPower(0);
@@ -1087,7 +1756,7 @@ public class RoboMec extends LinearOpMode {
 
                         rightIntakeState++;
                     } else if (rightIntakeState == 3) {
-                        if (rightIntakeTime.milliseconds() > 1250) {
+                        if (rightIntakeTime.milliseconds() > 750 && colorSensor_right.alpha() < 90) {
                             rightIntake.setPower(-highSweepPower);
 
                             rightIntakeTime.reset();
@@ -1387,6 +2056,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
                             leftIntakeState++;
+                        }else {
+                            i_topLeft.setPosition(i_minRange_topLeft);
+                            i_bottomLeft.setPosition(i_minRange_bottomLeft);
                         }
                     } else if (leftIntakeState == 2) {
                         leftIntake.setPower(0);
@@ -1398,7 +2070,7 @@ public class RoboMec extends LinearOpMode {
 
                         leftIntakeState++;
                     } else if (leftIntakeState == 3) {
-                        if (leftIntakeTime.milliseconds() > 1250) {
+                        if (leftIntakeTime.milliseconds() > 750 && colorSensor_left.alpha() < 90) {
                             leftIntake.setPower(-highSweepPower);
 
                             leftIntakeTime.reset();
@@ -1470,6 +2142,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomRight.setPosition(i_maxRange_bottomRight);
 
                             rightIntakeState++;
+                        }else {
+                            i_topRight.setPosition(i_minRange_topRight);
+                            i_bottomRight.setPosition(i_minRange_bottomRight);
                         }
                     } else if (rightIntakeState == 2) {
                         rightIntake.setPower(0);
@@ -1481,7 +2156,7 @@ public class RoboMec extends LinearOpMode {
 
                         rightIntakeState++;
                     } else if (rightIntakeState == 3) {
-                        if (rightIntakeTime.milliseconds() > 1250) {
+                        if (rightIntakeTime.milliseconds() > 750 && colorSensor_right.alpha() < 90) {
                             rightIntake.setPower(-highSweepPower);
 
                             rightIntakeTime.reset();
@@ -1582,6 +2257,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
                             leftIntakeState++;
+                        }else {
+                            i_topLeft.setPosition(i_minRange_topLeft);
+                            i_bottomLeft.setPosition(i_minRange_bottomLeft);
                         }
                     } else if (leftIntakeState == 2) {
                         leftIntake.setPower(0);
@@ -1593,7 +2271,7 @@ public class RoboMec extends LinearOpMode {
 
                         leftIntakeState++;
                     } else if (leftIntakeState == 3) {
-                        if (leftIntakeTime.milliseconds() > 1250) {
+                        if (leftIntakeTime.milliseconds() > 750 && colorSensor_left.alpha() < 90) {
                             leftIntake.setPower(-highSweepPower);
 
                             leftIntakeTime.reset();
@@ -1665,6 +2343,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomRight.setPosition(i_maxRange_bottomRight);
 
                             rightIntakeState++;
+                        }else {
+                            i_topRight.setPosition(i_minRange_topRight);
+                            i_bottomRight.setPosition(i_minRange_bottomRight);
                         }
                     } else if (rightIntakeState == 2) {
                         rightIntake.setPower(0);
@@ -1676,7 +2357,7 @@ public class RoboMec extends LinearOpMode {
 
                         rightIntakeState++;
                     } else if (rightIntakeState == 3) {
-                        if (rightIntakeTime.milliseconds() > 1250) {
+                        if (rightIntakeTime.milliseconds() > 750 && colorSensor_right.alpha() < 90) {
                             rightIntake.setPower(-highSweepPower);
 
                             rightIntakeTime.reset();
@@ -1789,6 +2470,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
                             leftIntakeState++;
+                        }else {
+                            i_topLeft.setPosition(i_minRange_topLeft);
+                            i_bottomLeft.setPosition(i_minRange_bottomLeft);
                         }
                     } else if (leftIntakeState == 2) {
                         leftIntake.setPower(0);
@@ -1800,7 +2484,7 @@ public class RoboMec extends LinearOpMode {
 
                         leftIntakeState++;
                     } else if (leftIntakeState == 3) {
-                        if (leftIntakeTime.milliseconds() > 1250) {
+                        if (leftIntakeTime.milliseconds() > 750 && colorSensor_left.alpha() < 90) {
                             leftIntake.setPower(-highSweepPower);
 
                             leftIntakeTime.reset();
@@ -1872,6 +2556,9 @@ public class RoboMec extends LinearOpMode {
                             i_bottomRight.setPosition(i_maxRange_bottomRight);
 
                             rightIntakeState++;
+                        }else {
+                            i_topRight.setPosition(i_minRange_topRight);
+                            i_bottomRight.setPosition(i_minRange_bottomRight);
                         }
                     } else if (rightIntakeState == 2) {
                         rightIntake.setPower(0);
@@ -1883,7 +2570,7 @@ public class RoboMec extends LinearOpMode {
 
                         rightIntakeState++;
                     } else if (rightIntakeState == 3) {
-                        if (rightIntakeTime.milliseconds() > 1250) {
+                        if (rightIntakeTime.milliseconds() > 750  && colorSensor_right.alpha() < 90) {
                             rightIntake.setPower(-highSweepPower);
 
                             rightIntakeTime.reset();
