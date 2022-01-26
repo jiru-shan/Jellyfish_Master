@@ -215,7 +215,7 @@ public class RoboBoss extends LinearOpMode {
         while (opModeIsActive()) {
 
             // Keep deposit in position while not in use
-//            d_open.setPosition(d_open_minRange);
+            d_open.setPosition(d_open_minRange);
             d_bendLeft.setPosition(d_minRange_bendLeft);
             d_bendRight.setPosition(d_minRange_bendRight);
 
