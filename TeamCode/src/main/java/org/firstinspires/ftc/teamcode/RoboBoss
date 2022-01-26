@@ -60,7 +60,17 @@ public class RoboBoss extends LinearOpMode {
         LIFT_EMPTY,
         LIFT_FULL,
         LIFT_EXTENDING,
+        LIFT_EXTENDING_BALANCED,
+        LIFT_EXTENDING_TIPPED,
+        LIFT_EXTENDING_NEAR,
+        LIFT_EXTENDING_MIDDLE,
+        LIFT_EXTENDING_FAR,
         LIFT_TARGET,
+        LIFT_TARGET_BALANCED,
+        LIFT_TARGET_TIPPED,
+        LIFT_TARGET_NEAR,
+        LIFT_TARGET_MIDDLE,
+        LIFT_TARGET_FAR,
         LIFT_DEPOSITING,
         LIFT_RELEASED,
         LIFT_RETRACTING
@@ -134,12 +144,12 @@ public class RoboBoss extends LinearOpMode {
 
         // Factor
         double normalSpeed = 1.0;
-        int alliance_targetTipped = 600;
-        int alliance_targetBalanced = 570;   // Fix this value
-        int alliance_middle = 580;   // Fix this value
-        int shared_targetClose = 120;
-        int shared_targetMiddle = 200;
-        int shared_targetFar = 280;
+        int TARGET_TIPPED = 600;
+        int TARGET_BALANCED = 570;   // Fix this value
+        // int TARGET_MIDDLE = 580;   // Fix this value
+        int TARGET_NEAR = 120;
+        int TARGET_MIDDLE = 200;
+        int TARGET_FAR = 280;
         int LIFT_TARGET = 580;
         int LIFT_IDLE = 0;
 
@@ -505,7 +515,7 @@ public class RoboBoss extends LinearOpMode {
                 case LIFT_EXTENDING:
 
                     // Check if button was pressed
-                    if (gamepad2.dpad_up || gamepad2.dpad_left) {
+                    if (gamepad2.dpad_up) {
 
                         // Keep deposit in place
                         d_open.setPosition(d_open_minRange);
@@ -513,13 +523,161 @@ public class RoboBoss extends LinearOpMode {
                         d_bendRight.setPosition(d_minRange_bendRight);
 
                         // "10" is arbitrary - might need to be adjusted
-                        while (Math.abs(liftFront.getCurrentPosition() - LIFT_TARGET) > 10) {
+                        while (Math.abs(liftFront.getCurrentPosition() - TARGET_TIPPED) > 10) {
 
                             // Run lift
                             liftFront.setPower(-1.0);
                             liftBack.setPower(-1.0);
-                            liftFront.setTargetPosition(LIFT_TARGET);
-                            liftBack.setTargetPosition(LIFT_TARGET);
+                            liftFront.setTargetPosition(TARGET_TIPPED);
+                            liftBack.setTargetPosition(TARGET_TIPPED);
+
+                            // Ensure movement of drivetrain during while loop
+                            y = -gamepad1.right_stick_x; // Reversed
+                            x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
+                            rx = -gamepad1.left_stick_y; // Forward/Backward
+
+                            denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+                            leftFrontPower = (y + x - rx) / denominator;
+                            leftBackPower = (y - x - rx) / denominator;
+                            rightFrontPower = (y - x + rx) / denominator;
+                            rightBackPower = (y + x + rx) / denominator;
+
+                            leftFront.setPower(leftBackPower);
+                            leftBack.setPower(leftFrontPower);
+                            rightFront.setPower(rightFrontPower);
+                            rightBack.setPower(rightBackPower);
+                        }
+
+                        // Set lift state to target
+                        liftState = LiftState.LIFT_TARGET;
+                        break;
+
+                    } else if (gamepad2.dpad_left) {
+
+                        // Keep deposit in place
+                        d_open.setPosition(d_open_minRange);
+                        d_bendLeft.setPosition(d_minRange_bendLeft);
+                        d_bendRight.setPosition(d_minRange_bendRight);
+
+                        // "10" is arbitrary - might need to be adjusted
+                        while (Math.abs(liftFront.getCurrentPosition() - TARGET_BALANCED) > 10) {
+
+                            // Run lift
+                            liftFront.setPower(-1.0);
+                            liftBack.setPower(-1.0);
+                            liftFront.setTargetPosition(TARGET_BALANCED);
+                            liftBack.setTargetPosition(TARGET_BALANCED);
+
+                            // Ensure movement of drivetrain during while loop
+                            y = -gamepad1.right_stick_x; // Reversed
+                            x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
+                            rx = -gamepad1.left_stick_y; // Forward/Backward
+
+                            denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+                            leftFrontPower = (y + x - rx) / denominator;
+                            leftBackPower = (y - x - rx) / denominator;
+                            rightFrontPower = (y - x + rx) / denominator;
+                            rightBackPower = (y + x + rx) / denominator;
+
+                            leftFront.setPower(leftBackPower);
+                            leftBack.setPower(leftFrontPower);
+                            rightFront.setPower(rightFrontPower);
+                            rightBack.setPower(rightBackPower);
+                        }
+
+                        // Set lift state to target
+                        liftState = LiftState.LIFT_TARGET;
+                        break;
+
+                    } else if (gamepad2.y) {
+
+                        // Keep deposit in place
+                        d_open.setPosition(d_open_minRange);
+                        d_bendLeft.setPosition(d_minRange_bendLeft);
+                        d_bendRight.setPosition(d_minRange_bendRight);
+
+                        // "10" is arbitrary - might need to be adjusted
+                        while (Math.abs(liftFront.getCurrentPosition() - TARGET_FAR) > 5) {
+
+                            // Run lift
+                            liftFront.setPower(-1.0);
+                            liftBack.setPower(-1.0);
+                            liftFront.setTargetPosition(TARGET_FAR);
+                            liftBack.setTargetPosition(TARGET_FAR);
+
+                            // Ensure movement of drivetrain during while loop
+                            y = -gamepad1.right_stick_x; // Reversed
+                            x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
+                            rx = -gamepad1.left_stick_y; // Forward/Backward
+
+                            denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+                            leftFrontPower = (y + x - rx) / denominator;
+                            leftBackPower = (y - x - rx) / denominator;
+                            rightFrontPower = (y - x + rx) / denominator;
+                            rightBackPower = (y + x + rx) / denominator;
+
+                            leftFront.setPower(leftBackPower);
+                            leftBack.setPower(leftFrontPower);
+                            rightFront.setPower(rightFrontPower);
+                            rightBack.setPower(rightBackPower);
+                        }
+
+                        // Set lift state to target
+                        liftState = LiftState.LIFT_TARGET;
+                        break;
+
+                    } else if (gamepad2.b) {
+
+                        // Keep deposit in place
+                        d_open.setPosition(d_open_minRange);
+                        d_bendLeft.setPosition(d_minRange_bendLeft);
+                        d_bendRight.setPosition(d_minRange_bendRight);
+
+                        // "10" is arbitrary - might need to be adjusted
+                        while (Math.abs(liftFront.getCurrentPosition() - TARGET_MIDDLE) > 5) {
+
+                            // Run lift
+                            liftFront.setPower(-1.0);
+                            liftBack.setPower(-1.0);
+                            liftFront.setTargetPosition(TARGET_MIDDLE);
+                            liftBack.setTargetPosition(TARGET_MIDDLE);
+
+                            // Ensure movement of drivetrain during while loop
+                            y = -gamepad1.right_stick_x; // Reversed
+                            x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
+                            rx = -gamepad1.left_stick_y; // Forward/Backward
+
+                            denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+                            leftFrontPower = (y + x - rx) / denominator;
+                            leftBackPower = (y - x - rx) / denominator;
+                            rightFrontPower = (y - x + rx) / denominator;
+                            rightBackPower = (y + x + rx) / denominator;
+
+                            leftFront.setPower(leftBackPower);
+                            leftBack.setPower(leftFrontPower);
+                            rightFront.setPower(rightFrontPower);
+                            rightBack.setPower(rightBackPower);
+                        }
+
+                        // Set lift state to target
+                        liftState = LiftState.LIFT_TARGET;
+                        break;
+
+                    } else if (gamepad2.a) {
+
+                        // Keep deposit in place
+                        d_open.setPosition(d_open_minRange);
+                        d_bendLeft.setPosition(d_minRange_bendLeft);
+                        d_bendRight.setPosition(d_minRange_bendRight);
+
+                        // "10" is arbitrary - might need to be adjusted
+                        while (Math.abs(liftFront.getCurrentPosition() - TARGET_NEAR) > 5) {
+
+                            // Run lift
+                            liftFront.setPower(-1.0);
+                            liftBack.setPower(-1.0);
+                            liftFront.setTargetPosition(TARGET_NEAR);
+                            liftBack.setTargetPosition(TARGET_NEAR);
 
                             // Ensure movement of drivetrain during while loop
                             y = -gamepad1.right_stick_x; // Reversed
@@ -546,7 +704,31 @@ public class RoboBoss extends LinearOpMode {
                 case LIFT_TARGET:
 
                     // Check if the lift has fully extended
-                    if (Math.abs(liftFront.getCurrentPosition() - LIFT_TARGET) < 10) {
+                    if (gamepad2.dpad_up && Math.abs(liftFront.getCurrentPosition() - TARGET_TIPPED) < 10) {
+
+                        // Set state to depositing
+                        liftState = LiftState.LIFT_DEPOSITING;
+                        break;
+
+                    } else if (gamepad2.dpad_left && Math.abs(liftFront.getCurrentPosition() - TARGET_BALANCED) < 10) {
+
+                        // Set state to depositing
+                        liftState = LiftState.LIFT_DEPOSITING;
+                        break;
+
+                    } else if (gamepad2.y && Math.abs(liftFront.getCurrentPosition() - TARGET_FAR) < 5) {
+
+                        // Set state to depositing
+                        liftState = LiftState.LIFT_DEPOSITING;
+                        break;
+
+                    } else if (gamepad2.b && Math.abs(liftFront.getCurrentPosition() - TARGET_MIDDLE) < 5) {
+
+                        // Set state to depositing
+                        liftState = LiftState.LIFT_DEPOSITING;
+                        break;
+
+                    } else if (gamepad2.a && Math.abs(liftFront.getCurrentPosition() - TARGET_NEAR) < 5) {
 
                         // Set state to depositing
                         liftState = LiftState.LIFT_DEPOSITING;
@@ -554,13 +736,13 @@ public class RoboBoss extends LinearOpMode {
                     }
 
                 case LIFT_DEPOSITING:
-                    if (gamepad2.dpad_down || gamepad2.a) {
+                    if (gamepad2.dpad_down || gamepad2.x) {
 
                         d_open.setPosition(d_open_top);
 
                         depositTimer.reset();
 
-                        while(depositTimer.milliseconds() <= 500) {
+                        while (depositTimer.milliseconds() <= 500) {
 
                             d_open.setPosition(d_open_top);
 
@@ -597,7 +779,7 @@ public class RoboBoss extends LinearOpMode {
                 case LIFT_RELEASED:
                     if (d_open.getPosition() == d_open_minRange) {
 
-                        while(Math.abs(liftFront.getCurrentPosition() - LIFT_IDLE) != 0) {
+                        while (Math.abs(liftFront.getCurrentPosition() - LIFT_IDLE) != 0) {
 
                             // Retract lift
                             liftFront.setPower(1.0);
@@ -833,8 +1015,6 @@ public class RoboBoss extends LinearOpMode {
             rightFront.setPower(rightFrontPower);
             rightBack.setPower(rightBackPower);
         }
-
-        /** Lift - Shared Hub **/
 
 
         /** Carousel **/
