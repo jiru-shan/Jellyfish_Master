@@ -48,40 +48,46 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
     double d_maxRange_bendLeft = 0.78;
     double d_minRange_bendRight = 0.10;
     double d_maxRange_bendRight = 0.21;
+    double d_open_minRangeSemi = 0.63;
 
     double i_minRange_topRight = 0.96;
     double i_maxRange_topRight = 0.17;
     double i_minRange_bottomRight = 0.04;
     double i_maxRange_bottomRight = 0.83;
 
-    double i_minRange_topLeft = 0.1;
-    double i_maxRange_topLeft = 0.85;
-    double i_minRange_bottomLeft = 0.9;
-    double i_maxRange_bottomLeft = 0.15;
+    double d_minRange_coverLeft = 0.55;
+    double d_minRange_coverRight = 0.45;
+    double d_maxRange_coverRight = 0.85;
 
     double CYCLE_TIME=4;
 
-    enum IntakeState {GETTING,
+    enum GrabbingState {GETTING,
         RETURNING,
     }
 
-    enum LiftState
+    enum ReturningState
     {
         LING,
         RETURNING,
         DONE
     }
+    enum IntakeState
+    {
+        INTO_DEPOSIT, EXTENDING_LIFT, STALLING
+    }
 
     int alliance_targetTipped = 700;
-
-    double i_hate_existence;
 
     SampleMecanumDriveCancelable drive;
 
     Trajectory goingTrajectory;
     Trajectory returningTrajectory;
-    IntakeState state;
-    //LiftState lstate;
+    GrabbingState GState;
+    ReturningState RState;
+    IntakeState IState;
+
+    double intakeTarget=0;
+    int intakeState;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -111,135 +117,203 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
 
         sensorRange1 = hardwareMap.get(ColorRangeSensor.class, "colorSensor_right");
         sensorRange2 = hardwareMap.get(ColorRangeSensor.class, "colorSensor_left");
-        driveLeft=hardwareMap.get(ColorRangeSensor.class, "driveSensor1");
-        driveRight=hardwareMap.get(ColorRangeSensor.class, "driveSensor2");
+        driveLeft = hardwareMap.get(ColorRangeSensor.class, "driveSensor1");
+        driveRight = hardwareMap.get(ColorRangeSensor.class, "driveSensor2");
 
         drive = new SampleMecanumDriveCancelable(hardwareMap);
         Pose2d startPose = new Pose2d(0, 0, 0);
         ElapsedTime time = new ElapsedTime();
         drive.setPoseEstimate(startPose);
 
+        d_open.setPosition(d_open_minRange);
+        d_bendLeft.setPosition(d_minRange_bendLeft);
+        d_bendRight.setPosition(d_minRange_bendRight);
+
+        d_coverLeft.setPosition(d_minRange_coverLeft);
+        d_coverRight.setPosition(d_minRange_coverRight);
 
         waitForStart();
 
         lowerIntakes();
-        Trajectory prepreTrajectory=drive.trajectoryBuilder(startPose)
+        Trajectory prepreTrajectory = drive.trajectoryBuilder(startPose)
                 .forward(7)
                 .build();
         drive.followTrajectory(prepreTrajectory);
-        drive.setPoseEstimate(new Pose2d(0,0,Math.toRadians(0)));
+        drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(0)));
 
 
-        while(30-time.seconds()>CYCLE_TIME)
-        {
-        double pathChange=0;
-        Trajectory preTrajectory = drive.trajectoryBuilder(startPose)
-                .lineToSplineHeading(new Pose2d(-49, -1,Math.toRadians(5)))
-                .build();
-        drive.followTrajectory(preTrajectory);
-        state=IntakeState.GETTING;
-        goingTrajectory=drive.trajectoryBuilder(preTrajectory.end())
-                .lineToSplineHeading(new Pose2d(-71, -3.25, Math.toRadians(10)), SampleMecanumDrive.getVelocityConstraint(40,
-                        DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .build();
+       // while (30 - time.seconds() > CYCLE_TIME) {
+            double pathChange = 0;
+            Trajectory preTrajectory = drive.trajectoryBuilder(startPose)
+                    .lineToSplineHeading(new Pose2d(-49, -1, Math.toRadians(5)))
+                    .build();
+            drive.followTrajectory(preTrajectory);
+            GState = GrabbingState.GETTING;
+            goingTrajectory = drive.trajectoryBuilder(preTrajectory.end())
+                    .lineToSplineHeading(new Pose2d(-73, -2.25, Math.toRadians(10)), SampleMecanumDrive.getVelocityConstraint(40,
+                            DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                    .build();
 
-        drive.followTrajectoryAsync(goingTrajectory);
-        pathChange=1;
-        while(!hasBlock()&&pathChange<3)
-        {
-            switch(state)
-            {
-                case GETTING:
-                    if(!drive.isBusy())
-                    {
+            drive.followTrajectoryAsync(goingTrajectory);
+            pathChange = 1;
+            while (!hasBlock() && pathChange < 3) {
+                switch (GState) {
+                    case GETTING:
+                        if (!drive.isBusy()) {
 
-                        state=IntakeState.RETURNING;
-                        returningTrajectory= drive.trajectoryBuilder(goingTrajectory.end())
-                                .lineToSplineHeading(new Pose2d(-49, -1, Math.toRadians(5)))
-                                .build();
-                        drive.followTrajectoryAsync(returningTrajectory);
-                    }
-                    break;
-                case RETURNING:
-                    if(!drive.isBusy())
-                    {
-                        state=IntakeState.GETTING;
-                        goingTrajectory=drive.trajectoryBuilder(returningTrajectory.end())
-                                .lineToSplineHeading(new Pose2d(-71-2*pathChange, -3.25-pathChange, Math.toRadians(10+(2.5*pathChange))), SampleMecanumDrive.getVelocityConstraint(40,
-                                        DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                                .build();
-                        drive.followTrajectory(goingTrajectory);
-                        pathChange++;
-                    }
-                    break;
+                            GState = GrabbingState.RETURNING;
+                            returningTrajectory = drive.trajectoryBuilder(goingTrajectory.end())
+                                    .lineToSplineHeading(new Pose2d(-49, -1, Math.toRadians(5)))
+                                    .build();
+                            drive.followTrajectoryAsync(returningTrajectory);
+                        }
+                        break;
+                    case RETURNING:
+                        if (!drive.isBusy()) {
+                            GState = GrabbingState.GETTING;
+                            goingTrajectory = drive.trajectoryBuilder(returningTrajectory.end())
+                                    .lineToSplineHeading(new Pose2d(-73 - 2 * pathChange, -2.25 - pathChange, Math.toRadians(10 + (2.5 * pathChange))), SampleMecanumDrive.getVelocityConstraint(40,
+                                            DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                                    .build();
+                            drive.followTrajectory(goingTrajectory);
+                            pathChange++;
+                        }
+                        break;
+                }
+                drive.update();
+                rightIntake.setPower(1);
             }
-            drive.update();
-            rightIntake.setPower(1);
-        }
-        double target=SystemClock.uptimeMillis()+300;
-        while(SystemClock.uptimeMillis()<target)
-        {
-            rightIntake.setPower(1);
-            drive.update();
-        }
-        drive.cancelFollowing();
-        rightIntake.setPower(0);
-        raiseIntakes();
-
-        returningTrajectory=drive.trajectoryBuilder(drive.getPoseEstimate())
-                .lineToSplineHeading(new Pose2d(-42, -1, Math.toRadians(0)))
-                .build();
-        drive.followTrajectory(returningTrajectory);
-
-        Trajectory maldTrajectory=drive.trajectoryBuilder(returningTrajectory.end())
-                .strafeLeft(10, SampleMecanumDrive.getVelocityConstraint(40,
-                        DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .build();
-        drive.followTrajectory(maldTrajectory);
-
-        drive.setPoseEstimate(new Pose2d(drive.getPoseEstimate().getX(), 0, 0));
-
-        //lstate=LiftState.LING;
-        Trajectory lineTrajectory=drive.trajectoryBuilder(drive.getPoseEstimate())
-                .lineToSplineHeading(startPose)
-                .build();
-        drive.followTrajectory(lineTrajectory);
-        /*while(lstate!=LiftState.DONE)
-        {
-
-            switch(lstate)
-            {
-                case LING:
-                    if(onColor()||!drive.isBusy())
-                    {
-                        telemetry.addData(">", "?");
-                        telemetry.update();
-                        lstate=LiftState.RETURNING;
-                        drive.cancelFollowing();
-                        drive.setPoseEstimate(new Pose2d(-46, 0, 0));
-                        Trajectory returnTrajectory=drive.trajectoryBuilder(drive.getPoseEstimate())
-                                .lineTo(new Vector2d(0,0))
-                                .build();
-                        drive.followTrajectoryAsync(returnTrajectory);
-                    }
-                    break;
-                case RETURNING:
-                    if(!drive.isBusy())
-                    {
-                        //lift();
-                        lstate=LiftState.DONE;
-                    }
-                    break;
-                case DONE:
-                    break;
+            double target = SystemClock.uptimeMillis() + 200;
+            while (SystemClock.uptimeMillis() < target) {
+                rightIntake.setPower(1);
+                drive.update();
             }
-*/
-        }
+            drive.cancelFollowing();
+            rightIntake.setPower(0);
+            raiseIntakes();
+
+            returningTrajectory = drive.trajectoryBuilder(drive.getPoseEstimate())
+                    .lineToSplineHeading(new Pose2d(-49, 8, Math.toRadians(0)))
+                    .build();
+            drive.followTrajectory(returningTrajectory);
+
+           /* Trajectory maldTrajectory = drive.trajectoryBuilder(returningTrajectory.end())
+                    .strafeLeft(10, SampleMecanumDrive.getVelocityConstraint(40,
+                            DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                    .build();
+            drive.followTrajectory(maldTrajectory);*/
+
+            drive.setPoseEstimate(new Pose2d(drive.getPoseEstimate().getX(), 0, 0));
+
+            RState = ReturningState.LING;
+            IState=IntakeState.INTO_DEPOSIT;
+            Trajectory lineTrajectory = drive.trajectoryBuilder(drive.getPoseEstimate())
+                    .lineToSplineHeading(startPose, SampleMecanumDrive.getVelocityConstraint(25,
+                            DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                    .build();
+            drive.followTrajectoryAsync(lineTrajectory);
+            while (RState != ReturningState.DONE)
+            {
+
+                switch (RState) {
+                    case LING:
+                        if (onColor())
+                        {
+                            telemetry.addData(">", "plz");
+                            telemetry.update();
+                            RState = ReturningState.RETURNING;
+                            drive.cancelFollowing();
+                            drive.setPoseEstimate(new Pose2d(-38, 0, 0));
+                            Trajectory returnTrajectory = drive.trajectoryBuilder(drive.getPoseEstimate())
+                                    .lineTo(new Vector2d(0, 0))
+                                    .build();
+                            drive.followTrajectoryAsync(returnTrajectory);
+                        }
+                        else if(!drive.isBusy())
+                        {
+                            RState = ReturningState.RETURNING;
+                        }
+                        break;
+                    case RETURNING:
+                        if (!drive.isBusy())
+                        {
+                            //lift();
+                            RState = ReturningState.DONE;
+                        }
+                        break;
+                    case DONE:
+                        break;
+                }
+                drive.update();
+                putInDepositT();
+            }
+       // }
     }
     public void lowerIntakes()
     {
         i_topRight.setPosition(i_minRange_topRight);
         i_bottomRight.setPosition(i_minRange_bottomRight);
+    }
+    public void putInDepositT()
+    {
+        if(hasBlock()&&intakeState==0)
+        {
+            d_open.setPosition(d_open_minRangeSemi);
+            d_bendLeft.setPosition(d_minRange_bendLeft);
+            d_bendRight.setPosition(d_minRange_bendRight);
+            d_coverRight.setPosition(d_maxRange_coverRight);
+            d_coverLeft.setPosition(d_minRange_coverLeft);
+            rightIntake.setPower(-1);
+            intakeTarget=SystemClock.uptimeMillis()+1500;
+            intakeState=1;
+        }
+        else if(SystemClock.uptimeMillis()<intakeTarget)
+        {
+            d_open.setPosition(d_open_minRangeSemi);
+            d_bendLeft.setPosition(d_minRange_bendLeft);
+            d_bendRight.setPosition(d_minRange_bendRight);
+            d_coverRight.setPosition(d_maxRange_coverRight);
+            d_coverLeft.setPosition(d_minRange_coverLeft);
+            rightIntake.setPower(-1);
+        }
+        else
+        {
+            rightIntake.setPower(0);
+            d_open.setPosition(d_open_minRange);
+            d_coverRight.setPosition(d_minRange_coverRight);
+        }
+    }
+    public void putInDeposit()
+    {
+        switch(IState)
+        {
+            case INTO_DEPOSIT:
+                d_open.setPosition(d_open_minRangeSemi);
+                d_bendLeft.setPosition(d_minRange_bendLeft);
+                d_bendRight.setPosition(d_minRange_bendRight);
+                d_coverRight.setPosition(d_maxRange_coverRight);
+                d_coverLeft.setPosition(d_minRange_coverLeft);
+                rightIntake.setPower(-1);
+                if(!hasBlock())
+                {
+                    IState= EvenLessScuffedAuton_RED.IntakeState.STALLING;
+                    intakeTarget=SystemClock.uptimeMillis()+1500;
+                }
+                break;
+            case STALLING:
+                rightIntake.setPower(-1);
+                if(SystemClock.uptimeMillis()>intakeTarget)
+                {
+                    rightIntake.setPower(0);
+                    d_open.setPosition(d_open_minRange);
+                    d_coverRight.setPosition(d_minRange_coverRight);
+                    IState= EvenLessScuffedAuton_RED.IntakeState.EXTENDING_LIFT;
+                }
+                break;
+            case EXTENDING_LIFT:
+                //pain
+
+        }
     }
     public void raiseIntakes()
     {
@@ -276,6 +350,7 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
         lift_back.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift_front.setPower(-1.0);
         lift_back.setPower(-1.0);
+
 
         //Thread.sleep(1000);
         double target= SystemClock.uptimeMillis()+1000;
