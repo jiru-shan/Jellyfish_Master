@@ -740,9 +740,7 @@ public class RoboBoss extends LinearOpMode {
 
                         d_open.setPosition(d_open_top);
 
-                        depositTimer.reset();
-
-                        while (depositTimer.milliseconds() <= 500) {
+                        if (depositTimer.milliseconds() <= 500) {
 
                             d_open.setPosition(d_open_top);
 
@@ -767,19 +765,26 @@ public class RoboBoss extends LinearOpMode {
                             leftBack.setPower(leftFrontPower);
                             rightFront.setPower(rightFrontPower);
                             rightBack.setPower(rightBackPower);
+                            
+                        } else {
+                            
+                            liftState = LiftState.LIFT_DEPOSITING;
                         }
 
                         d_open.setPosition(d_open_minRange);
 
+                        depositTimer.reset();
+
                         // Set lift state to released
                         liftState = LiftState.LIFT_RELEASED;
+                        
                         break;
                     }
 
                 case LIFT_RELEASED:
                     if (d_open.getPosition() == d_open_minRange) {
 
-                        while (Math.abs(liftFront.getCurrentPosition() - LIFT_IDLE) != 0) {
+                        if (Math.abs(liftFront.getCurrentPosition() - LIFT_IDLE) != 0) {
 
                             // Retract lift
                             liftFront.setPower(1.0);
@@ -803,183 +808,16 @@ public class RoboBoss extends LinearOpMode {
                             rightFront.setPower(rightFrontPower);
                             rightBack.setPower(rightBackPower);
 
-                            // Ensure movement of intake during while loop
-                            if (leftIntakeState == 0) {
-                                if (gamepad1.left_bumper) {
 
-                                    i_topLeft.setPosition(i_minRange_topLeft);
-                                    i_bottomLeft.setPosition(i_minRange_bottomLeft);
-
-                                    leftIntake.setPower(highSweepPower);
-
-                                    // d_open.setPosition(d_open_minRangeSemi);
-
-                                    leftIntakeTime.reset();
-
-                                    leftIntakeState++;
-                                }
-                            } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
-                                leftIntakeState = 10;
-                            } else if (leftIntakeState == 1) {
-                                if (colorSensor_left.alpha() > 500) {
-                                    leftIntake.setPower(0.25);
-
-                                    i_topLeft.setPosition(i_maxRange_topLeft);
-                                    i_bottomLeft.setPosition(i_maxRange_bottomLeft);
-
-                                    leftIntakeState++;
-                                } else {
-                                    i_topLeft.setPosition(i_minRange_topLeft);
-                                    i_bottomLeft.setPosition(i_minRange_bottomLeft);
-                                }
-                            } else if (leftIntakeState == 2) {
-                                leftIntake.setPower(0);
-
-                                d_coverLeft.setPosition(d_maxRange_coverLeft);
-                                d_coverRight.setPosition(d_minRange_coverRight);
-
-                                leftIntakeTime.reset();
-
-                                leftIntakeState++;
-                            } else if (leftIntakeState == 3) {
-                                if (leftIntakeTime.milliseconds() > 750 && colorSensor_left.alpha() < 90) {
-                                    leftIntake.setPower(-highSweepPower);
-
-                                    leftIntakeTime.reset();
-
-                                    leftIntakeState++;
-                                }
-                            } else if (leftIntakeState == 4) {
-                                if (leftIntakeTime.milliseconds() > 800) {
-                                    leftIntake.setPower(0);
-
-                                    d_open.setPosition(d_open_minRange);
-
-                                    d_coverLeft.setPosition(d_minRange_coverLeft);
-
-                                    leftIntakeState = 0;
-                                    objectCaptured = true;
-                                }
-                            } else if (leftIntakeState == 10) {
-                                leftIntake.setPower(-1);
-                                leftIntakeTime.reset();
-                                leftIntakeState++;
-                            } else if (leftIntakeState == 11) {
-                                if (leftIntakeTime.milliseconds() > 150) {
-                                    leftIntake.setPower(0);
-
-                                    i_topLeft.setPosition(i_maxRange_topLeft);
-                                    i_bottomLeft.setPosition(i_maxRange_bottomLeft);
-
-                                    d_open.setPosition(d_open_minRange);
-
-                                    d_coverLeft.setPosition(d_minRange_coverLeft);
-
-                                    leftIntakeState = 0;
-                                }
-                            } else {
-                                leftIntake.setPower(0);
-
-                                i_topLeft.setPosition(i_maxRange_topLeft);
-                                i_bottomLeft.setPosition(i_maxRange_bottomLeft);
-
-                                d_open.setPosition(d_open_minRange);
-
-                                d_coverLeft.setPosition(d_minRange_coverLeft);
-
-                                leftIntakeState = 0;
-                            }
-
-                            if (rightIntakeState == 0) {
-                                if (gamepad1.right_bumper) {
-
-                                    i_topRight.setPosition(i_minRange_topRight);
-                                    i_bottomRight.setPosition(i_minRange_bottomRight);
-
-                                    rightIntake.setPower(highSweepPower);
-
-                                    // d_open.setPosition(d_open_minRangeSemi);
-
-                                    rightIntakeTime.reset();
-
-                                    rightIntakeState++;
-                                }
-                            } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
-                                rightIntakeState = 10;
-                            } else if (rightIntakeState == 1) {
-                                if (colorSensor_right.alpha() > 500) {
-                                    rightIntake.setPower(0.25);
-
-                                    i_topRight.setPosition(i_maxRange_topRight);
-                                    i_bottomRight.setPosition(i_maxRange_bottomRight);
-
-                                    rightIntakeState++;
-                                } else {
-                                    i_topRight.setPosition(i_minRange_topRight);
-                                    i_bottomRight.setPosition(i_minRange_bottomRight);
-                                }
-                            } else if (rightIntakeState == 2) {
-                                rightIntake.setPower(0);
-
-                                d_coverRight.setPosition(d_maxRange_coverRight);
-                                d_coverLeft.setPosition(d_minRange_coverLeft);
-
-                                rightIntakeTime.reset();
-
-                                rightIntakeState++;
-                            } else if (rightIntakeState == 3) {
-                                if (rightIntakeTime.milliseconds() > 750 && colorSensor_right.alpha() < 90) {
-                                    rightIntake.setPower(-highSweepPower);
-
-                                    rightIntakeTime.reset();
-
-                                    rightIntakeState++;
-                                }
-                            } else if (rightIntakeState == 4) {
-                                if (rightIntakeTime.milliseconds() > 800) {
-                                    rightIntake.setPower(0);
-
-                                    d_open.setPosition(d_open_minRange);
-
-                                    d_coverRight.setPosition(d_minRange_coverRight);
-
-                                    rightIntakeState = 0;
-                                    objectCaptured = true;
-                                }
-                            } else if (rightIntakeState == 10) {
-                                rightIntake.setPower(-1);
-                                rightIntakeTime.reset();
-                                rightIntakeState++;
-                            } else if (rightIntakeState == 11) {
-                                if (rightIntakeTime.milliseconds() > 150) {
-                                    rightIntake.setPower(0);
-
-                                    i_topRight.setPosition(i_maxRange_topRight);
-                                    i_bottomRight.setPosition(i_maxRange_bottomRight);
-
-                                    d_open.setPosition(d_open_minRange);
-
-                                    d_coverRight.setPosition(d_minRange_coverRight);
-
-                                    rightIntakeState = 0;
-                                }
-                            } else {
-                                rightIntake.setPower(0);
-
-                                i_topRight.setPosition(i_maxRange_topRight);
-                                i_bottomRight.setPosition(i_maxRange_bottomRight);
-
-                                d_open.setPosition(d_open_minRange);
-
-                                d_coverRight.setPosition(d_minRange_coverRight);
-
-                                rightIntakeState = 0;
-
-                            }
+                            // Set lift state to retracting
+                            liftState = LiftState.LIFT_RETRACTING;
+                            
+                        } else {
+                            
+                            liftState = LiftState.LIFT_RELEASED;
                         }
-
-                        // Set lift state to retracting
-                        liftState = LiftState.LIFT_RETRACTING;
+                        
+                        break;
                     }
 
                 case LIFT_RETRACTING:
