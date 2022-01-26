@@ -57,8 +57,6 @@ public class RoboBoss extends LinearOpMode {
     LiftState liftState = LiftState.LIFT_EMPTY;
 
     enum LiftState {
-        LIFT_EMPTY,
-        LIFT_FULL,
         LIFT_EXTENDING,
         LIFT_EXTENDING_BALANCED,
         LIFT_EXTENDING_TIPPED,
@@ -488,30 +486,6 @@ public class RoboBoss extends LinearOpMode {
             // Motor tick count is equal to 384.5
 
             switch (liftState) {
-                case LIFT_EMPTY:
-
-                    if (leftIntake.getPower() == -1.0 || rightIntake.getPower() == -1.0) {
-
-                        // If left or right intake is ex-taking, set lift state to full
-                        liftState = LiftState.LIFT_FULL;
-                        break;
-                    }
-
-                case LIFT_FULL:
-
-                    // Check if game element is present
-                    if (d_coverLeft.getPosition() == d_minRange_coverLeft || d_coverRight.getPosition() == d_minRange_coverRight) {
-
-                        // Keep deposit in place
-                        d_open.setPosition(d_open_minRange);
-                        d_bendLeft.setPosition(d_minRange_bendLeft);
-                        d_bendRight.setPosition(d_minRange_bendRight);
-
-                        // If either cover is closed, set lift state to extending
-                        liftState = LiftState.LIFT_EXTENDING;
-                        break;
-                    }
-
                 case LIFT_EXTENDING:
 
                     // Check if button was pressed
@@ -554,7 +528,7 @@ public class RoboBoss extends LinearOpMode {
 
                             liftState = LiftState.LIFT_EXTENDING;
                         }
-                        
+
                         break;
 
                     } else if (gamepad2.dpad_left) {
@@ -679,7 +653,7 @@ public class RoboBoss extends LinearOpMode {
                         } else {
 
                             liftState = LiftState.LIFT_EXTENDING;
-                            
+
                         }
 
                         break;
@@ -1013,13 +987,13 @@ public class RoboBoss extends LinearOpMode {
                     if (Math.abs(liftFront.getCurrentPosition() - LIFT_IDLE) == 0) {
 
                         // Set lift state to empty
-                        liftState = LiftState.LIFT_EMPTY;
+                        liftState = LiftState.LIFT_EXTENDING;
 
                         break;
                     }
                 default:
                     // should never be reached, as liftState should never be null
-                    liftState = LiftState.LIFT_EMPTY;
+                    liftState = LiftState.LIFT_EXTENDING;
             }
 
             // intuitive controls in respect to the back of the robot
