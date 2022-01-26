@@ -11,6 +11,8 @@ import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 import java.util.List;
 
 @TeleOp
@@ -150,8 +152,8 @@ public class teleop extends LinearOpMode {
         ElapsedTime leftIntakeTime = new ElapsedTime();
         int rightIntakeState = 0;
         ElapsedTime rightIntakeTime = new ElapsedTime();
-        double intakeCaptureDistance = 1.0;
-        double intakeEjectDistance = 4.0; 
+        double intakeCaptureDistance = 6.0;
+        double intakeEjectDistance = 10.0;
         int intakeFlipUpTime = 100;
         /*
         0 = not moving
@@ -255,7 +257,7 @@ public class teleop extends LinearOpMode {
                     leftIntakeState++;
                 }
             } else if (leftIntakeState == 4) {
-                if (colorSensor_left.getDistance(DistanceUnit.CM) > intakeEjectDistance {
+                if (colorSensor_left.getDistance(DistanceUnit.CM) > intakeEjectDistance) {
                     leftIntake.setPower(0);
 
                     d_open.setPosition(d_open_minRange);
@@ -336,7 +338,7 @@ public class teleop extends LinearOpMode {
 
                 rightIntakeState++;
             } else if (rightIntakeState == 3) {
-                if (rightIntakeTime.milliseconds() > intakeFlipUPTime) {
+                if (rightIntakeTime.milliseconds() > intakeFlipUpTime) {
                     rightIntake.setPower(-highSweepPower);
 
                     rightIntakeTime.reset();
@@ -389,9 +391,9 @@ public class teleop extends LinearOpMode {
 
             // Motor tick count is equal to 384.5
             if(liftState == 0) {
-                if(!objectCaptured) {
+//                if(!objectCaptured) {
                     // continue;
-                }else if(gamepad2.a && (liftFront.getTargetPosition() != -shared_targetClose)) {
+                /*}else */if(gamepad2.a && (liftFront.getTargetPosition() != -shared_targetClose)) {
                     liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftFront.setTargetPosition(-shared_targetClose);
