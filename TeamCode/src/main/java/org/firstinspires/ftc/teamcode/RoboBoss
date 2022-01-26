@@ -523,7 +523,7 @@ public class RoboBoss extends LinearOpMode {
                         d_bendRight.setPosition(d_minRange_bendRight);
 
                         // "10" is arbitrary - might need to be adjusted
-                        while (Math.abs(liftFront.getCurrentPosition() - TARGET_TIPPED) > 10) {
+                        if (Math.abs(liftFront.getCurrentPosition() - TARGET_TIPPED) > 10) {
 
                             // Run lift
                             liftFront.setPower(-1.0);
@@ -546,10 +546,15 @@ public class RoboBoss extends LinearOpMode {
                             leftBack.setPower(leftFrontPower);
                             rightFront.setPower(rightFrontPower);
                             rightBack.setPower(rightBackPower);
-                        }
 
-                        // Set lift state to target
-                        liftState = LiftState.LIFT_TARGET;
+                            // Set lift state to target
+                            liftState = LiftState.LIFT_TARGET;
+
+                        } else {
+
+                            liftState = LiftState.LIFT_EXTENDING;
+                        }
+                        
                         break;
 
                     } else if (gamepad2.dpad_left) {
@@ -560,7 +565,7 @@ public class RoboBoss extends LinearOpMode {
                         d_bendRight.setPosition(d_minRange_bendRight);
 
                         // "10" is arbitrary - might need to be adjusted
-                        while (Math.abs(liftFront.getCurrentPosition() - TARGET_BALANCED) > 10) {
+                        if (Math.abs(liftFront.getCurrentPosition() - TARGET_BALANCED) > 10) {
 
                             // Run lift
                             liftFront.setPower(-1.0);
@@ -583,10 +588,15 @@ public class RoboBoss extends LinearOpMode {
                             leftBack.setPower(leftFrontPower);
                             rightFront.setPower(rightFrontPower);
                             rightBack.setPower(rightBackPower);
+
+                            // Set lift state to target
+                            liftState = LiftState.LIFT_TARGET;
+
+                        } else {
+
+                            liftState = LiftState.LIFT_EXTENDING;
                         }
 
-                        // Set lift state to target
-                        liftState = LiftState.LIFT_TARGET;
                         break;
 
                     } else if (gamepad2.y) {
@@ -597,7 +607,7 @@ public class RoboBoss extends LinearOpMode {
                         d_bendRight.setPosition(d_minRange_bendRight);
 
                         // "10" is arbitrary - might need to be adjusted
-                        while (Math.abs(liftFront.getCurrentPosition() - TARGET_FAR) > 5) {
+                        if (Math.abs(liftFront.getCurrentPosition() - TARGET_FAR) > 5) {
 
                             // Run lift
                             liftFront.setPower(-1.0);
@@ -620,10 +630,15 @@ public class RoboBoss extends LinearOpMode {
                             leftBack.setPower(leftFrontPower);
                             rightFront.setPower(rightFrontPower);
                             rightBack.setPower(rightBackPower);
+
+                            // Set lift state to target
+                            liftState = LiftState.LIFT_TARGET;
+
+                        } else {
+
+                            liftState = LiftState.LIFT_EXTENDING;
                         }
 
-                        // Set lift state to target
-                        liftState = LiftState.LIFT_TARGET;
                         break;
 
                     } else if (gamepad2.b) {
@@ -634,7 +649,7 @@ public class RoboBoss extends LinearOpMode {
                         d_bendRight.setPosition(d_minRange_bendRight);
 
                         // "10" is arbitrary - might need to be adjusted
-                        while (Math.abs(liftFront.getCurrentPosition() - TARGET_MIDDLE) > 5) {
+                        if (Math.abs(liftFront.getCurrentPosition() - TARGET_MIDDLE) > 5) {
 
                             // Run lift
                             liftFront.setPower(-1.0);
@@ -657,10 +672,16 @@ public class RoboBoss extends LinearOpMode {
                             leftBack.setPower(leftFrontPower);
                             rightFront.setPower(rightFrontPower);
                             rightBack.setPower(rightBackPower);
+
+                            // Set lift state to target
+                            liftState = LiftState.LIFT_TARGET;
+
+                        } else {
+
+                            liftState = LiftState.LIFT_EXTENDING;
+                            
                         }
 
-                        // Set lift state to target
-                        liftState = LiftState.LIFT_TARGET;
                         break;
 
                     } else if (gamepad2.a) {
@@ -671,7 +692,7 @@ public class RoboBoss extends LinearOpMode {
                         d_bendRight.setPosition(d_minRange_bendRight);
 
                         // "10" is arbitrary - might need to be adjusted
-                        while (Math.abs(liftFront.getCurrentPosition() - TARGET_NEAR) > 5) {
+                        if (Math.abs(liftFront.getCurrentPosition() - TARGET_NEAR) > 5) {
 
                             // Run lift
                             liftFront.setPower(-1.0);
@@ -694,10 +715,15 @@ public class RoboBoss extends LinearOpMode {
                             leftBack.setPower(leftFrontPower);
                             rightFront.setPower(rightFrontPower);
                             rightBack.setPower(rightBackPower);
+
+                            // Set lift state to target
+                            liftState = LiftState.LIFT_TARGET;
+
+                        } else {
+
+                            liftState = LiftState.LIFT_EXTENDING;
                         }
 
-                        // Set lift state to target
-                        liftState = LiftState.LIFT_TARGET;
                         break;
                     }
 
