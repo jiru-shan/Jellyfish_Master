@@ -21,10 +21,10 @@ public class MeepMeepTesting
                                 //.setReversed(true)
                                 //.lineToConstantHeading(new Vector2d(-42, -1))
                                 //.splineTo(new Vector2d(-42, -1), Math.toRadians(5))
-                                .lineToSplineHeading(new Pose2d(-42, -1,Math.toRadians(5)))
-                                .lineToSplineHeading(new Pose2d(-60, -3.25, Math.toRadians(10)))
+                                .lineToSplineHeading(new Pose2d(51, -3.25,Math.toRadians(-10)))
+                                //.lineToSplineHeading(new Pose2d(60, -3.25, Math.toRadians(-10)))
                                 //.setReversed(true)
-                                .lineToSplineHeading(new Pose2d(-42, -1, Math.toRadians(5)))
+                                .lineToSplineHeading(new Pose2d(29, 6, Math.toRadians(0)))
                                 //.lineToConstantHeading(new Vector2d(42, -1))
                                 .build()
                 );
