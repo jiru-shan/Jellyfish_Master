@@ -97,9 +97,9 @@ public class teleop extends LinearOpMode {
         double d_open_top = 0.53;
         double d_open_middle = 0.49;   // Fix this value
         double d_open_shared = 0.47;
-        double d_minRange_coverLeft = 0.55;
+        double d_minRange_coverLeft = 0.59;
         double d_maxRange_coverLeft = 0.15;
-        double d_minRange_coverRight = 0.45;
+        double d_minRange_coverRight = 0.41;
         double d_maxRange_coverRight = 0.85;
         double d_minRange_bendLeft = 0.96;
         double d_maxRange_bendLeft = 0.78;
@@ -123,9 +123,9 @@ public class teleop extends LinearOpMode {
 
         // Factor
         double normalSpeed = 1.0;
-        int alliance_targetTipped = 550;
-        int alliance_targetBalanced = 525;   // Fix this value
-        int alliance_middle = 580;   // Fix this value
+        int alliance_targetTipped = 625;
+        int alliance_targetBalanced = 575;   // Fix this value
+        int alliance_middle = 550;   // Fix this value
         int shared_targetClose = 120;
         int shared_targetMiddle = 200;
         int shared_targetFar = 280;
@@ -152,9 +152,10 @@ public class teleop extends LinearOpMode {
         ElapsedTime leftIntakeTime = new ElapsedTime();
         int rightIntakeState = 0;
         ElapsedTime rightIntakeTime = new ElapsedTime();
+
         double intakeCaptureDistance = 6.0;
-        double intakeEjectDistance = 10.0;
-        int intakeFlipUpTime = 100;
+        double intakeEjectDistance = 30.0;
+        int intakeFlipUpTime = 250;
         /*
         0 = not moving
         1 = flip down + intaking
@@ -164,7 +165,7 @@ public class teleop extends LinearOpMode {
         */
         int liftState = 0;
         int liftPosition = 0;
-        int liftExtendError = 10;
+        int liftExtendError = 100;
         int liftRetractError = 0;
         ElapsedTime liftTime = new ElapsedTime();
         /*
@@ -719,6 +720,8 @@ public class teleop extends LinearOpMode {
             telemetry.addData("Lift - Front:", liftFront.getCurrentPosition());
             telemetry.addData("Lift - Back:", liftBack.getCurrentPosition());
             telemetry.addData("Carousel: ", carousel.getPower());
+            telemetry.addData("Lift State: ", liftState);
+            telemetry.addData("Life Position: ", liftPosition);
             telemetry.update();
 
         }
