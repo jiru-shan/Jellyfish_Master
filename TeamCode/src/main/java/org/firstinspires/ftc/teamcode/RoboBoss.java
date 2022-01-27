@@ -213,7 +213,7 @@ public class RoboBoss extends LinearOpMode {
         while (opModeIsActive()) {
 
             // Keep deposit in position while not in use
-            d_open.setPosition(d_open_minRange);
+            // d_open.setPosition(d_open_minRange);
             d_bendLeft.setPosition(d_minRange_bendLeft);
             d_bendRight.setPosition(d_minRange_bendRight);
 
@@ -493,23 +493,19 @@ public class RoboBoss extends LinearOpMode {
                     if (gamepad2.dpad_up) {
 
                         // Run lift
-                        liftFront.setPower(-1.0);
-                        liftBack.setPower(-1.0);
                         liftFront.setTargetPosition(-TARGET_TIPPED);
                         liftBack.setTargetPosition(-TARGET_TIPPED);
-                        liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        liftFront.setPower(-1.0);
+                        liftBack.setPower(-1.0);
 
                         // "10" is arbitrary - might need to be adjusted
                         if ((Math.abs(liftFront.getCurrentPosition() - TARGET_TIPPED)) > 10) {
 
                             // Run lift
-                            liftFront.setPower(-1.0);
-                            liftBack.setPower(-1.0);
                             liftFront.setTargetPosition(-TARGET_TIPPED);
                             liftBack.setTargetPosition(-TARGET_TIPPED);
-                            liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                            liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            liftFront.setPower(-1.0);
+                            liftBack.setPower(-1.0);
 
                             // Ensure movement of drivetrain during while loop
                             y = -gamepad1.right_stick_x; // Reversed
@@ -540,12 +536,10 @@ public class RoboBoss extends LinearOpMode {
                     } else if (gamepad2.dpad_left) {
 
                         // Run lift
-                        liftFront.setPower(-1.0);
-                        liftBack.setPower(-1.0);
                         liftFront.setTargetPosition(-TARGET_TIPPED);
                         liftBack.setTargetPosition(-TARGET_TIPPED);
-                        liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        liftFront.setPower(-1.0);
+                        liftBack.setPower(-1.0);
 
                         // "10" is arbitrary - might need to be adjusted
                         if ((Math.abs(liftFront.getCurrentPosition() - TARGET_BALANCED)) > 10) {
@@ -555,8 +549,6 @@ public class RoboBoss extends LinearOpMode {
                             liftBack.setPower(-1.0);
                             liftFront.setTargetPosition(-TARGET_BALANCED);
                             liftBack.setTargetPosition(-TARGET_BALANCED);
-                            liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                            liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
                             // Ensure movement of drivetrain during while loop
                             y = -gamepad1.right_stick_x; // Reversed
@@ -587,23 +579,19 @@ public class RoboBoss extends LinearOpMode {
                     } else if (gamepad2.y) {
 
                         // Run lift
-                        liftFront.setPower(-1.0);
-                        liftBack.setPower(-1.0);
                         liftFront.setTargetPosition(-TARGET_TIPPED);
                         liftBack.setTargetPosition(-TARGET_TIPPED);
-                        liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        liftFront.setPower(-1.0);
+                        liftBack.setPower(-1.0);
 
                         // "10" is arbitrary - might need to be adjusted
                         if ((Math.abs(liftFront.getCurrentPosition() - TARGET_FAR) > 5)) {
 
                             // Run lift
-                            liftFront.setPower(-1.0);
-                            liftBack.setPower(-1.0);
                             liftFront.setTargetPosition(-TARGET_FAR);
                             liftBack.setTargetPosition(-TARGET_FAR);
-                            liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                            liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            liftFront.setPower(-1.0);
+                            liftBack.setPower(-1.0);
 
                             // Ensure movement of drivetrain during while loop
                             y = -gamepad1.right_stick_x; // Reversed
@@ -634,23 +622,19 @@ public class RoboBoss extends LinearOpMode {
                     } else if (gamepad2.b) {
 
                         // Run lift
-                        liftFront.setPower(-1.0);
-                        liftBack.setPower(-1.0);
                         liftFront.setTargetPosition(-TARGET_TIPPED);
                         liftBack.setTargetPosition(-TARGET_TIPPED);
-                        liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        liftFront.setPower(-1.0);
+                        liftBack.setPower(-1.0);
 
                         // "10" is arbitrary - might need to be adjusted
                         if ((Math.abs(liftFront.getCurrentPosition() - TARGET_MIDDLE)) > 5) {
 
                             // Run lift
-                            liftFront.setPower(-1.0);
-                            liftBack.setPower(-1.0);
                             liftFront.setTargetPosition(-TARGET_MIDDLE);
                             liftBack.setTargetPosition(-TARGET_MIDDLE);
-                            liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                            liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            liftFront.setPower(-1.0);
+                            liftBack.setPower(-1.0);
 
                             // Ensure movement of drivetrain during while loop
                             y = -gamepad1.right_stick_x; // Reversed
@@ -682,23 +666,19 @@ public class RoboBoss extends LinearOpMode {
                     } else if (gamepad2.a) {
 
                         // Run lift
-                        liftFront.setPower(-1.0);
-                        liftBack.setPower(-1.0);
                         liftFront.setTargetPosition(-TARGET_TIPPED);
                         liftBack.setTargetPosition(-TARGET_TIPPED);
-                        liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        liftFront.setPower(-1.0);
+                        liftBack.setPower(-1.0);
 
                         // "10" is arbitrary - might need to be adjusted
                         if ((Math.abs(liftFront.getCurrentPosition() - TARGET_NEAR) > 5)) {
 
                             // Run lift
-                            liftFront.setPower(-1.0);
-                            liftBack.setPower(-1.0);
                             liftFront.setTargetPosition(-TARGET_NEAR);
                             liftBack.setTargetPosition(-TARGET_NEAR);
-                            liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                            liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            liftFront.setPower(-1.0);
+                            liftBack.setPower(-1.0);
 
                             // Ensure movement of drivetrain during while loop
                             y = -gamepad1.right_stick_x; // Reversed
@@ -771,12 +751,10 @@ public class RoboBoss extends LinearOpMode {
                             d_open.setPosition(d_open_top);
 
                             // Keep lift in place while depositing
-                            liftFront.setPower(-1.0);
-                            liftBack.setPower(-1.0);
                             liftFront.setTargetPosition(0);
                             liftBack.setTargetPosition(0);
-                            liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                            liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            liftFront.setPower(-1.0);
+                            liftBack.setPower(-1.0);
 
                             // Ensure movement of drivetrain during while loop
                             y = -gamepad1.right_stick_x; // Reversed
@@ -809,22 +787,18 @@ public class RoboBoss extends LinearOpMode {
                     if (d_open.getPosition() == d_open_minRange) {
 
                         // Retract lift
-                        liftFront.setPower(1.0);
-                        liftFront.setPower(1.0);
                         liftFront.setTargetPosition(0);
                         liftFront.setTargetPosition(0);
-                        liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        liftFront.setPower(1.0);
+                        liftFront.setPower(1.0);
 
                         if ((Math.abs(liftFront.getCurrentPosition() - LIFT_IDLE)) != 0) {
 
                             // Retract lift
-                            liftFront.setPower(1.0);
-                            liftFront.setPower(1.0);
                             liftFront.setTargetPosition(0);
                             liftFront.setTargetPosition(0);
-                            liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                            liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            liftFront.setPower(1.0);
+                            liftFront.setPower(1.0);
 
                             // Ensure movement of drivetrain during while loop
                             y = -gamepad1.right_stick_x; // Reversed
@@ -851,7 +825,6 @@ public class RoboBoss extends LinearOpMode {
                             liftState = LiftState.LIFT_RELEASED;
                         }
 
-                        depositTimer.reset();
                         break;
                     }
 
