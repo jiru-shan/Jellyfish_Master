@@ -283,12 +283,11 @@ public class RoboBoss extends LinearOpMode {
             telemetry.addData("Left Back Encoders: ", leftBack.getCurrentPosition());
             telemetry.addData("Right Front Encoders: ", rightFront.getCurrentPosition());
             telemetry.addData("Right Back Encoders: ", rightBack.getCurrentPosition());
-            telemetry.addData("Color - Left", colorSensor_left.alpha());
-            telemetry.addData("Color - Right", colorSensor_right.alpha());
             telemetry.addData("Lift - Front:", liftFront.getCurrentPosition());
             telemetry.addData("Lift - Back:", liftBack.getCurrentPosition());
             telemetry.addData("Lift State: ", liftState);
             telemetry.addData("D_Open: ", d_open.getPosition());
+            telemetry.addData("Deposit Timer: ", depositTimer.milliseconds());
             telemetry.update();
 
 
@@ -549,7 +548,7 @@ public class RoboBoss extends LinearOpMode {
                         liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
                         // "10" is arbitrary - might need to be adjusted
-                        if (Math.abs(liftFront.getCurrentPosition() - TARGET_BALANCED) > 10) {
+                        if ((Math.abs(liftFront.getCurrentPosition() - TARGET_BALANCED)) > 10) {
 
                             // Run lift
                             liftFront.setPower(-1.0);
@@ -596,7 +595,7 @@ public class RoboBoss extends LinearOpMode {
                         liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
                         // "10" is arbitrary - might need to be adjusted
-                        if (Math.abs(liftFront.getCurrentPosition() - TARGET_FAR) > 5) {
+                        if ((Math.abs(liftFront.getCurrentPosition() - TARGET_FAR) > 5)) {
 
                             // Run lift
                             liftFront.setPower(-1.0);
@@ -691,7 +690,7 @@ public class RoboBoss extends LinearOpMode {
                         liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
                         // "10" is arbitrary - might need to be adjusted
-                        if (Math.abs(liftFront.getCurrentPosition() - TARGET_NEAR) > 5) {
+                        if ((Math.abs(liftFront.getCurrentPosition() - TARGET_NEAR) > 5)) {
 
                             // Run lift
                             liftFront.setPower(-1.0);
@@ -737,7 +736,7 @@ public class RoboBoss extends LinearOpMode {
                         liftState = LiftState.LIFT_DEPOSITING;
                         break;
 
-                    } else if (gamepad2.dpad_left && Math.abs(liftFront.getCurrentPosition() - TARGET_BALANCED) < 10) {
+                    } else if (gamepad2.dpad_left && (Math.abs(liftFront.getCurrentPosition() - TARGET_BALANCED)) < 10) {
 
                         // Set state to depositing
                         liftState = LiftState.LIFT_DEPOSITING;
@@ -749,13 +748,13 @@ public class RoboBoss extends LinearOpMode {
                         liftState = LiftState.LIFT_DEPOSITING;
                         break;
 
-                    } else if (gamepad2.b && Math.abs(liftFront.getCurrentPosition() - TARGET_MIDDLE) < 5) {
+                    } else if (gamepad2.b && (Math.abs(liftFront.getCurrentPosition() - TARGET_MIDDLE)) < 5) {
 
                         // Set state to depositing
                         liftState = LiftState.LIFT_DEPOSITING;
                         break;
 
-                    } else if (gamepad2.a && Math.abs(liftFront.getCurrentPosition() - TARGET_NEAR) < 5) {
+                    } else if (gamepad2.a && (Math.abs(liftFront.getCurrentPosition() - TARGET_NEAR)) < 5) {
 
                         // Set state to depositing
                         liftState = LiftState.LIFT_DEPOSITING;
@@ -799,7 +798,7 @@ public class RoboBoss extends LinearOpMode {
 
                         d_open.setPosition(d_open_minRange);
 
-
+                        depositTimer.reset();
                         // Set lift state to released
                         liftState = LiftState.LIFT_RELEASED;
 
@@ -817,7 +816,7 @@ public class RoboBoss extends LinearOpMode {
                         liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-                        if (Math.abs(liftFront.getCurrentPosition() - LIFT_IDLE) != 0) {
+                        if ((Math.abs(liftFront.getCurrentPosition() - LIFT_IDLE)) != 0) {
 
                             // Retract lift
                             liftFront.setPower(1.0);
@@ -858,7 +857,7 @@ public class RoboBoss extends LinearOpMode {
 
                 case LIFT_RETRACTING:
                     // Check if lift is fully retracted
-                    if (Math.abs(liftFront.getCurrentPosition() - LIFT_IDLE) == 0) {
+                    if ((Math.abs(liftFront.getCurrentPosition() - LIFT_IDLE)) == 0) {
 
                         // Set lift state to empty
                         liftState = LiftState.LIFT_EXTENDING;
