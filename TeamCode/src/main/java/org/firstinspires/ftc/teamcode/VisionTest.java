@@ -22,6 +22,7 @@ public class VisionTest extends LinearOpMode
     public void runOpMode() throws InterruptedException {
         webcamInit();
         waitForStart();
+        double cubePos=pipeline.getAnalysis();
         while(opModeIsActive())
         {
             telemetry.addData("Place", pipeline.getAnalysis());
@@ -54,7 +55,6 @@ public class VisionTest extends LinearOpMode
             }
         });
         //sam test stuff from here down
-        waitForStart();
         //switch (pipeline.getLocation)
     }
 }

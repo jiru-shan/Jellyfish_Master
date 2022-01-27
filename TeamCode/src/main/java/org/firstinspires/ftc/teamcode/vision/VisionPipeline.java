@@ -183,12 +183,12 @@ public class VisionPipeline extends OpenCvPipeline
         avg2 = (int) (1.1*Core.mean(region2_Cb).val[0])+(int) Core.mean(region2_Cr).val[0];
         avg3 = (int) (1.1*Core.mean(region3_Cb).val[0])+(int) Core.mean(region3_Cr).val[0];
 
-        tel.addData("Area 1", avg1);
+        /*tel.addData("Area 1", avg1);
         tel.addData("Area 2", avg2);
         tel.addData("Area 3", avg3);
         tel.addData("Test", (int) Core.mean(region1_Cb).val[0]);
         tel.addData("Spot", getAnalysis());
-        tel.update();
+        tel.update();*/
         /*
          * Draw a rectangle showing sample region 1 on the screen.
          * Simply a visual aid. Serves no functional purpose.
