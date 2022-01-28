@@ -35,10 +35,10 @@ public class VisionPipeline extends OpenCvPipeline
     /*
      * The core values which define the location and size of the sample regions
      */
-    static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(0,0);
-    static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(160,0);
+    static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(60,120);
+    static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(160,120);
     //static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(205,84);
-    static final int REGION_WIDTH = 160;
+    static final int REGION_WIDTH = 100;
     static final int REGION_HEIGHT = 120;
 
     /*
@@ -179,16 +179,17 @@ public class VisionPipeline extends OpenCvPipeline
          * pixel value of the 3-channel image, and referenced the value
          * at index 2 here.
          */
-        avg1 = (int) (1.1*Core.mean(region1_Cb).val[0])+(int) Core.mean(region1_Cr).val[0];
-        avg2 = (int) (1.1*Core.mean(region2_Cb).val[0])+(int) Core.mean(region2_Cr).val[0];
-        //avg3 = (int) (1.1*Core.mean(region3_Cb).val[0])+(int) Core.mean(region3_Cr).val[0];
+        avg1 = (int) (0.8*Core.mean(region1_Cb).val[0])+(int) Core.mean(region1_Cr).val[0];
+        avg2 = (int) (0.8*Core.mean(region2_Cb).val[0])+(int) Core.mean(region2_Cr).val[0];
+        //avg3 = (int) (0.8*Core.mean(region3_Cb).val[
+        0])+(int) Core.mean(region3_Cr).val[0];
 
-        /*tel.addData("Area 1", avg1);
+        tel.addData("Area 1", avg1);
         tel.addData("Area 2", avg2);
-        tel.addData("Area 3", avg3);
+        //tel.addData("Area 3", avg3);
         tel.addData("Test", (int) Core.mean(region1_Cb).val[0]);
         tel.addData("Spot", getAnalysis());
-        tel.update();*/
+        tel.update();
         /*
          * Draw a rectangle showing sample region 1 on the screen.
          * Simply a visual aid. Serves no functional purpose.
@@ -233,7 +234,7 @@ public class VisionPipeline extends OpenCvPipeline
          * Now that we found the max, we actually need to go and
          * figure out which sample region that value was from
          */
-        if(max == avg1&&max>150) // Was it from region 1?
+        if(max == avg1&&(avg1-avg2)>20) // Was it from region 1?
         {
             position = SkystonePosition.LEFT; // Record our analysis
             pos=1;
@@ -248,7 +249,7 @@ public class VisionPipeline extends OpenCvPipeline
                     GREEN, // The color the rectangle is drawn in
                     -1); // Negative thickness means solid fill
         }
-        else if(max == avg2&&max>150) // Was it from region 2?
+        else if(max == avg2&&(avg2-avg1)>20) // Was it from region 2?
         {
             position = SkystonePosition.CENTER; // Record our analysis
             pos=2;
