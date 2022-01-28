@@ -181,8 +181,7 @@ public class VisionPipeline extends OpenCvPipeline
          */
         avg1 = (int) (0.8*Core.mean(region1_Cb).val[0])+(int) Core.mean(region1_Cr).val[0];
         avg2 = (int) (0.8*Core.mean(region2_Cb).val[0])+(int) Core.mean(region2_Cr).val[0];
-        //avg3 = (int) (0.8*Core.mean(region3_Cb).val[
-        0])+(int) Core.mean(region3_Cr).val[0];
+        //avg3 = (int) (0.8*Core.mean(region3_Cb).val[0])+(int) Core.mean(region3_Cr).val[0];
 
         tel.addData("Area 1", avg1);
         tel.addData("Area 2", avg2);
@@ -257,12 +256,12 @@ public class VisionPipeline extends OpenCvPipeline
              * Draw a solid rectangle on top of the chosen region.
              * Simply a visual aid. Serves no functional purpose.
              */
-            Imgproc.rectangle(
+            /*Imgproc.rectangle(
                     input, // Buffer to draw on
                     region2_pointA, // First point which defines the rectangle
                     region2_pointB, // Second point which defines the rectangle
                     GREEN, // The color the rectangle is drawn in
-                    -1); // Negative thickness means solid fill
+                    -1); // Negative thickness means solid fill*/
         }
         else if(max<150)
             {
