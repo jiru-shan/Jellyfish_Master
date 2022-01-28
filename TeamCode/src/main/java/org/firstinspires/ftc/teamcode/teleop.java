@@ -461,7 +461,6 @@ public class teleop extends LinearOpMode {
                     liftPosition = 1;
                 }
             }else if(gamepad2.dpad_right && liftState < 20) {
-                telemetry.addData("Lift Positionasdfasdf: ", liftPosition);
                 if(Math.abs(liftFront.getCurrentPosition()) > 100) {
 
                     d_bendLeft.setPosition(d_maxRange_bendLeft);
@@ -663,7 +662,7 @@ public class teleop extends LinearOpMode {
                 liftTime.reset();
                 liftState = 21;
             }else if(liftState == 21) {
-                if(liftTime.milliseconds() > 600 || (d_bendLeft.getPosition() == d_minRange_bendLeft)) {
+                if(liftTime.milliseconds() > 800/* || (d_bendLeft.getPosition() == d_minRange_bendLeft)*/) {
                     d_open.setPosition(d_open_minRange);
                     d_bendLeft.setPosition(d_minRange_bendLeft);
                     d_bendRight.setPosition(d_minRange_bendRight);
