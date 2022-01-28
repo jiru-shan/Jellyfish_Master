@@ -661,7 +661,7 @@ public class teleop extends LinearOpMode {
                 liftTime.reset();
                 liftState = 21;
             }*/else if(liftState == 21) {
-                if(liftTime.milliseconds() > 1200/* || (d_bendLeft.getPosition() == d_minRange_bendLeft)*/) {
+                if(liftTime.milliseconds() > 700/* || (d_bendLeft.getPosition() == d_minRange_bendLeft)*/) {
                     d_open.setPosition(d_open_minRange);
                     d_bendLeft.setPosition(d_minRange_bendLeft);
                     d_bendRight.setPosition(d_minRange_bendRight);
