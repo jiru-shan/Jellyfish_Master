@@ -10,6 +10,7 @@ import com.acmerobotics.roadrunner.path.PathSegment;
 import com.acmerobotics.roadrunner.path.QuinticSpline;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryGenerator;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -52,6 +53,7 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
     Servo i_bottomLeft;
     Servo i_topRight;
     Servo i_bottomRight;
+    Rev2mDistanceSensor depositSensor;
 
     //APPROACH 1: Start the deposit low so weighted cubes can make it in and then
     //increase the servo values so that deposit climbs higher for ball
@@ -60,12 +62,12 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
 
 
     // Deposit servo positions
-    double d_open_minRange = 0.52;
+    double d_open_minRange = 0.57;
     double d_open_top = 0.4;
     double d_open_clamp=0.66;
-    double d_minRange_bendLeft = 0.98;      // need to fix bend values
+    double d_minRange_bendLeft = 0.96;      // need to fix bend values
     double d_maxRange_bendLeft = 0.78;
-    double d_minRange_bendRight = 0.02;
+    double d_minRange_bendRight = 0.04;
     double d_maxRange_bendRight = 0.21;
 
     double i_minRange_topRight = 0.96;
@@ -77,7 +79,6 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
     double d_minRange_coverRight = 0.45;
     double d_maxRange_coverRight = 0.85;
 
-    double prevTimer;
     double intakePower=1;
 
     OpenCvWebcam camera;
@@ -119,10 +120,6 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
     ReturningState RState;
     IntakeState IState;
 
-    double intakeTarget=0;
-
-    double intakeEjectDistance=30.0;
-
     @Override
     public void runOpMode() throws InterruptedException {
         // Motors
@@ -153,6 +150,7 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
         sensorRange2 = hardwareMap.get(ColorRangeSensor.class, "colorSensor_left");
         driveLeft = hardwareMap.get(ColorRangeSensor.class, "driveSensor1");
         driveRight = hardwareMap.get(ColorRangeSensor.class, "driveSensor2");
+        depositSensor=hardwareMap.get(Rev2mDistanceSensor.class, "depositSensor");
 
         drive = new SampleMecanumDriveCancelable(hardwareMap);
         Pose2d startPose = new Pose2d(0, 0, 0);
@@ -253,7 +251,6 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
             IState=IntakeState.INTO_DEPOSIT;
             //intakeTarget=SystemClock.uptimeMillis()+2500;
             intakeTimer.reset();
-            prevTimer=100;
             Trajectory lineTrajectory = drive.trajectoryBuilder(drive.getPoseEstimate())
                     .lineToSplineHeading(startPose, SampleMecanumDrive.getVelocityConstraint(25,
                             DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
@@ -332,7 +329,7 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
                         d_coverRight.setPosition(d_maxRange_coverRight);
                         d_coverLeft.setPosition(d_minRange_coverLeft);
                         rightIntake.setPower(-intakePower);
-                    if (intakeTimer.milliseconds()>2000)
+                    if (depositCube())
                     {
                         IState = EvenLessScuffedAuton_RED.IntakeState.STALLING;
                         intakeTimer.reset();
@@ -340,11 +337,11 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
                     break;
                 case STALLING:
                     rightIntake.setPower(-intakePower);
-                    if(intakeTimer.milliseconds()>200)
+                    if(intakeTimer.milliseconds()>50)
                     {
                         d_open.setPosition(d_open_clamp);
                     }
-                    if (intakeTimer.milliseconds()>600)
+                    if (intakeTimer.milliseconds()>500)
                     {
                         rightIntake.setPower(0);
                         d_coverRight.setPosition(d_minRange_coverRight);
@@ -468,6 +465,14 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
         {
 
         }
+    }
+    public boolean depositCube()
+    {
+        if(depositSensor.getDistance(DistanceUnit.CM)<13)
+        {
+            return true;
+        }
+        return false;
     }
     public void webcamInit()
     {

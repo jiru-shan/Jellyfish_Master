@@ -6,6 +6,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -47,9 +48,11 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
     Servo i_bottomLeft;
     Servo i_topRight;
     Servo i_bottomRight;
+    Rev2mDistanceSensor depositSensor;
+
 
     // Deposit servo positions
-    double d_open_minRange = 0.53;
+    double d_open_minRange = 0.57;
     double d_open_top = 0.45;
     double d_open_clamp=0.66;
     double d_minRange_bendLeft = 0.96;      // need to fix bend values
@@ -68,7 +71,6 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
     double d_maxRange_coverLeft = 0.15;
     double d_minRange_coverRight = 0.45;
 
-    double prevTimer;
     ElapsedTime intakeTimer=new ElapsedTime();
 
     OpenCvWebcam camera;
@@ -92,8 +94,6 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
     }
 
     int alliance_targetTipped = 1000;
-    double intakeTarget=0;
-    double intakeEjectDistance=30.0;
 
     SampleMecanumDriveCancelable drive;
 
@@ -133,6 +133,8 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
         i_topRight = hardwareMap.servo.get("i_topRight");
         i_bottomRight = hardwareMap.servo.get("i_bottomRight");
         carousel = hardwareMap.crservo.get("carousel");
+        depositSensor=hardwareMap.get(Rev2mDistanceSensor.class, "depositSensor");
+
 
         sensorRange1 = hardwareMap.get(ColorRangeSensor.class, "colorSensor_right");
         sensorRange2 = hardwareMap.get(ColorRangeSensor.class, "colorSensor_left");
@@ -239,7 +241,6 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
         RState = ReturningState.LING;
         IState=IntakeState.INTO_DEPOSIT;
         intakeTimer.reset();
-        prevTimer=100;
         d_open.setPosition(d_open_minRange);
         Trajectory lineTrajectory = drive.trajectoryBuilder(drive.getPoseEstimate())
                 .lineToSplineHeading(startPose, SampleMecanumDrive.getVelocityConstraint(25,
@@ -338,17 +339,17 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
                     d_coverLeft.setPosition(d_maxRange_coverLeft);
                     d_coverRight.setPosition(d_minRange_coverRight);
                     leftIntake.setPower(-1);
-                    if (sensorRange2.getDistance(DistanceUnit.CM) > intakeEjectDistance) {
+                    if (depositCube()) {
                         IState = IntakeState.STALLING;
-                        intakeTarget = SystemClock.uptimeMillis() + 500;
+                        intakeTimer.reset();
                     }
                     break;
                 case STALLING:
                     leftIntake.setPower(-1);
-                    if(intakeTimer.milliseconds()>200) {
+                    if(intakeTimer.milliseconds()>50) {
                         d_open.setPosition(d_open_clamp);
                     }
-                    if (intakeTimer.milliseconds()>700) {
+                    if (intakeTimer.milliseconds()>500) {
                         leftIntake.setPower(0);
                         d_coverLeft.setPosition(d_minRange_coverLeft);
                         IState = IntakeState.EXTENDING_LIFT;
@@ -428,6 +429,14 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
         d_coverLeft.setPosition(d_minRange_coverLeft);
         d_coverRight.setPosition(d_minRange_coverRight);
     }
+    public boolean depositCube()
+    {
+        if(depositSensor.getDistance(DistanceUnit.CM)<13)
+        {
+            return true;
+        }
+        return false;
+    }
     public void visionDeposit(int level)
     {
         if(level==1)
@@ -446,7 +455,7 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
     public boolean checkLift()
     {
         double change=727727727;
-        if(time.milliseconds()>300)
+        if(time.milliseconds()>500)
         {
             change=Math.abs(Math.abs(lift_front.getCurrentPosition())-Math.abs(past_lift_value));
             past_lift_value=lift_front.getCurrentPosition();
