@@ -460,7 +460,7 @@ public class teleop extends LinearOpMode {
                     liftState = 17;
                     liftPosition = 1;
                 }
-            }else if(gamepad2.dpad_right && liftState < 20) {
+            }else if(gamepad2.x && liftState < 20) {
                 if(Math.abs(liftFront.getCurrentPosition()) > 100) {
                     d_bendLeft.setPosition(d_maxRange_bendLeft);
                     d_bendRight.setPosition(d_maxRange_bendRight);
@@ -469,7 +469,7 @@ public class teleop extends LinearOpMode {
                     liftState = 21;
                     liftTime.reset();
                 }
-            }else if(gamepad2.x && liftState < 20) {
+            }else if(gamepad2.dpad_right && liftState < 20) {
                 if(Math.abs(liftFront.getCurrentPosition()) > 100) {
                     d_bendLeft.setPosition(d_minRange_bendLeft);
                     d_bendRight.setPosition(d_minRange_bendRight);
