@@ -53,14 +53,20 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
     Servo i_topRight;
     Servo i_bottomRight;
 
+    //APPROACH 1: Start the deposit low so weighted cubes can make it in and then
+    //increase the servo values so that deposit climbs higher for ball
+
+    //APPROACH 2: Wide deposit and then clamp as soon as it stalls
+
+
     // Deposit servo positions
-    double d_open_minRange = 0.65;
-    double d_open_top = 0.45;
-    double d_minRange_bendLeft = 0.89;      // need to fix bend values
+    double d_open_minRange = 0.52;
+    double d_open_top = 0.4;
+    double d_open_clamp=0.66;
+    double d_minRange_bendLeft = 0.98;      // need to fix bend values
     double d_maxRange_bendLeft = 0.78;
-    double d_minRange_bendRight = 0.10;
+    double d_minRange_bendRight = 0.02;
     double d_maxRange_bendRight = 0.21;
-    double d_open_minRangeSemi = 0.63;
 
     double i_minRange_topRight = 0.96;
     double i_maxRange_topRight = 0.20;
@@ -71,6 +77,9 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
     double d_minRange_coverRight = 0.45;
     double d_maxRange_coverRight = 0.85;
 
+    double prevTimer;
+    double intakePower=1;
+
     OpenCvWebcam camera;
     VisionPipeline pipeline;
 
@@ -78,7 +87,7 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
     double CYCLE_TIME=4;
 
     ElapsedTime time = new ElapsedTime();
-    double intakeTimer;
+    ElapsedTime intakeTimer=new ElapsedTime();
 
     enum GrabbingState {GETTING,
         RETURNING,
@@ -159,6 +168,9 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
         d_coverLeft.setPosition(d_minRange_coverLeft);
         d_coverRight.setPosition(d_minRange_coverRight);
 
+        i_bottomRight.setDirection(Servo.Direction.FORWARD);
+        i_topRight.setDirection(Servo.Direction.FORWARD);
+
         waitForStart();
 
         cubePos= pipeline.getAnalysis();
@@ -174,8 +186,12 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
 
         while (opModeIsActive())
         {
+
             drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(0)));
             lowerIntakes();
+            d_bendLeft.setPosition(d_minRange_bendLeft);
+            d_bendRight.setPosition(d_minRange_bendRight);
+            d_open.setPosition(d_open_minRange);
             double pathChange = 0;
 
             GState = GrabbingState.GETTING;
@@ -220,9 +236,9 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
             {
                 rightIntake.setPower(1);
                 drive.update();
+                raiseIntakes();
             }
             drive.cancelFollowing();
-            raiseIntakes();
             rightIntake.setPower(0);
 
 
@@ -235,7 +251,9 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
 
             RState = ReturningState.LING;
             IState=IntakeState.INTO_DEPOSIT;
-            intakeTarget=SystemClock.uptimeMillis()+2500;
+            //intakeTarget=SystemClock.uptimeMillis()+2500;
+            intakeTimer.reset();
+            prevTimer=100;
             Trajectory lineTrajectory = drive.trajectoryBuilder(drive.getPoseEstimate())
                     .lineToSplineHeading(startPose, SampleMecanumDrive.getVelocityConstraint(25,
                             DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
@@ -248,22 +266,16 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
                     case LING:
                         if (onColor())
                         {
-                            telemetry.addData(">", "plz");
-                            telemetry.update();
                             RState = ReturningState.RETURNING;
-                            drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                             drive.cancelFollowing();
                             drive.setPoseEstimate(new Pose2d(-38, 0, 0));
                             Trajectory returnTrajectory = drive.trajectoryBuilder(drive.getPoseEstimate())
                                     .lineTo(new Vector2d(0, 0))
                                     .build();
                             drive.followTrajectoryAsync(returnTrajectory);
-                            drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                         }
                         else if(!drive.isBusy())
                         {
-                            telemetry.addData(">", "useless");
-                            telemetry.update();
                             RState = ReturningState.RETURNING;
                         }
                         break;
@@ -274,27 +286,6 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
                             RState = ReturningState.DONE;
                         }
                         break;
-                    /*case BALL:
-                        Trajectory ballTrajectory=drive.trajectoryBuilder(drive.getPoseEstimate())
-                                .splineTo(new Vector2d(-49, -1), Math.toRadians(185))
-                                .splineTo(new Vector2d(-55, -6.25), Math.toRadians(200))
-                                .build();
-                        drive.followTrajectoryAsync(ballTrajectory);
-                        RState=ReturningState.BALL_2;
-                        break;
-                    case BALL_2:
-                        if(!drive.isBusy())
-                        {
-                            RState=ReturningState.BALL_END;
-                        }
-                        break;
-                    case BALL_END:
-                        if(IState==IntakeState.DONE)
-                        {
-                            //grab another cube and then restart
-                        }
-                        break;
-                        */
 
                     case DONE:
                         break;
@@ -312,13 +303,13 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
     public boolean checkLift()
     {
         double change=727727727;
-        if(time.milliseconds()>300)
+        if(time.milliseconds()>500)
         {
             change=Math.abs(Math.abs(lift_front.getCurrentPosition())-Math.abs(past_lift_value));
             past_lift_value=lift_front.getCurrentPosition();
             time.reset();
         }
-        if(change<10)
+        if(change<7.5)
         {
             return true;
         }
@@ -335,34 +326,30 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
         if(IState!= EvenLessScuffedAuton_RED.IntakeState.DONE) {
             switch (IState) {
                 case INTO_DEPOSIT:
-                    d_open.setPosition(d_open_minRange);
-                    d_bendLeft.setPosition(d_minRange_bendLeft);
-                    d_bendRight.setPosition(d_minRange_bendRight);
-                    d_coverRight.setPosition(d_maxRange_coverRight);
-                    d_coverLeft.setPosition(d_minRange_coverLeft);
-                    rightIntake.setPower(-1);
-                    telemetry.addData(">", sensorRange1.getDistance(DistanceUnit.CM));
-                    telemetry.update();
-                    if (sensorRange1.getDistance(DistanceUnit.CM) > intakeEjectDistance)
+                        d_open.setPosition(d_open_minRange);
+                        d_bendLeft.setPosition(d_minRange_bendLeft);
+                        d_bendRight.setPosition(d_minRange_bendRight);
+                        d_coverRight.setPosition(d_maxRange_coverRight);
+                        d_coverLeft.setPosition(d_minRange_coverLeft);
+                        rightIntake.setPower(-intakePower);
+                    if (intakeTimer.milliseconds()>2000)
                     {
                         IState = EvenLessScuffedAuton_RED.IntakeState.STALLING;
-                        intakeTarget = SystemClock.uptimeMillis() + 500;
+                        intakeTimer.reset();
                     }
-                    /*else if(SystemClock.uptimeMillis()>intakeTarget)
-                    {
-                        rightIntake.setPower(0);
-                        d_open.setPosition(d_open_minRange);
-                        d_coverRight.setPosition(d_minRange_coverRight);
-                        IState=EvenLessScuffedAuton_RED.IntakeState.BALL;
-                        RState=ReturningState.BALL;
-                    }*/
                     break;
                 case STALLING:
-                    rightIntake.setPower(-1);
-                    if (SystemClock.uptimeMillis() > intakeTarget) {
+                    rightIntake.setPower(-intakePower);
+                    if(intakeTimer.milliseconds()>200)
+                    {
+                        d_open.setPosition(d_open_clamp);
+                    }
+                    if (intakeTimer.milliseconds()>600)
+                    {
                         rightIntake.setPower(0);
-                        d_open.setPosition(d_open_minRange);
                         d_coverRight.setPosition(d_minRange_coverRight);
+
+                        //if d_open has moved to its needed position
                         IState = EvenLessScuffedAuton_RED.IntakeState.EXTENDING_LIFT;
                         past_lift_value=10000;
                         time.reset();
@@ -382,23 +369,8 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
                         IState = EvenLessScuffedAuton_RED.IntakeState.DONE;
                     }
                     break;
-                /*case BALL:
-                    if(RState==ReturningState.BALL_END)
-                    {
-                        lowerIntakes();
-                        IState=IntakeState.BALL_2;
-                    }
-                    break;
-                case BALL_2:
-                    rightIntake.setPower(-1);
-                    if(!hasBlock())
-                    {
-                        IState=IntakeState.DONE;
-                    }
-                    break;*/
                 case DONE:
                     break;
-
             }
         }
     }
@@ -439,7 +411,7 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
         // Open to deposit in top level of alliance hub
 
         //Thread.sleep(500);
-        double target=SystemClock.uptimeMillis()+250;
+        double target=SystemClock.uptimeMillis()+500;
         while(SystemClock.uptimeMillis()<target)
         {
             //stall

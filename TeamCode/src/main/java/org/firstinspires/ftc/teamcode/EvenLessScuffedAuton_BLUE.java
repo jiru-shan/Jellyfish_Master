@@ -49,11 +49,12 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
     Servo i_bottomRight;
 
     // Deposit servo positions
-    double d_open_minRange = 0.65;
+    double d_open_minRange = 0.53;
     double d_open_top = 0.45;
-    double d_minRange_bendLeft = 0.89;      // need to fix bend values
+    double d_open_clamp=0.66;
+    double d_minRange_bendLeft = 0.96;      // need to fix bend values
     double d_maxRange_bendLeft = 0.78;
-    double d_minRange_bendRight = 0.10;
+    double d_minRange_bendRight = 0.04;
     double d_maxRange_bendRight = 0.21;
     double d_open_minRangeSemi = 0.63;
 
@@ -66,6 +67,9 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
     double d_minRange_coverLeft = 0.55;
     double d_maxRange_coverLeft = 0.15;
     double d_minRange_coverRight = 0.45;
+
+    double prevTimer;
+    ElapsedTime intakeTimer=new ElapsedTime();
 
     OpenCvWebcam camera;
     VisionPipeline pipeline;
@@ -148,6 +152,9 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
         d_coverLeft.setPosition(d_minRange_coverLeft);
         d_coverRight.setPosition(d_minRange_coverRight);
 
+        i_bottomLeft.setDirection(Servo.Direction.REVERSE);
+        i_topLeft.setDirection(Servo.Direction.REVERSE);
+
         waitForStart();
 
         cubePos= pipeline.getAnalysis();
@@ -165,6 +172,9 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
         {
         drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(0)));
         lowerIntakes();
+            d_bendLeft.setPosition(d_minRange_bendLeft);
+            d_bendRight.setPosition(d_minRange_bendRight);
+            d_open.setPosition(d_open_minRange);
         double pathChange=0;
         GState = GrabbingState.GETTING;
         goingTrajectory = drive.trajectoryBuilder(startPose)
@@ -211,9 +221,10 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
         while (SystemClock.uptimeMillis() < target) {
             leftIntake.setPower(1);
             drive.update();
+            raiseIntakes();
         }
         drive.cancelFollowing();
-        raiseIntakes();
+
         leftIntake.setPower(0);
 
 
@@ -227,6 +238,9 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
 
         RState = ReturningState.LING;
         IState=IntakeState.INTO_DEPOSIT;
+        intakeTimer.reset();
+        prevTimer=100;
+        d_open.setPosition(d_open_minRange);
         Trajectory lineTrajectory = drive.trajectoryBuilder(drive.getPoseEstimate())
                 .lineToSplineHeading(startPose, SampleMecanumDrive.getVelocityConstraint(25,
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
@@ -240,14 +254,12 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
                     if (onColor())
                     {
                         RState = ReturningState.RETURNING;
-                        drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                         drive.cancelFollowing();
                         drive.setPoseEstimate(new Pose2d(31.5, 0, 0));
                         Trajectory returnTrajectory = drive.trajectoryBuilder(drive.getPoseEstimate())
                                 .lineTo(new Vector2d(0, 0))
                                 .build();
                         drive.followTrajectoryAsync(returnTrajectory);
-                        drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                     }
                     else if(!drive.isBusy())
                     {
@@ -321,7 +333,6 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
         {
             switch (IState) {
                 case INTO_DEPOSIT:
-                    d_open.setPosition(d_open_minRangeSemi);
                     d_bendLeft.setPosition(d_minRange_bendLeft);
                     d_bendRight.setPosition(d_minRange_bendRight);
                     d_coverLeft.setPosition(d_maxRange_coverLeft);
@@ -334,9 +345,11 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
                     break;
                 case STALLING:
                     leftIntake.setPower(-1);
-                    if (SystemClock.uptimeMillis() > intakeTarget) {
+                    if(intakeTimer.milliseconds()>200) {
+                        d_open.setPosition(d_open_clamp);
+                    }
+                    if (intakeTimer.milliseconds()>700) {
                         leftIntake.setPower(0);
-                        d_open.setPosition(d_open_minRange);
                         d_coverLeft.setPosition(d_minRange_coverLeft);
                         IState = IntakeState.EXTENDING_LIFT;
                         past_lift_value=10000;
@@ -370,7 +383,7 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
 
         // Open to deposit in top level of alliance hub
 
-        double target=SystemClock.uptimeMillis()+250;
+        double target=SystemClock.uptimeMillis()+500;
         while(SystemClock.uptimeMillis()<target)
         {
             //stall
@@ -439,7 +452,7 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
             past_lift_value=lift_front.getCurrentPosition();
             time.reset();
         }
-        if(change<10)
+        if(change<7.5)
         {
             return true;
         }
