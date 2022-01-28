@@ -166,7 +166,7 @@ public class teleop extends LinearOpMode {
         int liftState = 0;
         int liftPosition = 0;
         int liftExtendError = 100;
-        int liftRetractError = 0;
+        int liftRetractError = 10;
         ElapsedTime liftTime = new ElapsedTime();
         /*
         0 = down
@@ -178,6 +178,7 @@ public class teleop extends LinearOpMode {
         17 = aliance tip
         20-? = retracting
         ? = retracted
+        30-? manual control
         */
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
@@ -461,50 +462,68 @@ public class teleop extends LinearOpMode {
                     liftState = 17;
                     liftPosition = 1;
                 }
-            }else if(liftState >=10 && liftState <20) {
-                if(liftState == 12) {
-                    if(Math.abs(liftFront.getCurrentPosition() - shared_targetClose) < liftExtendError) {
-                        liftPosition = 12;
-                        if(gamepad2.dpad_right || gamepad2.x) {
-                            liftState = 20;
-                        }
-                    }
-                }else if(liftState == 13) {
-                    if(Math.abs(liftFront.getCurrentPosition() - shared_targetMiddle) < liftExtendError) {
-                        liftPosition = 13;
-                        if(gamepad2.dpad_right || gamepad2.x) {
-                            liftState = 20;
-                        }
-                    }
-                }else if(liftState == 14) {
-                    if(Math.abs(liftFront.getCurrentPosition() - shared_targetFar) < liftExtendError) {
-                        liftPosition = 14;
-                        if(gamepad2.dpad_right || gamepad2.x) {
-                            liftState = 20;
-                        }
-                    }
-                }else if(liftState == 15) {
-                    if(Math.abs(liftFront.getCurrentPosition() - alliance_middle) < liftExtendError) {
-                        liftPosition = 15;
-                        if(gamepad2.dpad_right || gamepad2.x) {
-                            liftState = 20;
-                        }
-                    }
-                }else if(liftState == 16) {
-                    if(Math.abs(liftFront.getCurrentPosition() - alliance_targetBalanced) < liftExtendError) {
-                        liftPosition = 16;
-                        if(gamepad2.dpad_right || gamepad2.x) {
-                            liftState = 20;
-                        }
-                    }
-                }else if(liftState == 17) {
-                    if(Math.abs(liftFront.getCurrentPosition() - alliance_targetTipped) < liftExtendError) {
-                        liftPosition = 17;
-                        if(gamepad2.dpad_right || gamepad2.x) {
-                            liftState = 20;
-                        }
-                    }
+            }else if(gamepad2.dpad_right) {
+                if(liftFront.getCurrentPosition() > 100) {
+                    d_bendLeft.setPosition(d_maxRange_bendLeft);
+                    d_bendRight.setPosition(d_maxRange_bendRight);
+                    d_open.setPosition(d_open_shared);
+
+                    liftState = 21;
+                    liftTime.reset();
                 }
+            }else if(gamepad2.x) {
+                if(liftFront.getCurrentPosition() > 100) {
+                    d_bendLeft.setPosition(d_minRange_bendLeft);
+                    d_bendRight.setPosition(d_minRange_bendRight);
+                    d_open.setPosition(d_open_top);
+
+                    liftState = 21;
+                    liftTime.reset();
+                }
+            }else if(liftState >=10 && liftState <20) {
+                // if(liftState == 12) {
+                //     if(Math.abs(liftFront.getCurrentPosition() - shared_targetClose) < liftExtendError) {
+                //         liftPosition = 12;
+                //         if(gamepad2.dpad_right || gamepad2.x) {
+                //             liftState = 20;
+                //         }
+                //     }
+                // }else if(liftState == 13) {
+                //     if(Math.abs(liftFront.getCurrentPosition() - shared_targetMiddle) < liftExtendError) {
+                //         liftPosition = 13;
+                //         if(gamepad2.dpad_right || gamepad2.x) {
+                //             liftState = 20;
+                //         }
+                //     }
+                // }else if(liftState == 14) {
+                //     if(Math.abs(liftFront.getCurrentPosition() - shared_targetFar) < liftExtendError) {
+                //         liftPosition = 14;
+                //         if(gamepad2.dpad_right || gamepad2.x) {
+                //             liftState = 20;
+                //         }
+                //     }
+                // }else if(liftState == 15) {
+                //     if(Math.abs(liftFront.getCurrentPosition() - alliance_middle) < liftExtendError) {
+                //         liftPosition = 15;
+                //         if(gamepad2.dpad_right || gamepad2.x) {
+                //             liftState = 20;
+                //         }
+                //     }
+                // }else if(liftState == 16) {
+                //     if(Math.abs(liftFront.getCurrentPosition() - alliance_targetBalanced) < liftExtendError) {
+                //         liftPosition = 16;
+                //         if(gamepad2.dpad_right || gamepad2.x) {
+                //             liftState = 20;
+                //         }
+                //     }
+                // }else if(liftState == 17) {
+                //     if(Math.abs(liftFront.getCurrentPosition() - alliance_targetTipped) < liftExtendError) {
+                //         liftPosition = 17;
+                //         if(gamepad2.dpad_right || gamepad2.x) {
+                //             liftState = 20;
+                //         }
+                //     }
+                // }
 
                 if(gamepad2.a && (liftFront.getTargetPosition() != (-shared_targetClose))) {
                     liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -665,6 +684,7 @@ public class teleop extends LinearOpMode {
                     liftFront.setPower(1.0);
                     liftBack.setPower(1.0);
                     liftState = 23;
+                    // liftState = 0;
                 }
             }else if(liftState == 23) {
                 if(Math.abs(liftFront.getCurrentPosition() - 0) < liftRetractError) {
@@ -699,7 +719,15 @@ public class teleop extends LinearOpMode {
             float a = gamepad2.left_trigger;
             float b = gamepad2.right_trigger;
 
-            carousel.setPower(b-a);
+            if(gamepad2.left_bumper) {
+                carousel.setPower(-1);
+            }else if(gamepad2.rightbumper) {
+                carousel.setPower(1);
+            }else {
+                carousel.setPower(0);
+            }
+
+            carousel.setPower(Math.max(0, Math.min(1, b-a)));
 
             /** Reset Encoders **/
 
