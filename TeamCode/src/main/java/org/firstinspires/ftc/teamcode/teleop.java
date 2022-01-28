@@ -393,9 +393,7 @@ public class teleop extends LinearOpMode {
 
             // Motor tick count is equal to 384.5
             if(liftState == 0) {
-//                if(!objectCaptured) {
-                    // continue;
-                /*}else */if(gamepad2.a) {
+                if(gamepad2.a) {
                     liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftFront.setTargetPosition(-shared_targetClose);
@@ -462,7 +460,7 @@ public class teleop extends LinearOpMode {
                     liftState = 17;
                     liftPosition = 1;
                 }
-            }else if(gamepad2.dpad_right) {
+            }else if(gamepad2.dpad_right && liftState < 20) {
                 if(liftFront.getCurrentPosition() > 100) {
                     d_bendLeft.setPosition(d_maxRange_bendLeft);
                     d_bendRight.setPosition(d_maxRange_bendRight);
@@ -471,7 +469,7 @@ public class teleop extends LinearOpMode {
                     liftState = 21;
                     liftTime.reset();
                 }
-            }else if(gamepad2.x) {
+            }else if(gamepad2.x && liftState < 20) {
                 if(liftFront.getCurrentPosition() > 100) {
                     d_bendLeft.setPosition(d_minRange_bendLeft);
                     d_bendRight.setPosition(d_minRange_bendRight);
