@@ -199,9 +199,9 @@ public class teleop extends LinearOpMode {
             
             //inits
             // Keep deposit in position while not in use
-            d_open.setPosition(d_open_minRangeSemi);
-            d_bendLeft.setPosition(d_minRange_bendLeft);
-            d_bendRight.setPosition(d_minRange_bendRight);
+            // d_open.setPosition(d_open_minRangeSemi);
+            // d_bendLeft.setPosition(d_minRange_bendLeft);
+            // d_bendRight.setPosition(d_minRange_bendRight);
 
 
             /** Combined Functions **/
@@ -292,7 +292,7 @@ public class teleop extends LinearOpMode {
                 i_topLeft.setPosition(i_maxRange_topLeft);
                 i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
-                d_open.setPosition(d_open_minRangeSemi);
+                // d_open.setPosition(d_open_minRangeSemi);
 
                 d_coverLeft.setPosition(d_minRange_coverLeft);
 
@@ -381,7 +381,7 @@ public class teleop extends LinearOpMode {
                 i_topRight.setPosition(i_maxRange_topRight);
                 i_bottomRight.setPosition(i_maxRange_bottomRight);
 
-                d_open.setPosition(d_open_minRangeSemi);
+                // d_open.setPosition(d_open_minRangeSemi);
 
                 d_coverRight.setPosition(d_minRange_coverRight);
 
@@ -462,7 +462,6 @@ public class teleop extends LinearOpMode {
                 }
             }else if(gamepad2.dpad_right && liftState < 20) {
                 if(Math.abs(liftFront.getCurrentPosition()) > 100) {
-
                     d_bendLeft.setPosition(d_maxRange_bendLeft);
                     d_bendRight.setPosition(d_maxRange_bendRight);
                     d_open.setPosition(d_open_shared);
