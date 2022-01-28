@@ -83,6 +83,7 @@ public class teleop extends LinearOpMode {
         // Color sensors
         colorSensor_left = hardwareMap.get(ColorRangeSensor.class, "colorSensor_left");
         colorSensor_right = hardwareMap.get(ColorRangeSensor.class, "colorSensor_right");
+        depositSensor = hardwareMap.get(Rev2mDistanceSensor.class, "depositSensor");
 
         // Intake
         double highSweepPower = 0.8;
@@ -259,7 +260,7 @@ public class teleop extends LinearOpMode {
                     leftIntakeState++;
                 }
             } else if (leftIntakeState == 4) {
-                if (colorSensor_left.getDistance(DistanceUnit.CM) > intakeEjectDistance) {
+                if (/*colorSensor_left.getDistance(DistanceUnit.CM) > intakeEjectDistance*/ depositSensor.getDistance(DistanceUnit.CM) < 13.0) {
                     leftIntake.setPower(0);
 
                     d_open.setPosition(d_open_minRange);
@@ -348,7 +349,7 @@ public class teleop extends LinearOpMode {
                     rightIntakeState++;
                 }
             } else if (rightIntakeState == 4) {
-                if (colorSensor_right.getDistance(DistanceUnit.CM) > intakeEjectDistance) {
+                if (/*colorSensor_right.getDistance(DistanceUnit.CM) > intakeEjectDistance*/depositSensor.getDistance(DistanceUnit.CM) < 15.0) {
                     rightIntake.setPower(0);
 
                     d_open.setPosition(d_open_minRange);
