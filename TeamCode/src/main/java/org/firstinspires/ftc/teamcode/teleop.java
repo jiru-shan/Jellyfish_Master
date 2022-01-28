@@ -631,7 +631,7 @@ public class teleop extends LinearOpMode {
                     liftState = 17;
                     liftPosition = 1;
                 }
-            }else if(liftState == 20) {
+            }/*else if(liftState == 20) {
                 //moving the deposit to correct angle and depositing
                 //fill in these values idk if these are right
                 if(liftPosition == 12) {
@@ -661,8 +661,8 @@ public class teleop extends LinearOpMode {
                 }
                 liftTime.reset();
                 liftState = 21;
-            }else if(liftState == 21) {
-                if(liftTime.milliseconds() > 800/* || (d_bendLeft.getPosition() == d_minRange_bendLeft)*/) {
+            }*/else if(liftState == 21) {
+                if(liftTime.milliseconds() > 1200/* || (d_bendLeft.getPosition() == d_minRange_bendLeft)*/) {
                     d_open.setPosition(d_open_minRange);
                     d_bendLeft.setPosition(d_minRange_bendLeft);
                     d_bendRight.setPosition(d_minRange_bendRight);
