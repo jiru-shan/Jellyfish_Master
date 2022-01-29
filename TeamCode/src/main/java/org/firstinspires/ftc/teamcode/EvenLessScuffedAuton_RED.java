@@ -7,6 +7,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -28,11 +29,10 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-@TeleOp
+@Autonomous
 @Config
 public class EvenLessScuffedAuton_RED extends LinearOpMode
 {
-    DcMotorEx test;
     ColorRangeSensor sensorRange1, sensorRange2, driveLeft, driveRight;
 
     DcMotorEx leftFront, leftBack, rightBack, rightFront;
@@ -81,11 +81,12 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
     VisionPipeline_RED pipeline;
 
     double past_lift_value;
-    double CYCLE_TIME=4;
+    double CYCLE_TIME=8;
     boolean cubeCheck;
 
     ElapsedTime time = new ElapsedTime();
     ElapsedTime intakeTimer=new ElapsedTime();
+    ElapsedTime overallTime=new ElapsedTime();
 
     enum GrabbingState {GETTING,
         RETURNING,
@@ -98,14 +99,11 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
     {
         LING, //Ling arknights :)
         RETURNING,
-        BALL,
-        BALL_2,
-        BALL_END,
         DONE
     }
     enum IntakeState
     {
-        INTO_DEPOSIT, STALLING, EXTENDING_LIFT, BALL, BALL_2, DONE
+        INTO_DEPOSIT, STALLING, EXTENDING_LIFT, DONE
     }
 
     int alliance_targetTipped = 625;
@@ -171,7 +169,7 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
         i_topRight.setDirection(Servo.Direction.FORWARD);
 
         waitForStart();
-
+        overallTime.reset();
         cubePos= pipeline.getAnalysis();
 
 
@@ -185,7 +183,7 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
         //Run roadrunner code to place in correct level and then return to starting pos
         visionDeposit(cubePos);
 
-        while (30-time.seconds()>CYCLE_TIME+3)
+        while (30-overallTime.seconds()>CYCLE_TIME+3)
         {
 
             drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(0)));
@@ -267,6 +265,7 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
                                     GState=GrabbingState.RETURNING;
                                 }
                         }
+                        break;
                     case DONE:
                         break;
                 }
@@ -278,9 +277,6 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
             }
 
             rightIntake.setPower(0);
-
-
-
 
             RState = ReturningState.LING;
             IState=IntakeState.INTO_DEPOSIT;
