@@ -35,11 +35,11 @@ public class VisionPipeline extends OpenCvPipeline
     /*
      * The core values which define the location and size of the sample regions
      */
-    static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(60,120);
-    static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(160,120);
-    static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(205,84);
-    static final int REGION_WIDTH = 100;
-    static final int REGION_HEIGHT = 120;
+    static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(0,120);
+    static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(120,120);
+    static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(260,120);
+    static final int REGION_WIDTH = 60;
+    static final int REGION_HEIGHT = 90;
 
     /*
      * Points which actually define the sample region rectangles, derived from above values
@@ -234,7 +234,7 @@ public class VisionPipeline extends OpenCvPipeline
          * Now that we found the max, we actually need to go and
          * figure out which sample region that value was from
          */
-        if(trueMax==1) // Was it from region 1?
+        if(trueMax==avg1) // Was it from region 1?
         {
             position = SkystonePosition.LEFT; // Record our analysis
             pos=1;
@@ -257,12 +257,12 @@ public class VisionPipeline extends OpenCvPipeline
              * Draw a solid rectangle on top of the chosen region.
              * Simply a visual aid. Serves no functional purpose.
              */
-            /*Imgproc.rectangle(
+            Imgproc.rectangle(
                     input, // Buffer to draw on
                     region2_pointA, // First point which defines the rectangle
                     region2_pointB, // Second point which defines the rectangle
                     GREEN, // The color the rectangle is drawn in
-                    -1); // Negative thickness means solid fill*/
+                    -1); // Negative thickness means solid fill
         }
 
         else if(trueMax == avg3) // Was it from region 3?
