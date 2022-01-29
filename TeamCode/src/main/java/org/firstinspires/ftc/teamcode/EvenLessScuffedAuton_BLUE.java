@@ -151,6 +151,12 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
 
         d_coverLeft.setPosition(d_minRange_coverLeft);
         d_coverRight.setPosition(d_minRange_coverRight);
+        d_open.setPosition(d_open_minRange);
+        d_open.setPosition(d_open_minRange);
+        d_open.setPosition(d_open_minRange);
+        d_open.setPosition(d_open_minRange);
+        d_open.setPosition(d_open_minRange);
+        d_open.setPosition(d_open_minRange);
 
         waitForStart();
 
