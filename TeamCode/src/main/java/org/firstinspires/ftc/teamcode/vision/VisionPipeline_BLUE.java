@@ -11,10 +11,10 @@ import org.openftc.easyopencv.OpenCvPipeline;
 
 //OpenCV code that may or may not work
 //Test github commit
-public class VisionPipeline extends OpenCvPipeline
+public class VisionPipeline_BLUE extends OpenCvPipeline
 {
     Telemetry tel;
-    public VisionPipeline(Telemetry tel)
+    public VisionPipeline_BLUE(Telemetry tel)
     {
         this.tel=tel;
     }
@@ -35,11 +35,11 @@ public class VisionPipeline extends OpenCvPipeline
     /*
      * The core values which define the location and size of the sample regions
      */
-    static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(35,84);
-    static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(120,84);
-    static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(205,84);
-    static final int REGION_WIDTH = 85;
-    static final int REGION_HEIGHT = 60;
+    static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(0,120);
+    static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(120,120);
+    static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(260,120);
+    static final int REGION_WIDTH = 60;
+    static final int REGION_HEIGHT = 90;
 
     /*
      * Points which actually define the sample region rectangles, derived from above values
@@ -179,9 +179,9 @@ public class VisionPipeline extends OpenCvPipeline
          * pixel value of the 3-channel image, and referenced the value
          * at index 2 here.
          */
-        avg1 = (int) (1.1*Core.mean(region1_Cb).val[0])+(int) Core.mean(region1_Cr).val[0];
-        avg2 = (int) (1.1*Core.mean(region2_Cb).val[0])+(int) Core.mean(region2_Cr).val[0];
-        avg3 = (int) (1.1*Core.mean(region3_Cb).val[0])+(int) Core.mean(region3_Cr).val[0];
+        avg1 = (int) (0.8*Core.mean(region1_Cb).val[0])+(int) Core.mean(region1_Cr).val[0];
+        avg2 = (int) (0.8*Core.mean(region2_Cb).val[0])+(int) Core.mean(region2_Cr).val[0];
+        avg3 = (int) (0.8*Core.mean(region3_Cb).val[0])+(int) Core.mean(region3_Cr).val[0];
 
         tel.addData("Area 1", avg1);
         tel.addData("Area 2", avg2);
@@ -217,7 +217,7 @@ public class VisionPipeline extends OpenCvPipeline
          */
         Imgproc.rectangle(
                 input, // Buffer to draw on
-                region3_pointA, // Firswt point which defines the rectangle
+                region3_pointA, // First point which defines the rectangle
                 region3_pointB, // Second point which defines the rectangle
                 BLUE, // The color the rectangle is drawn in
                 2); // Thickness of the rectangle lines
@@ -226,17 +226,18 @@ public class VisionPipeline extends OpenCvPipeline
         /*
          * Find the max of the 3 averages
          */
-        int maxOneTwo = Math.max(avg1, avg2);
-        int max = Math.max(maxOneTwo, avg3);
+
+        int max = Math.max(avg1, avg2);
+        int trueMax=Math.max(max, avg3);
 
         /*
          * Now that we found the max, we actually need to go and
          * figure out which sample region that value was from
          */
-        if(max == avg1) // Was it from region 1?
+        if(trueMax==avg1) // Was it from region 1?
         {
             position = SkystonePosition.LEFT; // Record our analysis
-            pos=0;
+            pos=3;
             /*
              * Draw a solid rectangle on top of the chosen region.
              * Simply a visual aid. Serves no functional purpose.
@@ -248,10 +249,10 @@ public class VisionPipeline extends OpenCvPipeline
                     GREEN, // The color the rectangle is drawn in
                     -1); // Negative thickness means solid fill
         }
-        else if(max == avg2) // Was it from region 2?
+        else if(trueMax==avg2) // Was it from region 2?
         {
             position = SkystonePosition.CENTER; // Record our analysis
-            pos=1;
+            pos=2;
             /*
              * Draw a solid rectangle on top of the chosen region.
              * Simply a visual aid. Serves no functional purpose.
@@ -263,10 +264,11 @@ public class VisionPipeline extends OpenCvPipeline
                     GREEN, // The color the rectangle is drawn in
                     -1); // Negative thickness means solid fill
         }
-        else if(max == avg3) // Was it from region 3?
+
+        else if(trueMax == avg3) // Was it from region 3?
         {
             position = SkystonePosition.RIGHT; // Record our analysis
-            pos=2;
+            pos=1;
             /*
              * Draw a solid rectangle on top of the chosen region.
              * Simply a visual aid. Serves no functional purpose.

@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.vision.VisionPipeline;
+import org.firstinspires.ftc.teamcode.vision.VisionPipeline_RED;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -16,12 +16,13 @@ import org.openftc.easyopencv.OpenCvWebcam;
 public class VisionTest extends LinearOpMode
 {
     OpenCvWebcam camera;
-    VisionPipeline pipeline;
+    VisionPipeline_RED pipeline;
 
     @Override
     public void runOpMode() throws InterruptedException {
         webcamInit();
         waitForStart();
+        double cubePos=pipeline.getAnalysis();
         while(opModeIsActive())
         {
             telemetry.addData("Place", pipeline.getAnalysis());
@@ -35,7 +36,7 @@ public class VisionTest extends LinearOpMode
     {
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam"), cameraMonitorViewId);
-        pipeline=new VisionPipeline(telemetry);
+        pipeline=new VisionPipeline_RED(telemetry);
         camera.setPipeline(pipeline);
         camera.setMillisecondsPermissionTimeout(2500); // Timeout for obtaining permission is configurable. Set before opening.
         camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
@@ -54,7 +55,6 @@ public class VisionTest extends LinearOpMode
             }
         });
         //sam test stuff from here down
-        waitForStart();
         //switch (pipeline.getLocation)
     }
 }
