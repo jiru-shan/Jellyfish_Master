@@ -717,22 +717,22 @@ public class teleop extends LinearOpMode {
 
             /** Carousel **/
 
-            float a = gamepad2.left_trigger;
-            float b = gamepad2.right_trigger;
+            // float a = gamepad2.left_trigger;
+            // float b = gamepad2.right_trigger;
 
-            // if(gamepad2.left_bumper) {
-            //     carousel.setPower(-1);
-            // }else if(gamepad2.rightbumper) {
-            //     carousel.setPower(1);
-            // }else {
-            //     carousel.setPower(0);
-            // }
+            if(gamepad2.left_bumper) {
+                carousel.setPower(-1);
+            }else if(gamepad2.rightbumper) {
+                carousel.setPower(1);
+            }else {
+                carousel.setPower(0);
+            }
 
-            carousel.setPower(Math.max(0, Math.min(1, b-a)));
+            // carousel.setPower(Math.max(0, Math.min(1, b-a)));
 
             /** Reset Encoders **/
 
-            if (gamepad2.left_bumper) {
+            if (gamepad2.right_trigger != 0) {
                 liftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
                 liftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             }
