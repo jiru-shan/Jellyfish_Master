@@ -62,13 +62,12 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
 
 
     // Deposit servo positions
-    double d_open_minRange = 0.57;
-    double d_open_top = 0.4;
-    double d_open_clamp=0.66;
-    double d_minRange_bendLeft = 0.96;      // need to fix bend values
-    double d_maxRange_bendLeft = 0.78;
-    double d_minRange_bendRight = 0.04;
-    double d_maxRange_bendRight = 0.21;
+    double d_open_minRange = 0.59;
+    public static double d_open_top = 0.4;
+    public static double d_open_clamp=0.66;
+    public static double d_minRange_bendLeft = 0.96;      // need to fix bend values
+    public static double d_minRange_bendRight = 0.04;
+
 
     double i_minRange_topRight = 0.96;
     double i_maxRange_topRight = 0.20;
@@ -78,6 +77,9 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
     double d_minRange_coverLeft = 0.55;
     double d_minRange_coverRight = 0.45;
     double d_maxRange_coverRight = 0.85;
+
+    public static double d_bendLeft_lift=0.8;
+    public static double d_bendRight_lift=0.2;
 
     double intakePower=1;
 
@@ -108,7 +110,7 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
         INTO_DEPOSIT, STALLING, EXTENDING_LIFT, BALL, BALL_2, DONE
     }
 
-    int alliance_targetTipped = 1000;
+    int alliance_targetTipped = 625;
 
     SampleMecanumDriveCancelable drive;
 
@@ -159,26 +161,33 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
 
         webcamInit();
 
-        d_open.setPosition(d_open_minRange);
+        d_coverLeft.setPosition(d_minRange_coverLeft);
+        d_coverRight.setPosition(d_minRange_coverRight);
+        d_open.setPosition(d_open_clamp);
         d_bendLeft.setPosition(d_minRange_bendLeft);
         d_bendRight.setPosition(d_minRange_bendRight);
 
-        d_coverLeft.setPosition(d_minRange_coverLeft);
-        d_coverRight.setPosition(d_minRange_coverRight);
+
 
         i_bottomRight.setDirection(Servo.Direction.FORWARD);
         i_topRight.setDirection(Servo.Direction.FORWARD);
 
         waitForStart();
 
+        telemetry.addData(">", "here");
+        telemetry.update();
         cubePos= pipeline.getAnalysis();
 
-        Trajectory prepreTrajectory = drive.trajectoryBuilder(startPose)
+       visionDeposit(3);
+
+       requestOpModeStop();
+
+        /*Trajectory prepreTrajectory = drive.trajectoryBuilder(startPose)
                 .forward(7)
                 .build();
         drive.followTrajectory(prepreTrajectory);
         drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(0)));
-
+*/
         //Run roadrunner code to place in correct level and then return to starting pos
         //visionDeposit(cubePos);
 
@@ -299,6 +308,8 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
     }
     public boolean checkLift()
     {
+        telemetry.addData(">", lift_front.getCurrentPosition());
+        telemetry.update();
         double change=727727727;
         if(time.milliseconds()>500)
         {
@@ -341,7 +352,7 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
                     {
                         d_open.setPosition(d_open_clamp);
                     }
-                    if (intakeTimer.milliseconds()>500)
+                    if (intakeTimer.milliseconds()>1500)
                     {
                         rightIntake.setPower(0);
                         d_coverRight.setPosition(d_minRange_coverRight);
@@ -402,8 +413,8 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
     public void deposit()
     {
 
-        d_bendLeft.setPosition(d_maxRange_bendLeft);
-        d_bendRight.setPosition(d_maxRange_bendRight);
+        //d_bendLeft.setPosition(d_maxRange_bendLeft);
+        //d_bendRight.setPosition(d_maxRange_bendRight);
 
         // Open to deposit in top level of alliance hub
 
@@ -455,15 +466,138 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
     {
         if(level==1)
         {
+            Trajectory strafeTrajectory = drive.trajectoryBuilder(new Pose2d())
+                    .strafeRight(20)
+                    .build();
+            drive.followTrajectory(strafeTrajectory);
+            lift_front.setTargetPosition(-200);
+            lift_back.setTargetPosition(-200);
+            lift_front.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
+            lift_back.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            d_bendLeft.setPosition(0.8);
+            d_bendRight.setPosition(0.2);
+            time.reset();
+            while(!checkLift())
+            {
+                lift_front.setPower(-1.0);
+                lift_back.setPower(-1.0);
+            }
+            double target=SystemClock.uptimeMillis()+500;
+            while(SystemClock.uptimeMillis()<target)
+            {
+                //stall
+                d_open.setPosition(0.15);
+            }
+            d_open.setPosition(d_open_minRange);
+            d_bendLeft.setPosition(d_minRange_bendLeft);
+            d_bendRight.setPosition(d_minRange_bendRight);
 
+            //Thread.sleep(1000);
+
+
+            past_lift_value=10000;
+            time.reset();
+            // Retract arm to original position
+            lift_front.setTargetPosition(0);
+            lift_back.setTargetPosition(0);
+            lift_front.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
+            lift_back.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+
+            // Thread.sleep(1000);
+
+            while(!checkLift())
+            {
+                lift_front.setPower(1.0);
+                lift_back.setPower(1.0);
+            }
+            lift_front.setPower(0);
+            lift_back.setPower(0);
+            lift_front.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            lift_back.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+            d_open.setPosition(d_open_minRange);
+            d_bendLeft.setPosition(d_minRange_bendLeft);
+            d_bendRight.setPosition(d_minRange_bendRight);
+
+            d_coverLeft.setPosition(d_minRange_coverLeft);
+            d_coverRight.setPosition(d_minRange_coverRight);
         }
         if(level==2)
         {
+            d_open.setPosition(d_open_clamp);
+            lift_front.setTargetPosition(-(alliance_targetTipped-200));
+            lift_back.setTargetPosition(-(alliance_targetTipped-200));
+            lift_front.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
+            lift_back.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            d_bendLeft.setPosition(0.6);
+            d_bendRight.setPosition(0.4);
+            time.reset();
+            while(!checkLift())
+            {
+                lift_front.setPower(-1.0);
+                lift_back.setPower(-1.0);
+            }
+            double target=SystemClock.uptimeMillis()+500;
+            while(SystemClock.uptimeMillis()<target)
+            {
+                //stall
+                d_open.setPosition(0.3);
+            }
+            d_open.setPosition(d_open_minRange);
+            d_bendLeft.setPosition(d_minRange_bendLeft);
+            d_bendRight.setPosition(d_minRange_bendRight);
 
+            //Thread.sleep(1000);
+
+
+            past_lift_value=10000;
+            time.reset();
+            // Retract arm to original position
+            lift_front.setTargetPosition(0);
+            lift_back.setTargetPosition(0);
+            lift_front.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
+            lift_back.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+
+            // Thread.sleep(1000);
+
+            while(!checkLift())
+            {
+                lift_front.setPower(1.0);
+                lift_back.setPower(1.0);
+            }
+            lift_front.setPower(0);
+            lift_back.setPower(0);
+            lift_front.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            lift_back.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+            d_open.setPosition(d_open_minRange);
+            d_bendLeft.setPosition(d_minRange_bendLeft);
+            d_bendRight.setPosition(d_minRange_bendRight);
+
+            d_coverLeft.setPosition(d_minRange_coverLeft);
+            d_coverRight.setPosition(d_minRange_coverRight);
         }
         if(level==3)
         {
+            d_open.setPosition(d_open_clamp);
+            lift_front.setTargetPosition(-alliance_targetTipped);
+            lift_back.setTargetPosition(-alliance_targetTipped);
+            lift_front.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
+            lift_back.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            d_bendLeft.setPosition(d_bendLeft_lift);
+            d_bendRight.setPosition(d_bendRight_lift);
+            time.reset();
+            while(!checkLift())
+            {
+                lift_front.setPower(-1.0);
+                lift_back.setPower(-1.0);
+            }
+            lift_front.setPower(0);
+            lift_back.setPower(0);
 
+            deposit();
         }
     }
     public boolean depositCube()

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -52,6 +53,7 @@ public class teleop extends LinearOpMode {
     // Configuration - REV color/range sensor
     ColorRangeSensor colorSensor_left;
     ColorRangeSensor colorSensor_right;
+    Rev2mDistanceSensor depositSensor;
 
     // Runtime
     ElapsedTime runtime = new ElapsedTime();

@@ -18,6 +18,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.DriveConstants;
@@ -52,7 +53,7 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
 
 
     // Deposit servo positions
-    double d_open_minRange = 0.57;
+    double d_open_minRange = 0.59;
     double d_open_top = 0.45;
     double d_open_clamp=0.66;
     double d_minRange_bendLeft = 0.96;      // need to fix bend values
@@ -93,7 +94,7 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
         INTO_DEPOSIT, STALLING, EXTENDING_LIFT,  DONE
     }
 
-    int alliance_targetTipped = 1000;
+    int alliance_targetTipped = 625;
 
     SampleMecanumDriveCancelable drive;
 
@@ -147,15 +148,15 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
 
         webcamInit();
 
-        d_open.setPosition(d_open_minRange);
+        d_open.setPosition(d_open_clamp);
         d_bendLeft.setPosition(d_minRange_bendLeft);
         d_bendRight.setPosition(d_minRange_bendRight);
 
         d_coverLeft.setPosition(d_minRange_coverLeft);
         d_coverRight.setPosition(d_minRange_coverRight);
 
-        i_bottomLeft.setDirection(Servo.Direction.REVERSE);
-        i_topLeft.setDirection(Servo.Direction.REVERSE);
+        i_bottomLeft.setDirection(Servo.Direction.FORWARD);
+        i_topLeft.setDirection(Servo.Direction.FORWARD);
 
         waitForStart();
 
@@ -168,7 +169,11 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
         drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(0)));
 
         //run roadrunner code to deposit in correct place and then return to starting pos
+        telemetry.addData(">", "here");
+        telemetry.update();
         visionDeposit(cubePos);
+
+
 
         while(opModeIsActive())
         {
@@ -379,8 +384,8 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
     }
     public void deposit()
     {
-        d_bendLeft.setPosition(d_maxRange_bendLeft);
-        d_bendRight.setPosition(d_maxRange_bendRight);
+        //d_bendLeft.setPosition(d_maxRange_bendLeft);
+        //d_bendRight.setPosition(d_maxRange_bendRight);
 
         // Open to deposit in top level of alliance hub
 
