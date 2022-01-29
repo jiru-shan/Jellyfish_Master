@@ -262,10 +262,10 @@ public class teleop extends LinearOpMode {
                     leftIntakeState++;
                 }
             } else if (leftIntakeState == 4) {
-                if (/*colorSensor_left.getDistance(DistanceUnit.CM) > intakeEjectDistance*/ depositSensor.getDistance(DistanceUnit.CM) < 13.0) {
+                if (/*colorSensor_left.getDistance(DistanceUnit.CM) > intakeEjectDistance*/ depositSensor.getDistance(DistanceUnit.CM) < 9.0) {
                     leftIntake.setPower(0);
 
-                    d_open.setPosition(d_open_minRange);
+                    d_open.setPosition(d_open_minRangeSemi);
 
                     d_coverLeft.setPosition(d_minRange_coverLeft);
 
@@ -273,11 +273,11 @@ public class teleop extends LinearOpMode {
                     objectCaptured = true;
                 }
             } else if (leftIntakeState == 10) {
-                leftIntake.setPower(-1);
+                // leftIntake.setPower(-1);
                 leftIntakeTime.reset();
                 leftIntakeState++;
             } else if (leftIntakeState == 11) {
-                if (leftIntakeTime.milliseconds() > 50) {
+                // if (leftIntakeTime.milliseconds() > 50) {
                     leftIntake.setPower(0);
 
                     i_topLeft.setPosition(i_maxRange_topLeft);
@@ -288,7 +288,7 @@ public class teleop extends LinearOpMode {
                     d_coverLeft.setPosition(d_minRange_coverLeft);
 
                     leftIntakeState = 0;
-                }
+                // }
             } else {
                 leftIntake.setPower(0);
 
@@ -351,10 +351,10 @@ public class teleop extends LinearOpMode {
                     rightIntakeState++;
                 }
             } else if (rightIntakeState == 4) {
-                if (/*colorSensor_right.getDistance(DistanceUnit.CM) > intakeEjectDistance*/depositSensor.getDistance(DistanceUnit.CM) < 15.0) {
+                if (/*colorSensor_right.getDistance(DistanceUnit.CM) > intakeEjectDistance*/depositSensor.getDistance(DistanceUnit.CM) < 9.0) {
                     rightIntake.setPower(0);
 
-                    d_open.setPosition(d_open_minRange);
+                    d_open.setPosition(d_open_minRangeSemi);
 
                     d_coverRight.setPosition(d_minRange_coverRight);
 
@@ -362,11 +362,11 @@ public class teleop extends LinearOpMode {
                     objectCaptured = true;
                 }
             } else if (rightIntakeState == 10) {
-                rightIntake.setPower(-1);
+                // rightIntake.setPower(-1);
                 rightIntakeTime.reset();
                 rightIntakeState++;
             } else if (rightIntakeState == 11) {
-                if (rightIntakeTime.milliseconds() > 50) {
+                // if (rightIntakeTime.milliseconds() > 50) {
                     rightIntake.setPower(0);
 
                     i_topRight.setPosition(i_maxRange_topRight);
@@ -377,7 +377,7 @@ public class teleop extends LinearOpMode {
                     d_coverRight.setPosition(d_minRange_coverRight);
 
                     rightIntakeState = 0;
-                }
+                // }
             } else {
                 rightIntake.setPower(0);
 
