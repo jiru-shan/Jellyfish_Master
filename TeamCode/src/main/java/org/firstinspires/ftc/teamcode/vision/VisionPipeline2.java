@@ -11,10 +11,10 @@ import org.openftc.easyopencv.OpenCvPipeline;
 
 //OpenCV code that may or may not work
 //Test github commit
-public class VisionPipeline extends OpenCvPipeline
+public class VisionPipeline2 extends OpenCvPipeline
 {
     Telemetry tel;
-    public VisionPipeline(Telemetry tel)
+    public VisionPipeline2(Telemetry tel)
     {
         this.tel=tel;
     }

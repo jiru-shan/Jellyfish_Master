@@ -9,6 +9,7 @@ import com.acmerobotics.roadrunner.path.Path;
 import com.acmerobotics.roadrunner.path.PathSegment;
 import com.acmerobotics.roadrunner.path.QuinticSpline;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryGenerator;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -88,12 +89,16 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
 
     double past_lift_value;
     double CYCLE_TIME=4;
+    boolean cubeCheck;
 
     ElapsedTime time = new ElapsedTime();
     ElapsedTime intakeTimer=new ElapsedTime();
 
     enum GrabbingState {GETTING,
         RETURNING,
+        HAS_CUBE,
+        HAS_CUBE_2,
+        DONE
     }
 
     enum ReturningState
@@ -178,20 +183,18 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
         telemetry.update();
         cubePos= pipeline.getAnalysis();
 
-       visionDeposit(3);
 
-       requestOpModeStop();
 
-        /*Trajectory prepreTrajectory = drive.trajectoryBuilder(startPose)
-                .forward(7)
+        Trajectory prepreTrajectory = drive.trajectoryBuilder(startPose)
+                .forward(24+7)
                 .build();
         drive.followTrajectory(prepreTrajectory);
         drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(0)));
-*/
-        //Run roadrunner code to place in correct level and then return to starting pos
-        //visionDeposit(cubePos);
 
-        while (opModeIsActive())
+        //Run roadrunner code to place in correct level and then return to starting pos
+        visionDeposit(cubePos);
+
+        while (30-time.seconds()>CYCLE_TIME+3)
         {
 
             drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(0)));
@@ -209,15 +212,20 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
                     .build();
 
             drive.followTrajectoryAsync(goingTrajectory);
+            cubeCheck=false;
             pathChange = 1;
-            while (!hasBlock() && pathChange < 3)
+            while (GState!=GrabbingState.DONE && pathChange < 3)
             {
                 switch (GState) {
                     case GETTING:
-                        if (!drive.isBusy()) {
+                        if(hasBlock())
+                        {
+                            GState= GrabbingState.HAS_CUBE;
+                        }
+                        else if (!drive.isBusy()) {
 
                             GState = GrabbingState.RETURNING;
-                            returningTrajectory = drive.trajectoryBuilder(goingTrajectory.end())
+                            returningTrajectory = drive.trajectoryBuilder(drive.getPoseEstimate())
                                     .lineToSplineHeading(new Pose2d(-49, -1, Math.toRadians(5)))
                                     .build();
                             drive.followTrajectoryAsync(returningTrajectory);
@@ -226,7 +234,7 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
                     case RETURNING:
                         if (!drive.isBusy()) {
                             GState = GrabbingState.GETTING;
-                            goingTrajectory = drive.trajectoryBuilder(returningTrajectory.end())
+                            goingTrajectory = drive.trajectoryBuilder(drive.getPoseEstimate())
                                     .lineToSplineHeading(new Pose2d(-73 - 2 * pathChange, -2.25 - pathChange, Math.toRadians(10 + (2.5 * pathChange))), SampleMecanumDrive.getVelocityConstraint(40,
                                             DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                                     .build();
@@ -234,27 +242,54 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
                             pathChange++;
                         }
                         break;
+                    case HAS_CUBE:
+                        double target = SystemClock.uptimeMillis() + 300;
+                        while (SystemClock.uptimeMillis() < target)
+                        {
+                            rightIntake.setPower(1);
+                            drive.update();
+                            raiseIntakes();
+                        }
+                        drive.cancelFollowing();
+                        rightIntake.setPower(0);
+                        returningTrajectory = drive.trajectoryBuilder(drive.getPoseEstimate())
+                                .lineToSplineHeading(new Pose2d(-49, 8, Math.toRadians(0)))
+                                .build();
+                        drive.followTrajectoryAsync(returningTrajectory);
+                        GState=GrabbingState.HAS_CUBE_2;
+
+                        break;
+                    case HAS_CUBE_2:
+                        if(hasBlock())
+                        {
+                            cubeCheck=true;
+                        }
+                        if(!drive.isBusy())
+                        {
+                            drive.setPoseEstimate(new Pose2d(drive.getPoseEstimate().getX(), 0, 0));
+                            if(cubeCheck)
+                            {
+                                GState=GrabbingState.DONE;
+                            }
+                            else
+                                {
+                                    GState=GrabbingState.RETURNING;
+                                }
+                        }
+                    case DONE:
+                        break;
                 }
                 drive.update();
-                rightIntake.setPower(1);
+                if(GState!=GrabbingState.HAS_CUBE_2)
+                {
+                    rightIntake.setPower(1);
+                }
             }
-            double target = SystemClock.uptimeMillis() + 300;
-            while (SystemClock.uptimeMillis() < target)
-            {
-                rightIntake.setPower(1);
-                drive.update();
-                raiseIntakes();
-            }
-            drive.cancelFollowing();
+
             rightIntake.setPower(0);
 
 
-            returningTrajectory = drive.trajectoryBuilder(drive.getPoseEstimate())
-                    .lineToSplineHeading(new Pose2d(-49, 8, Math.toRadians(0)))
-                    .build();
-            drive.followTrajectory(returningTrajectory);
 
-            drive.setPoseEstimate(new Pose2d(drive.getPoseEstimate().getX(), 0, 0));
 
             RState = ReturningState.LING;
             IState=IntakeState.INTO_DEPOSIT;
@@ -361,6 +396,8 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
                         IState = EvenLessScuffedAuton_RED.IntakeState.EXTENDING_LIFT;
                         past_lift_value=10000;
                         time.reset();
+                        d_bendLeft.setPosition(d_bendLeft_lift);
+                        d_bendRight.setPosition(d_bendRight_lift);
                         lift_front.setTargetPosition(-alliance_targetTipped);
                         lift_back.setTargetPosition(-alliance_targetTipped);
                         lift_front.setMode(DcMotor.RunMode.RUN_TO_POSITION);   // Move to deposit position
@@ -467,7 +504,7 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
         if(level==1)
         {
             Trajectory strafeTrajectory = drive.trajectoryBuilder(new Pose2d())
-                    .strafeRight(20)
+                    .strafeRight(28)
                     .build();
             drive.followTrajectory(strafeTrajectory);
             lift_front.setTargetPosition(-200);
@@ -522,6 +559,13 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
 
             d_coverLeft.setPosition(d_minRange_coverLeft);
             d_coverRight.setPosition(d_minRange_coverRight);
+
+            Trajectory strafeBack=drive.trajectoryBuilder(drive.getPoseEstimate())
+            .lineToConstantHeading(new Vector2d(0,0))
+                    .build();
+
+            drive.followTrajectory(strafeBack);
+
         }
         if(level==2)
         {
