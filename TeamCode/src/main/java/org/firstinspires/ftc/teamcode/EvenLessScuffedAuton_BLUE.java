@@ -52,7 +52,7 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
 
 
     // Deposit servo positions
-    double d_open_minRange = 0.59;
+    double d_open_minRange = 0.65; // it was 0.59
     double d_open_top = 0.4;
     double d_open_clamp=0.66;
     double d_minRange_bendLeft = 0.96;      // need to fix bend values
@@ -160,6 +160,12 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
 
         d_coverLeft.setPosition(d_minRange_coverLeft);
         d_coverRight.setPosition(d_minRange_coverRight);
+        d_open.setPosition(d_open_minRange);
+        d_open.setPosition(d_open_minRange);
+        d_open.setPosition(d_open_minRange);
+        d_open.setPosition(d_open_minRange);
+        d_open.setPosition(d_open_minRange);
+        d_open.setPosition(d_open_minRange);
 
         waitForStart();
 
