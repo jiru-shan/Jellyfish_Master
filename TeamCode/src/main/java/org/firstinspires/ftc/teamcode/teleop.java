@@ -403,6 +403,7 @@ public class teleop extends LinearOpMode {
                     liftBack.setTargetPosition(-shared_targetClose);
                     liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    d_open.setPosition(d_open_minRange);
                     liftFront.setPower(-1.0);
                     liftBack.setPower(-1.0);
                     liftState = 12;
@@ -414,6 +415,7 @@ public class teleop extends LinearOpMode {
                     liftBack.setTargetPosition(-shared_targetMiddle);
                     liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    d_open.setPosition(d_open_minRange);
                     liftFront.setPower(-1.0);
                     liftBack.setPower(-1.0);
                     liftState = 13;
@@ -425,6 +427,7 @@ public class teleop extends LinearOpMode {
                     liftBack.setTargetPosition(-shared_targetFar);
                     liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    d_open.setPosition(d_open_minRange);
                     liftFront.setPower(-1.0);
                     liftBack.setPower(-1.0);
                     liftState = 14;
@@ -436,6 +439,7 @@ public class teleop extends LinearOpMode {
                     liftBack.setTargetPosition(-alliance_middle);
                     liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    d_open.setPosition(d_open_minRange);
                     liftFront.setPower(-1.0);
                     liftBack.setPower(-1.0);
                     liftState = 15;
@@ -447,6 +451,7 @@ public class teleop extends LinearOpMode {
                     liftBack.setTargetPosition(-alliance_targetBalanced);
                     liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    d_open.setPosition(d_open_minRange);
                     liftFront.setPower(-1.0);
                     liftBack.setPower(-1.0);
                     liftState = 16;
@@ -458,12 +463,16 @@ public class teleop extends LinearOpMode {
                     liftBack.setTargetPosition(-alliance_targetTipped);
                     liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    d_open.setPosition(d_open_minRange);
                     liftFront.setPower(-1.0);
                     liftBack.setPower(-1.0);
                     liftState = 17;
                     liftPosition = 1;
                 }
             }else if(gamepad2.left_trigger != 0 && liftFront.getTargetPosition() < 500) {
+                d_open.setPosition(d_open_minRange);
+                d_bendLeft.setPosition(d_minRange_bendLeft);
+                d_bendRight.setPosition(d_minRange_bendRight);
                 liftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 liftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 liftFront.setTargetPosition(800);
