@@ -6,7 +6,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -22,7 +21,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDriveCancelable;
-import org.firstinspires.ftc.teamcode.vision.VisionPipeline;
+import org.firstinspires.ftc.teamcode.vision.VisionPipeline_BLUE;
+import org.firstinspires.ftc.teamcode.vision.VisionPipeline_RED;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -72,7 +72,7 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
     ElapsedTime intakeTimer=new ElapsedTime();
 
     OpenCvWebcam camera;
-    VisionPipeline pipeline;
+    VisionPipeline_BLUE pipeline;
 
     double CYCLE_TIME=4;
     double past_lift_value;
@@ -157,7 +157,7 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
         cubePos= pipeline.getAnalysis();
 
         Trajectory prepreTrajectory = drive.trajectoryBuilder(startPose)
-                .back(7)
+                .back(7+12.25)
                 .build();
         drive.followTrajectory(prepreTrajectory);
         drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(0)));
@@ -459,7 +459,7 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
     {
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam"), cameraMonitorViewId);
-        pipeline=new VisionPipeline(telemetry);
+        pipeline=new VisionPipeline_BLUE(telemetry);
         camera.setPipeline(pipeline);
         camera.setMillisecondsPermissionTimeout(2500); // Timeout for obtaining permission is configurable. Set before opening.
         camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()

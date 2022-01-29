@@ -11,10 +11,10 @@ import org.openftc.easyopencv.OpenCvPipeline;
 
 //OpenCV code that may or may not work
 //Test github commit
-public class VisionPipeline extends OpenCvPipeline
+public class VisionPipeline_BLUE extends OpenCvPipeline
 {
     Telemetry tel;
-    public VisionPipeline(Telemetry tel)
+    public VisionPipeline_BLUE(Telemetry tel)
     {
         this.tel=tel;
     }
@@ -237,7 +237,7 @@ public class VisionPipeline extends OpenCvPipeline
         if(trueMax==avg1) // Was it from region 1?
         {
             position = SkystonePosition.LEFT; // Record our analysis
-            pos=1;
+            pos=3;
             /*
              * Draw a solid rectangle on top of the chosen region.
              * Simply a visual aid. Serves no functional purpose.
@@ -268,7 +268,7 @@ public class VisionPipeline extends OpenCvPipeline
         else if(trueMax == avg3) // Was it from region 3?
         {
             position = SkystonePosition.RIGHT; // Record our analysis
-            pos=3;
+            pos=1;
             /*
              * Draw a solid rectangle on top of the chosen region.
              * Simply a visual aid. Serves no functional purpose.

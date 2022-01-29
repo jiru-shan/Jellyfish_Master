@@ -5,14 +5,8 @@ import android.os.SystemClock;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.path.Path;
-import com.acmerobotics.roadrunner.path.PathSegment;
-import com.acmerobotics.roadrunner.path.QuinticSpline;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
-import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
-import com.acmerobotics.roadrunner.trajectory.TrajectoryGenerator;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -28,8 +22,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDriveCancelable;
-import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
-import org.firstinspires.ftc.teamcode.vision.VisionPipeline;
+import org.firstinspires.ftc.teamcode.vision.VisionPipeline_RED;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -85,7 +78,7 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
     double intakePower=1;
 
     OpenCvWebcam camera;
-    VisionPipeline pipeline;
+    VisionPipeline_RED pipeline;
 
     double past_lift_value;
     double CYCLE_TIME=4;
@@ -179,14 +172,12 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
 
         waitForStart();
 
-        telemetry.addData(">", "here");
-        telemetry.update();
         cubePos= pipeline.getAnalysis();
 
 
 
         Trajectory prepreTrajectory = drive.trajectoryBuilder(startPose)
-                .forward(24+7)
+                .forward(21.5+7)
                 .build();
         drive.followTrajectory(prepreTrajectory);
         drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(0)));
@@ -335,10 +326,10 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
                 putInDeposit();
             }
        }
-            /*Trajectory park=drive.trajectoryBuilder(drive.getPoseEstimate())
+            Trajectory park=drive.trajectoryBuilder(drive.getPoseEstimate())
                 .lineToSplineHeading(new Pose2d(-50, 0, Math.toRadians(0)))
                 .build();
-            drive.followTrajectory(park);*/
+            drive.followTrajectory(park);
 
     }
     public boolean checkLift()
@@ -656,7 +647,7 @@ public class EvenLessScuffedAuton_RED extends LinearOpMode
     {
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam"), cameraMonitorViewId);
-        pipeline=new VisionPipeline(telemetry);
+        pipeline=new VisionPipeline_RED(telemetry);
         camera.setPipeline(pipeline);
         camera.setMillisecondsPermissionTimeout(2500); // Timeout for obtaining permission is configurable. Set before opening.
         camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
