@@ -481,6 +481,7 @@ public class teleop extends LinearOpMode {
                 liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 liftFront.setPower(1.0);
                 liftBack.setPower(1.0);
+                liftState=0;
             }else if(gamepad2.x && liftState < 20) {
                 if(Math.abs(liftFront.getCurrentPosition()) > 100) {
                     d_bendLeft.setPosition(d_maxRange_bendLeft);
