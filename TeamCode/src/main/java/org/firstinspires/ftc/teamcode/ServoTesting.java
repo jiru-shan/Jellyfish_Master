@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoController;
+import com.qualcomm.robotcore.hardware.ServoControllerEx;
 
 @Config
 @TeleOp
@@ -24,7 +26,7 @@ public class ServoTesting extends LinearOpMode
 
     DcMotor rightIntake;
 
-    public static double d_open_minRange = 0.62;
+    public static double d_open_minRange = 0.66;
     double d_open_top = 0.45;
     public static double d_minRange_bendLeft = 0.94;      // need to fix bend values
     double d_maxRange_bendLeft = 0.78;
@@ -45,6 +47,7 @@ public class ServoTesting extends LinearOpMode
     double i_maxRange_topLeft = 0.85;
     double i_minRange_bottomLeft = 0.9;
     double i_maxRange_bottomLeft = 0.15;
+    ServoController servoController;
 
     @Override
     public void runOpMode() throws InterruptedException
@@ -58,33 +61,25 @@ public class ServoTesting extends LinearOpMode
         i_bottomLeft = hardwareMap.servo.get("i_bottomLeft");
         i_topRight = hardwareMap.servo.get("i_topRight");
         i_bottomRight = hardwareMap.servo.get("i_bottomRight");
+        servoController=d_open.getController();
+        int port=d_open.getPortNumber();
 
         rightIntake = hardwareMap.dcMotor.get("rightIntake");
 
         i_bottomLeft.setDirection(Servo.Direction.REVERSE);
         i_topLeft.setDirection(Servo.Direction.REVERSE);
 
+        d_open.resetDeviceConfigurationForOpMode();
         waitForStart();
-        d_open.setPosition(d_open_minRange);
-        d_bendLeft.setPosition(d_minRange_bendLeft);
-        d_bendRight.setPosition(d_minRange_bendRight);
-        double target= SystemClock.uptimeMillis()+2000;
 
-        d_coverRight.setPosition(d_maxRange_coverRight);
-        d_coverLeft.setPosition(d_minRange_coverLeft);
-        while(opModeIsActive())
+        //d_open.setDirection(Servo.Direction.REVERSE);
+        servoController.pwmEnable();
+        servoController.setServoPosition(port, d_open_minRange);
+        while(true)
         {
-
-            i_topLeft.setPosition(i_maxRange_topLeft);
-            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
-            if(gamepad1.a)
-            {
-                rightIntake.setPower(-1);
-            }
-            else
-                {
-                    rightIntake.setPower(0);
-                }
+            telemetry.addData(">", servoController.getServoPosition(port));
+            telemetry.update();
         }
+
     }
 }
