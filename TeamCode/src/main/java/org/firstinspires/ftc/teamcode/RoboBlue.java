@@ -30,19 +30,18 @@ public class RoboBlue extends LinearOpMode {
     DcMotor liftRight;
 
     // 12 Servos
-    CRServo c_Left;
-    CRServo c_Right;
-    Servo bucket;
-    Servo arm;
     Servo i_topLeft;
     Servo i_bottomLeft;
     Servo i_topRight;
     Servo i_bottomRight;
+    CRServo c_Left;
+    CRServo c_Right;
+    Servo bucket;
+    Servo arm;
 
     // Color sensors
     ColorRangeSensor colorSensor_left;
     ColorRangeSensor colorSensor_right;
-    Rev2mDistanceSensor depositSensor;
 
     // Runtime
     ElapsedTime runtime = new ElapsedTime();
@@ -72,29 +71,18 @@ public class RoboBlue extends LinearOpMode {
         // Color sensors
         colorSensor_left = hardwareMap.get(ColorRangeSensor.class, "colorSensor_left");
         colorSensor_right = hardwareMap.get(ColorRangeSensor.class, "colorSensor_right");
-        depositSensor = hardwareMap.get(Rev2mDistanceSensor.class, "depositSensor");
 
         // Intake
         double highSweepPower = 0.8;
         // double lowSweepPower = 0.4;
 
-        // minRange - intake down, deposit position closed, deposit folded down
-        // maxRange - intake up, deposit position open, deposit in scoring position
-
         // Deposit servo positions
         double bucket_down = 0.55;
         double bucket_left = 0.27;
         double bucket_right = 0.83;
-
-        double d_open_shared = 0.47;
-        double d_minRange_coverLeft = 0.59;
-        double d_maxRange_coverLeft = 0.15;
-        double d_minRange_coverRight = 0.41;
-        double d_maxRange_coverRight = 0.85;
-        double d_minRange_bendLeft = 0.96;
-        double d_maxRange_bendLeft = 0.78;
-        double d_minRange_bendRight = 0.05;
-        double d_maxRange_bendRight = 0.23;
+        double arm_forward = 0.30;   // temporary
+        double arm_backward = 0.87;
+        double turret_center = 0.5;
 
         double i_minRange_topLeft = 0.15;   // 0.08
         double i_maxRange_topLeft = 0.87;
@@ -192,24 +180,31 @@ public class RoboBlue extends LinearOpMode {
 
 
             if (leftIntakeState == 0) {
+
                 if (gamepad1.left_bumper) {
+
                     i_topLeft.setPosition(i_minRange_topLeft);
                     i_bottomLeft.setPosition(i_minRange_bottomLeft);
 
                     leftIntake.setPower(highSweepPower);
 
-                    bucket.setPosition(d_open_minRangeSemi);
+                    bucket.setPosition(bucket_down);
 
                     leftIntakeTime.reset();
 
                     leftIntakeState++;
+
                 } else {
+
                     i_topLeft.setPosition(i_maxRange_topLeft);
                     i_bottomLeft.setPosition(i_maxRange_bottomLeft);
                 }
+
             } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
                 leftIntakeState = 10;
+
             } else if (leftIntakeState == 1) {
+
                 if (colorSensor_left.getDistance(DistanceUnit.CM) < intakeCaptureDistance) {
                     leftIntake.setPower(0.25);
 
@@ -217,20 +212,24 @@ public class RoboBlue extends LinearOpMode {
                     i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
                     leftIntakeState++;
+
                 } else {
                     i_topLeft.setPosition(i_minRange_topLeft);
                     i_bottomLeft.setPosition(i_minRange_bottomLeft);
                 }
+
             } else if (leftIntakeState == 2) {
+
                 leftIntake.setPower(0);
 
-                d_coverLeft.setPosition(d_maxRange_coverLeft);
-                d_coverRight.setPosition(d_minRange_coverRight);
+                bucket.setPosition(bucket_left);
 
                 leftIntakeTime.reset();
 
                 leftIntakeState++;
+
             } else if (leftIntakeState == 3) {
+
                 if (leftIntakeTime.milliseconds() > intakeFlipUpTime) {
                     leftIntake.setPower(-highSweepPower);
 
@@ -238,48 +237,47 @@ public class RoboBlue extends LinearOpMode {
 
                     leftIntakeState++;
                 }
+
             } else if (leftIntakeState == 4) {
-                if (/*colorSensor_left.getDistance(DistanceUnit.CM) > intakeEjectDistance*/ depositSensor.getDistance(DistanceUnit.CM) < 9.0) {
-                    leftIntake.setPower(0);
 
-                    d_open.setPosition(d_open_minRangeSemi);
+                leftIntake.setPower(0);
 
-                    d_coverLeft.setPosition(d_minRange_coverLeft);
+                bucket.setPosition(bucket_down);
 
-                    leftIntakeState = 0;
-                    objectCaptured = true;
-                }
+                leftIntakeState = 0;
+                objectCaptured = true;
+
             } else if (leftIntakeState == 10) {
+
                 // leftIntake.setPower(-1);
                 leftIntakeTime.reset();
                 leftIntakeState++;
+
             } else if (leftIntakeState == 11) {
-                // if (leftIntakeTime.milliseconds() > 50) {
+
                 leftIntake.setPower(0);
 
                 i_topLeft.setPosition(i_maxRange_topLeft);
                 i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
-                d_open.setPosition(d_open_minRangeSemi);
-
-                d_coverLeft.setPosition(d_minRange_coverLeft);
+                bucket.setPosition(bucket_down);
 
                 leftIntakeState = 0;
-                // }
+
             } else {
+
                 leftIntake.setPower(0);
 
                 i_topLeft.setPosition(i_maxRange_topLeft);
                 i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
-                // d_open.setPosition(d_open_minRangeSemi);
-
-                d_coverLeft.setPosition(d_minRange_coverLeft);
+                bucket.setPosition(bucket_down);
 
                 leftIntakeState = 0;
             }
 
             if (rightIntakeState == 0) {
+
                 if (gamepad1.right_bumper) {
 
                     i_topRight.setPosition(i_minRange_topRight);
@@ -287,18 +285,24 @@ public class RoboBlue extends LinearOpMode {
 
                     rightIntake.setPower(highSweepPower);
 
-                    d_open.setPosition(d_open_minRangeSemi);
+                    bucket.setPosition(bucket_down);
 
                     rightIntakeTime.reset();
 
                     rightIntakeState++;
+
                 } else {
+
                     i_topRight.setPosition(i_maxRange_topRight);
                     i_bottomRight.setPosition(i_maxRange_bottomRight);
                 }
+
             } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
+
                 rightIntakeState = 10;
+
             } else if (rightIntakeState == 1) {
+
                 if (colorSensor_right.getDistance(DistanceUnit.CM) < intakeCaptureDistance) {
                     rightIntake.setPower(0.25);
 
@@ -306,20 +310,25 @@ public class RoboBlue extends LinearOpMode {
                     i_bottomRight.setPosition(i_maxRange_bottomRight);
 
                     rightIntakeState++;
+
                 } else {
+
                     i_topRight.setPosition(i_minRange_topRight);
                     i_bottomRight.setPosition(i_minRange_bottomRight);
                 }
+
             } else if (rightIntakeState == 2) {
+
                 rightIntake.setPower(0);
 
-                d_coverRight.setPosition(d_maxRange_coverRight);
-                d_coverLeft.setPosition(d_minRange_coverLeft);
+                bucket.setPosition(bucket_right);
 
                 rightIntakeTime.reset();
 
                 rightIntakeState++;
+
             } else if (rightIntakeState == 3) {
+
                 if (rightIntakeTime.milliseconds() > intakeFlipUpTime) {
                     rightIntake.setPower(-highSweepPower);
 
@@ -327,35 +336,37 @@ public class RoboBlue extends LinearOpMode {
 
                     rightIntakeState++;
                 }
+
             } else if (rightIntakeState == 4) {
-                if (/*colorSensor_right.getDistance(DistanceUnit.CM) > intakeEjectDistance*/depositSensor.getDistance(DistanceUnit.CM) < 9.0) {
-                    rightIntake.setPower(0);
 
-                    d_open.setPosition(d_open_minRangeSemi);
+                rightIntake.setPower(0);
 
-                    d_coverRight.setPosition(d_minRange_coverRight);
+                bucket.setPosition(bucket_down);
 
-                    rightIntakeState = 0;
-                    objectCaptured = true;
-                }
+                rightIntakeState = 0;
+                objectCaptured = true;
+
             } else if (rightIntakeState == 10) {
+
                 // rightIntake.setPower(-1);
                 rightIntakeTime.reset();
                 rightIntakeState++;
+
             } else if (rightIntakeState == 11) {
+
                 // if (rightIntakeTime.milliseconds() > 50) {
                 rightIntake.setPower(0);
 
                 i_topRight.setPosition(i_maxRange_topRight);
                 i_bottomRight.setPosition(i_maxRange_bottomRight);
 
-                d_open.setPosition(d_open_minRangeSemi);
-
-                d_coverRight.setPosition(d_minRange_coverRight);
+                bucket.setPosition(bucket_down);
 
                 rightIntakeState = 0;
                 // }
+
             } else {
+
                 rightIntake.setPower(0);
 
                 i_topRight.setPosition(i_maxRange_topRight);
@@ -363,7 +374,7 @@ public class RoboBlue extends LinearOpMode {
 
                 // d_open.setPosition(d_open_minRangeSemi);
 
-                d_coverRight.setPosition(d_minRange_coverRight);
+                bucket.setPosition(bucket_down);
 
                 rightIntakeState = 0;
 
@@ -373,83 +384,95 @@ public class RoboBlue extends LinearOpMode {
 
             // Motor tick count is equal to 384.5
             if (liftState == 0) {
+
                 if (gamepad2.a) {
+
                     liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftLeft.setTargetPosition(-shared_targetClose);
                     liftRight.setTargetPosition(-shared_targetClose);
                     liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    d_open.setPosition(d_open_minRange);
+                    bucket.setPosition(bucket_down);
                     liftLeft.setPower(-1.0);
                     liftRight.setPower(-1.0);
                     liftState = 12;
                     liftPosition = 1;
+
                 } else if (gamepad2.b) {
+
                     liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftLeft.setTargetPosition(-shared_targetMiddle);
                     liftRight.setTargetPosition(-shared_targetMiddle);
                     liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    d_open.setPosition(d_open_minRange);
+                    bucket.setPosition(bucket_down);
                     liftLeft.setPower(-1.0);
                     liftRight.setPower(-1.0);
                     liftState = 13;
                     liftPosition = 1;
+
                 } else if (gamepad2.y) {
+
                     liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftLeft.setTargetPosition(-shared_targetFar);
                     liftRight.setTargetPosition(-shared_targetFar);
                     liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    d_open.setPosition(d_open_minRange);
+                    bucket.setPosition(bucket_down);
                     liftLeft.setPower(-1.0);
                     liftRight.setPower(-1.0);
                     liftState = 14;
                     liftPosition = 1;
+
                 } else if (gamepad2.dpad_down) {
+
                     liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftLeft.setTargetPosition(-alliance_middle);
                     liftRight.setTargetPosition(-alliance_middle);
                     liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    d_open.setPosition(d_open_minRange);
+                    bucket.setPosition(bucket_down);
                     liftLeft.setPower(-1.0);
                     liftRight.setPower(-1.0);
                     liftState = 15;
                     liftPosition = 1;
+
                 } else if (gamepad2.dpad_left) {
+
                     liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftLeft.setTargetPosition(-alliance_targetBalanced);
                     liftRight.setTargetPosition(-alliance_targetBalanced);
                     liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    d_open.setPosition(d_open_minRange);
+                    bucket.setPosition(bucket_down);
                     liftLeft.setPower(-1.0);
                     liftRight.setPower(-1.0);
                     liftState = 16;
                     liftPosition = 1;
+
                 } else if (gamepad2.dpad_up) {
+
                     liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftLeft.setTargetPosition(-alliance_targetTipped);
                     liftRight.setTargetPosition(-alliance_targetTipped);
                     liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    d_open.setPosition(d_open_minRange);
+                    bucket.setPosition(bucket_down);
                     liftLeft.setPower(-1.0);
                     liftRight.setPower(-1.0);
                     liftState = 17;
                     liftPosition = 1;
                 }
+
             } else if (gamepad2.left_trigger != 0 && liftLeft.getTargetPosition() < 500) {
-                d_open.setPosition(d_open_minRange);
-                d_bendLeft.setPosition(d_minRange_bendLeft);
-                d_bendRight.setPosition(d_minRange_bendRight);
+
+                bucket.setPosition(bucket_down);
                 liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 liftLeft.setTargetPosition(800);
@@ -459,86 +482,56 @@ public class RoboBlue extends LinearOpMode {
                 liftLeft.setPower(1.0);
                 liftRight.setPower(1.0);
                 liftState = 0;
+
             } else if (gamepad2.x && liftState < 20) {
+
                 if (Math.abs(liftLeft.getCurrentPosition()) > 100) {
-                    d_bendLeft.setPosition(d_maxRange_bendLeft);
-                    d_bendRight.setPosition(d_maxRange_bendRight);
-                    d_open.setPosition(d_open_shared);
+
+                    arm.setPosition(arm_forward);
+                    bucket.setPosition(bucket_left);
 
                     liftState = 21;
                     liftTime.reset();
                 }
+
             } else if (gamepad2.dpad_right && liftState < 20) {
+
                 if (Math.abs(liftLeft.getCurrentPosition()) > 100) {
-                    d_bendLeft.setPosition(d_minRange_bendLeft);
-                    d_bendRight.setPosition(d_minRange_bendRight);
-                    d_open.setPosition(d_open_top);
+
+                    arm.setPosition(arm_forward);
+                    bucket.setPosition(bucket_right);
 
                     liftState = 21;
                     liftTime.reset();
                 }
+
             } else if (liftState >= 10 && liftState < 20) {
-                // if(liftState == 12) {
-                //     if(Math.abs(liftFront.getCurrentPosition() - shared_targetClose) < liftExtendError) {
-                //         liftPosition = 12;
-                //         if(gamepad2.dpad_right || gamepad2.x) {
-                //             liftState = 20;
-                //         }
-                //     }
-                // }else if(liftState == 13) {
-                //     if(Math.abs(liftFront.getCurrentPosition() - shared_targetMiddle) < liftExtendError) {
-                //         liftPosition = 13;
-                //         if(gamepad2.dpad_right || gamepad2.x) {
-                //             liftState = 20;
-                //         }
-                //     }
-                // }else if(liftState == 14) {
-                //     if(Math.abs(liftFront.getCurrentPosition() - shared_targetFar) < liftExtendError) {
-                //         liftPosition = 14;
-                //         if(gamepad2.dpad_right || gamepad2.x) {
-                //             liftState = 20;
-                //         }
-                //     }
-                // }else if(liftState == 15) {
-                //     if(Math.abs(liftFront.getCurrentPosition() - alliance_middle) < liftExtendError) {
-                //         liftPosition = 15;
-                //         if(gamepad2.dpad_right || gamepad2.x) {
-                //             liftState = 20;
-                //         }
-                //     }
-                // }else if(liftState == 16) {
-                //     if(Math.abs(liftFront.getCurrentPosition() - alliance_targetBalanced) < liftExtendError) {
-                //         liftPosition = 16;
-                //         if(gamepad2.dpad_right || gamepad2.x) {
-                //             liftState = 20;
-                //         }
-                //     }
-                // }else if(liftState == 17) {
-                //     if(Math.abs(liftFront.getCurrentPosition() - alliance_targetTipped) < liftExtendError) {
-                //         liftPosition = 17;
-                //         if(gamepad2.dpad_right || gamepad2.x) {
-                //             liftState = 20;
-                //         }
-                //     }
-                // }
 
                 if (gamepad2.a && (liftLeft.getTargetPosition() != (-shared_targetClose))) {
+
                     liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftLeft.setTargetPosition(-shared_targetClose);
                     liftRight.setTargetPosition(-shared_targetClose);
                     liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
                     if (liftLeft.getCurrentPosition() < (-shared_targetClose)) {
+
                         liftLeft.setPower(1.0);
                         liftRight.setPower(1.0);
+
                     } else {
+
                         liftLeft.setPower(-1.0);
                         liftRight.setPower(-1.0);
                     }
+
                     liftState = 12;
                     liftPosition = 1;
+
                 } else if (gamepad2.b && (liftLeft.getTargetPosition() != (-shared_targetMiddle))) {
+
                     liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftLeft.setTargetPosition(-shared_targetMiddle);
@@ -547,16 +540,23 @@ public class RoboBlue extends LinearOpMode {
                     liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftLeft.setPower(-1.0);
                     liftRight.setPower(-1.0);
+
                     if (liftLeft.getCurrentPosition() < (-shared_targetMiddle)) {
+
                         liftLeft.setPower(1.0);
                         liftRight.setPower(1.0);
+
                     } else {
+
                         liftLeft.setPower(-1.0);
                         liftRight.setPower(-1.0);
                     }
+
                     liftState = 13;
                     liftPosition = 1;
+
                 } else if (gamepad2.y && (liftLeft.getTargetPosition() != (-shared_targetFar))) {
+
                     liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftLeft.setTargetPosition(-shared_targetFar);
@@ -565,16 +565,23 @@ public class RoboBlue extends LinearOpMode {
                     liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftLeft.setPower(-1.0);
                     liftRight.setPower(-1.0);
+
                     if (liftLeft.getCurrentPosition() < (-shared_targetFar)) {
+
                         liftLeft.setPower(1.0);
                         liftRight.setPower(1.0);
+
                     } else {
+
                         liftLeft.setPower(-1.0);
                         liftRight.setPower(-1.0);
                     }
+
                     liftState = 14;
                     liftPosition = 1;
+
                 } else if (gamepad2.dpad_down && (liftLeft.getTargetPosition() != (-alliance_middle))) {
+
                     liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftLeft.setTargetPosition(-alliance_middle);
@@ -583,16 +590,23 @@ public class RoboBlue extends LinearOpMode {
                     liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftLeft.setPower(-1.0);
                     liftRight.setPower(-1.0);
+
                     if (liftLeft.getCurrentPosition() < (-alliance_middle)) {
+
                         liftLeft.setPower(1.0);
                         liftRight.setPower(1.0);
+
                     } else {
+
                         liftLeft.setPower(-1.0);
                         liftRight.setPower(-1.0);
                     }
+
                     liftState = 15;
                     liftPosition = 1;
+
                 } else if (gamepad2.dpad_left && (liftLeft.getTargetPosition() != (-alliance_targetBalanced))) {
+
                     liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftLeft.setTargetPosition(-alliance_targetBalanced);
@@ -601,16 +615,23 @@ public class RoboBlue extends LinearOpMode {
                     liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftLeft.setPower(-1.0);
                     liftRight.setPower(-1.0);
+
                     if (liftLeft.getCurrentPosition() < (-alliance_targetBalanced)) {
+
                         liftLeft.setPower(1.0);
                         liftRight.setPower(1.0);
+
                     } else {
+
                         liftLeft.setPower(-1.0);
                         liftRight.setPower(-1.0);
                     }
+
                     liftState = 16;
                     liftPosition = 1;
+
                 } else if (gamepad2.dpad_up && (liftLeft.getTargetPosition() != (-alliance_targetTipped))) {
+
                     liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftLeft.setTargetPosition(-alliance_targetTipped);
@@ -619,58 +640,35 @@ public class RoboBlue extends LinearOpMode {
                     liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftLeft.setPower(-1.0);
                     liftRight.setPower(-1.0);
+
                     if (liftLeft.getCurrentPosition() < (-alliance_targetTipped)) {
+
                         liftLeft.setPower(1.0);
                         liftRight.setPower(1.0);
+
                     } else {
+
                         liftLeft.setPower(-1.0);
                         liftRight.setPower(-1.0);
                     }
+
                     liftState = 17;
                     liftPosition = 1;
                 }
-            }/*else if(liftState == 20) {
-                //moving the deposit to correct angle and depositing
-                //fill in these values idk if these are right
-                if(liftPosition == 12) {
-                    d_bendLeft.setPosition(d_maxRange_bendLeft);
-                    d_bendRight.setPosition(d_maxRange_bendRight);
-                    d_open.setPosition(d_open_shared);
-                }else if(liftPosition == 13) {
-                    d_bendLeft.setPosition(d_maxRange_bendLeft);
-                    d_bendRight.setPosition(d_maxRange_bendRight);
-                    d_open.setPosition(d_open_shared);
-                }else if(liftPosition == 14) {
-                    d_bendLeft.setPosition(d_maxRange_bendLeft);
-                    d_bendRight.setPosition(d_maxRange_bendRight);
-                    d_open.setPosition(d_open_shared);
-                }else if(liftPosition == 15) {
-                    d_bendLeft.setPosition(d_maxRange_bendLeft);
-                    d_bendRight.setPosition(d_maxRange_bendRight);
-                    d_open.setPosition(d_open_shared);
-                }else if(liftPosition == 16) {
-                    d_bendLeft.setPosition(d_minRange_bendLeft);
-                    d_bendRight.setPosition(d_minRange_bendRight);
-                    d_open.setPosition(d_open_top);
-                }else if(liftPosition == 17) {
-                    d_bendLeft.setPosition(d_minRange_bendLeft);
-                    d_bendRight.setPosition(d_minRange_bendRight);
-                    d_open.setPosition(d_open_top);
-                }
-                liftTime.reset();
-                liftState = 21;
-            }*/ else if (liftState == 21) {
+            } else if (liftState == 21) {
                 if (liftTime.milliseconds() > 700/* || (d_bendLeft.getPosition() == d_minRange_bendLeft)*/) {
-                    d_open.setPosition(d_open_minRange);
-                    d_bendLeft.setPosition(d_minRange_bendLeft);
-                    d_bendRight.setPosition(d_minRange_bendRight);
+
+                    bucket.setPosition(bucket_down);
+                    arm.setPosition(arm_forward);
 
                     objectCaptured = false;
 
                     liftTime.reset();
                     liftState = 22;
                 }
+
             } else if (liftState == 22) {
+
                 if (liftTime.milliseconds() > 500 /* || liftPosition > 15 */) { // this do be risky idk
                     liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -683,6 +681,7 @@ public class RoboBlue extends LinearOpMode {
                     liftState = 23;
                     // liftState = 0;
                 }
+
             } else if (liftState == 23) {
                 if (Math.abs(liftLeft.getCurrentPosition() - 0) < liftRetractError) {
                     liftPosition = 0;
@@ -719,11 +718,13 @@ public class RoboBlue extends LinearOpMode {
 
             if (gamepad2.left_trigger != 0) {
 
-                carousel.setPower(0.5 + 0.5 * (int) a);
+                c_Left.setPower(0.5 + 0.5 * (int) a);
+                c_Right.setPower(-(0.5 + 0.5 * (int) a));
 
             } else if (gamepad2.right_trigger != 0) {
 
-                carousel.setPower(-(0.5 + 0.5 * (int) a));
+                c_Left.setPower(-(0.5 + 0.5 * (int) a));
+                c_Right.setPower(0.5 + 0.5 * (int) a);
             }
 
 //            if (gamepad2.left_bumper) {
@@ -769,6 +770,7 @@ public class RoboBlue extends LinearOpMode {
             /** Reset Encoders **/
 
             if (gamepad2.right_trigger != 0) {
+
                 liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
                 liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             }
@@ -776,19 +778,15 @@ public class RoboBlue extends LinearOpMode {
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "leftFront (%.2f), leftBack (%.2f), rightFront (%.2f), rightBack (%.2f)",
                     leftFrontPower, leftBackPower, rightFrontPower, rightBackPower);
-            telemetry.addData("Left Front Encoders:", leftFront.getCurrentPosition());
-            telemetry.addData("Left Back Encoders: ", leftBack.getCurrentPosition());
-            telemetry.addData("Right Front Encoders: ", rightFront.getCurrentPosition());
-            telemetry.addData("Right Back Encoders: ", rightBack.getCurrentPosition());
             telemetry.addData("Color - Left", colorSensor_left.getDistance(DistanceUnit.CM));
             telemetry.addData("Color - Right", colorSensor_right.getDistance(DistanceUnit.CM));
             telemetry.addData("Lift - Front:", liftLeft.getCurrentPosition());
             telemetry.addData("Lift - Back:", liftRight.getCurrentPosition());
-            telemetry.addData("Carousel: ", carousel.getPower());
+            telemetry.addData("C_Left: ", c_Left.getPower());
+            telemetry.addData("C_Right: ", c_Right.getPower());
             telemetry.addData("Lift State: ", liftState);
             telemetry.addData("Lift Position: ", liftPosition);
             telemetry.update();
-
         }
     }
 }
