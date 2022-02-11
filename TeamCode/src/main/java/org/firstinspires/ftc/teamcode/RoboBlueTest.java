@@ -96,9 +96,9 @@ public class RoboBlueTest extends LinearOpMode {
         double turret_center = 0.5;
 
         double i_minRange_topLeft = 0.15;   // 0.08
-        double i_maxRange_topLeft = 0.87;
+        double i_maxRange_topLeft = 0.92;
         double i_minRange_bottomLeft = 0.90;   // 0.92
-        double i_maxRange_bottomLeft = 0.18;
+        double i_maxRange_bottomLeft = 0.13;
         double i_minRange_topRight = 0.87;   // 0.94
         double i_maxRange_topRight = 0.16;
         double i_minRange_bottomRight = 0.16;   // 0.08
@@ -208,26 +208,28 @@ public class RoboBlueTest extends LinearOpMode {
 
                         intakeState = IntakeState.I_INTAKE;
 
-                    } else if (gamepad1.right_bumper) {
-
-                        // right intake flips down
-                        i_topRight.setPosition(i_minRange_topRight);
-                        i_bottomRight.setPosition(i_minRange_bottomRight);
-
-                        i_topLeft.setPosition(i_maxRange_topLeft);
-                        i_bottomLeft.setPosition(i_maxRange_bottomLeft);
-
-                        leftIntake.setPower(0);
-
-                        // start right intake
-                        rightIntake.setPower(highSweepPower);
-
-                        // turn bucket down
-                        bucket.setPosition(bucket_down);
-
-                        intakeState = IntakeState.I_INTAKE;
-
-                    } else {
+                    }
+//                    else if (gamepad1.right_bumper) {
+//
+//                        // right intake flips down
+//                        i_topRight.setPosition(i_minRange_topRight);
+//                        i_bottomRight.setPosition(i_minRange_bottomRight);
+//
+//                        i_topLeft.setPosition(i_maxRange_topLeft);
+//                        i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+//
+//                        leftIntake.setPower(0);
+//
+//                        // start right intake
+//                        rightIntake.setPower(highSweepPower);
+//
+//                        // turn bucket down
+//                        bucket.setPosition(bucket_down);
+//
+//                        intakeState = IntakeState.I_INTAKE;
+//
+//                    }
+                   else {
 
                         intakeState = IntakeState.I_STATIONARY;
                     }
@@ -236,7 +238,7 @@ public class RoboBlueTest extends LinearOpMode {
 
                 case I_INTAKE:
 
-                    if (colorSensor_left.alpha() > 200) {
+                    if (colorSensor_left.alpha() > 500) {
 
                         // hold elements in intake
                         leftIntake.setPower(0.25);
@@ -247,23 +249,20 @@ public class RoboBlueTest extends LinearOpMode {
 
                         intakeState = IntakeState.I_CAPTURE;
 
-                    } else if (colorSensor_right.alpha() > 200) {
-
-                        // hold elements in intake
-                        rightIntake.setPower(0.25);
-
-                        // right intake flips up
-                        i_topLeft.setPosition(i_maxRange_topLeft);
-                        i_bottomLeft.setPosition(i_maxRange_bottomLeft);
-
-                        intakeState = IntakeState.I_CAPTURE;
-
-                    } else {
-
-                        i_topLeft.setPosition(i_minRange_topLeft);
-                        i_bottomLeft.setPosition(i_minRange_bottomLeft);
-                        i_topRight.setPosition(i_minRange_topRight);
-                        i_bottomRight.setPosition(i_minRange_bottomRight);
+                    }
+//                    else if (colorSensor_right.alpha() > 500) {
+//
+//                        // hold elements in intake
+//                        rightIntake.setPower(0.25);
+//
+//                        // right intake flips up
+//                        i_topLeft.setPosition(i_maxRange_topLeft);
+//                        i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+//
+//                        intakeState = IntakeState.I_CAPTURE;
+//
+//                    }
+                    else {
 
                         intakeState = IntakeState.I_INTAKE;
                     }
@@ -282,17 +281,19 @@ public class RoboBlueTest extends LinearOpMode {
 
                         intakeState = IntakeState.I_TRANSFER;
 
-                    } else if (i_topRight.getPosition() == i_maxRange_topRight) {
-
-                        // stop left intake
-                        rightIntake.setPower(0);
-
-                        // turn bucket left
-                        bucket.setPosition(bucket_right);
-
-                        intakeState = IntakeState.I_TRANSFER;
-
-                    } else {
+                    }
+//                    else if (i_topRight.getPosition() == i_maxRange_topRight) {
+//
+//                        // stop left intake
+//                        rightIntake.setPower(0);
+//
+//                        // turn bucket left
+//                        bucket.setPosition(bucket_right);
+//
+//                        intakeState = IntakeState.I_TRANSFER;
+//
+//                    }
+                    else {
 
                         intakeState = IntakeState.I_TRANSFER;
                     }
@@ -304,18 +305,20 @@ public class RoboBlueTest extends LinearOpMode {
                     if (bucket.getPosition() == bucket_left) {
 
                         // ex-take element
-                        leftIntake.setPower(highSweepPower);
+                        leftIntake.setPower(-highSweepPower);
 
                         intakeState = IntakeState.I_COMPLETE;
 
-                    } else if (bucket.getPosition() == bucket_right) {
-
-                        // ex-take element
-                        rightIntake.setPower(-highSweepPower);
-
-                        intakeState = IntakeState.I_COMPLETE;
-
-                    } else {
+                    }
+//                    else if (bucket.getPosition() == bucket_right) {
+//
+//                        // ex-take element
+//                        rightIntake.setPower(-highSweepPower);
+//
+//                        intakeState = IntakeState.I_COMPLETE;
+//
+//                    }
+                    else {
 
                         intakeState = IntakeState.I_TRANSFER;
                     }
