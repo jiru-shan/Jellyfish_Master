@@ -198,6 +198,8 @@ public class RoboBlueTest extends LinearOpMode {
                         i_topRight.setPosition(i_maxRange_topRight);
                         i_bottomRight.setPosition(i_maxRange_bottomRight);
 
+                        rightIntake.setPower(0);
+
                         // start left intake
                         leftIntake.setPower(highSweepPower);
 
@@ -215,6 +217,8 @@ public class RoboBlueTest extends LinearOpMode {
                         i_topLeft.setPosition(i_maxRange_topLeft);
                         i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
+                        leftIntake.setPower(0);
+
                         // start right intake
                         rightIntake.setPower(highSweepPower);
 
@@ -224,11 +228,6 @@ public class RoboBlueTest extends LinearOpMode {
                         intakeState = IntakeState.I_INTAKE;
 
                     } else {
-
-                        i_topLeft.setPosition(i_maxRange_topLeft);
-                        i_bottomLeft.setPosition(i_maxRange_bottomLeft);
-                        i_topRight.setPosition(i_maxRange_topRight);
-                        i_bottomRight.setPosition(i_maxRange_bottomRight);
 
                         intakeState = IntakeState.I_STATIONARY;
                     }
