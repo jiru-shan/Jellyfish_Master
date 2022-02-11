@@ -174,11 +174,10 @@ public class RoboBlueTest extends LinearOpMode {
                 module.clearBulkCache();
             }
 
-            // Keep deposit in position while not in use
-            // d_open.setPosition(d_open_minRangeSemi);
-            // d_bendLeft.setPosition(d_minRange_bendLeft);
-            // d_bendRight.setPosition(d_minRange_bendRight);
-
+            i_topLeft.setPosition(i_maxRange_topLeft);
+            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+            i_topRight.setPosition(i_maxRange_topRight);
+            i_bottomRight.setPosition(i_maxRange_bottomRight);
 
             /** Combined Functions **/
 
@@ -205,8 +204,6 @@ public class RoboBlueTest extends LinearOpMode {
                         // keep bucket down
                         bucket.setPosition(bucket_down);
 
-                        leftIntakeTime.reset();
-
                         intakeState = IntakeState.I_INTAKE;
 
                     } else if (gamepad1.right_bumper) {
@@ -224,8 +221,6 @@ public class RoboBlueTest extends LinearOpMode {
                         // turn bucket down
                         bucket.setPosition(bucket_down);
 
-                        rightIntakeTime.reset();
-
                         intakeState = IntakeState.I_INTAKE;
 
                     } else {
@@ -242,7 +237,7 @@ public class RoboBlueTest extends LinearOpMode {
 
                 case I_INTAKE:
 
-                    if (colorSensor_left.getDistance(DistanceUnit.CM) < intakeCaptureDistance) {
+                    if (colorSensor_left.alpha() > 200) {
 
                         // hold elements in intake
                         leftIntake.setPower(0.25);
@@ -253,7 +248,7 @@ public class RoboBlueTest extends LinearOpMode {
 
                         intakeState = IntakeState.I_CAPTURE;
 
-                    } else if (colorSensor_right.getDistance(DistanceUnit.CM) < intakeCaptureDistance) {
+                    } else if (colorSensor_right.alpha() > 200) {
 
                         // hold elements in intake
                         rightIntake.setPower(0.25);
@@ -286,8 +281,6 @@ public class RoboBlueTest extends LinearOpMode {
                         // turn bucket left
                         bucket.setPosition(bucket_left);
 
-                        leftIntakeTime.reset();
-
                         intakeState = IntakeState.I_TRANSFER;
 
                     } else if (i_topRight.getPosition() == i_maxRange_topRight) {
@@ -298,8 +291,6 @@ public class RoboBlueTest extends LinearOpMode {
                         // turn bucket left
                         bucket.setPosition(bucket_right);
 
-                        rightIntakeTime.reset();
-
                         intakeState = IntakeState.I_TRANSFER;
 
                     } else {
@@ -309,23 +300,19 @@ public class RoboBlueTest extends LinearOpMode {
 
                     break;
 
-                case I_TRANSFER: {
+                case I_TRANSFER:
 
-                    if (leftIntakeTime.milliseconds() > intakeFlipUpTime) {
+                    if (bucket.getPosition() == bucket_left) {
 
                         // ex-take element
-                        leftIntake.setPower(-highSweepPower);
-
-                        leftIntakeTime.reset();
+                        leftIntake.setPower(highSweepPower);
 
                         intakeState = IntakeState.I_COMPLETE;
 
-                    } else if (rightIntakeTime.milliseconds() > intakeFlipUpTime) {
+                    } else if (bucket.getPosition() == bucket_right) {
 
                         // ex-take element
                         rightIntake.setPower(-highSweepPower);
-
-                        rightIntakeTime.reset();
 
                         intakeState = IntakeState.I_COMPLETE;
 
@@ -333,7 +320,12 @@ public class RoboBlueTest extends LinearOpMode {
 
                         intakeState = IntakeState.I_TRANSFER;
                     }
-                }
+
+                    break;
+
+                case I_COMPLETE:
+
+                    intakeState = IntakeState.I_STATIONARY;
             }
 
 //            /** Lift **/
@@ -725,8 +717,8 @@ public class RoboBlueTest extends LinearOpMode {
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "leftFront (%.2f), leftBack (%.2f), rightFront (%.2f), rightBack (%.2f)",
                     leftFrontPower, leftBackPower, rightFrontPower, rightBackPower);
-            telemetry.addData("Color - Left", colorSensor_left.getDistance(DistanceUnit.CM));
-            telemetry.addData("Color - Right", colorSensor_right.getDistance(DistanceUnit.CM));
+            telemetry.addData("Left Sensor: ", colorSensor_left.alpha());
+            telemetry.addData("Right Sensor: ", colorSensor_right.alpha());
             telemetry.addData("Intake State: ", intakeState);
 //            telemetry.addData("Lift - Front:", liftLeft.getCurrentPosition());
 //            telemetry.addData("Lift - Back:", liftRight.getCurrentPosition());
