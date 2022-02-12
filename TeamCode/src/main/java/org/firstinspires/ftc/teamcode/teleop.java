@@ -88,7 +88,7 @@ public class teleop extends LinearOpMode {
         depositSensor = hardwareMap.get(Rev2mDistanceSensor.class, "depositSensor");
 
         // Intake
-        double highSweepPower = 1.0;
+        double highSweepPower = 0.8;
         // double lowSweepPower = 0.4;
 
         // minRange - intake down, deposit position closed, deposit folded down
@@ -158,7 +158,7 @@ public class teleop extends LinearOpMode {
 
         double intakeCaptureDistance = 6.0;
         double intakeEjectDistance = 30.0;
-        int intakeFlipUpTime = 1000;
+        int intakeFlipUpTime = 250;
         /*
         0 = not moving
         1 = flip down + intaking
@@ -230,17 +230,11 @@ public class teleop extends LinearOpMode {
                     i_topLeft.setPosition(i_maxRange_topLeft);
                     i_bottomLeft.setPosition(i_maxRange_bottomLeft);
                 }
-            } else if(gamepad1.left_trigger != 0) {
-                i_topLeft.setPosition(i_minRange_topLeft);
-                i_bottomLeft.setPosition(i_minRange_bottomLeft);
-
-                leftIntake.setPower(-1);
-                leftIntakeState = 12;
             } else if (((rightIntakeState > 0 && rightIntakeState <= 9) || (gamepad1.left_bumper && leftIntakeTime.milliseconds() > 400)) && (leftIntakeState < 9)) {
                 leftIntakeState = 10;
             } else if (leftIntakeState == 1) {
                 if (colorSensor_left.getDistance(DistanceUnit.CM) < intakeCaptureDistance) {
-                    leftIntake.setPower(0.75);
+                    leftIntake.setPower(0.25);
 
                     i_topLeft.setPosition(i_maxRange_topLeft);
                     i_bottomLeft.setPosition(i_maxRange_bottomLeft);
@@ -295,10 +289,6 @@ public class teleop extends LinearOpMode {
 
                     leftIntakeState = 0;
                 // }
-            } else if(leftIntakeState == 12) {
-                if(leftIntakeTime.milliseconds() > 1000) {
-                    leftIntakeState = 11;
-                }
             } else {
                 leftIntake.setPower(0);
 
@@ -329,17 +319,11 @@ public class teleop extends LinearOpMode {
                     i_topRight.setPosition(i_maxRange_topRight);
                     i_bottomRight.setPosition(i_maxRange_bottomRight);
                 }
-            } else if(gamepad1.right_trigger != 0) {
-                i_topRight.setPosition(i_minRange_topRight);
-                i_bottomRight.setPosition(i_minRange_bottomRight);
-
-                rightIntake.setPower(-1);
-                rightIntakeState = 12;
             } else if (((leftIntakeState > 0 && leftIntakeState <= 9) || (gamepad1.right_bumper && rightIntakeTime.milliseconds() > 400)) && (rightIntakeState < 9)) {
                 rightIntakeState = 10;
             } else if (rightIntakeState == 1) {
                 if (colorSensor_right.getDistance(DistanceUnit.CM) < intakeCaptureDistance) {
-                    rightIntake.setPower(0.75);
+                    rightIntake.setPower(0.25);
 
                     i_topRight.setPosition(i_maxRange_topRight);
                     i_bottomRight.setPosition(i_maxRange_bottomRight);
@@ -394,10 +378,6 @@ public class teleop extends LinearOpMode {
 
                     rightIntakeState = 0;
                 // }
-            } else if(rightIntakeState == 12) {
-                if(rightIntakeTime.milliseconds() > 1000) {
-                    rightIntakeState = 11;
-                }
             } else {
                 rightIntake.setPower(0);
 
@@ -489,7 +469,7 @@ public class teleop extends LinearOpMode {
                     liftState = 17;
                     liftPosition = 1;
                 }
-            }/*else if(gamepad2.left_bumper && liftFront.getTargetPosition() < 500) {
+            }else if(gamepad2.left_trigger != 0 && liftFront.getTargetPosition() < 500) {
                 d_open.setPosition(d_open_minRange);
                 d_bendLeft.setPosition(d_minRange_bendLeft);
                 d_bendRight.setPosition(d_minRange_bendRight);
@@ -501,7 +481,8 @@ public class teleop extends LinearOpMode {
                 liftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 liftFront.setPower(1.0);
                 liftBack.setPower(1.0);
-            }*/else if(gamepad2.x && liftState < 20) {
+                liftState=0;
+            }else if(gamepad2.x && liftState < 20) {
                 if(Math.abs(liftFront.getCurrentPosition()) > 100) {
                     d_bendLeft.setPosition(d_maxRange_bendLeft);
                     d_bendRight.setPosition(d_maxRange_bendRight);
@@ -726,10 +707,10 @@ public class teleop extends LinearOpMode {
                     // liftState = 0;
                 }
             }else if(liftState == 23) {
-//                if(Math.abs(liftFront.getCurrentPosition() - 0) < liftRetractError) {
+                if(Math.abs(liftFront.getCurrentPosition() - 0) < liftRetractError) {
                     liftPosition = 0;
                     liftState = 0;
-//                }
+                }
             }
 
             // drivetrain
@@ -755,22 +736,22 @@ public class teleop extends LinearOpMode {
 
             /** Carousel **/
 
-            float a = gamepad2.left_trigger;
-            float b = gamepad2.right_trigger;
+            // float a = gamepad2.left_trigger;
+            // float b = gamepad2.right_trigger;
 
-            /*if(gamepad2.left_bumper) {
+            if(gamepad2.left_bumper) {
                 carousel.setPower(-1);
             }else if(gamepad2.right_bumper) {
                 carousel.setPower(1);
             }else {
                 carousel.setPower(0);
-            }*/
+            }
 
-            carousel.setPower(Math.max(-1, Math.min(1, b-a)));
+            // carousel.setPower(Math.max(0, Math.min(1, b-a)));
 
             /** Reset Encoders **/
 
-            if (gamepad2.right_bumper) {
+            if (gamepad2.right_trigger != 0) {
                 liftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
                 liftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             }
