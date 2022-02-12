@@ -26,8 +26,8 @@ public class RoboBlueTest extends LinearOpMode {
     DcMotor rightBack;
     DcMotor leftIntake;
     DcMotor rightIntake;
-//    DcMotor liftLeft;
-//    DcMotor liftRight;
+    DcMotor liftLeft;
+    DcMotor liftRight;
 
     // 12 Servos
     Servo i_topLeft;
@@ -42,20 +42,59 @@ public class RoboBlueTest extends LinearOpMode {
     // Color sensors
     ColorRangeSensor colorSensor_left;
     ColorRangeSensor colorSensor_right;
+    ColorRangeSensor bucketSensor;
 
     // Runtime
     ElapsedTime runtime = new ElapsedTime();
 
     enum IntakeState {
 
-        I_STATIONARY,
-        I_INTAKE,
-        I_CAPTURE,
-        I_TRANSFER,
-        I_COMPLETE
+        IS_STATIONARY,
+        IS_SETUP,
+        IS_INTAKE,
+        IS_CAPTURE,
+        IS_TRANSFER,
+        IS_OUT,
+        IS_COMPLETE,
+        IS_RESET,
+        IS_LIFT
     }
 
-    IntakeState intakeState = IntakeState.I_STATIONARY;
+    enum IntakeHand {
+
+        IH_LEFT,
+        IH_RIGHT,
+        IH_NEITHER
+    }
+
+    enum BucketHand {
+
+        BH_LEFT,
+        BH_RIGHT,
+        BH_CENTER
+    }
+
+    //    enum LiftState {
+//        LIFT_EXTENDING,
+//        LIFT_EXTENDING_BALANCED,
+//        LIFT_EXTENDING_TIPPED,
+//        LIFT_EXTENDING_NEAR,
+//        LIFT_EXTENDING_MIDDLE,
+//        LIFT_EXTENDING_FAR,
+//        LIFT_TARGET,
+//        LIFT_TARGET_BALANCED,
+//        LIFT_TARGET_TIPPED,
+//        LIFT_TARGET_NEAR,
+//        LIFT_TARGET_MIDDLE,
+//        LIFT_TARGET_FAR,
+//        LIFT_DEPOSITING,
+//        LIFT_RELEASED,
+//        LIFT_RETRACTING
+//    }
+
+    IntakeState intakeState = IntakeState.IS_STATIONARY;
+    IntakeHand intakeHand = IntakeHand.IH_NEITHER;
+    BucketHand bucketHand = BucketHand.BH_CENTER;
 
     public void runOpMode() throws InterruptedException {
 
@@ -64,8 +103,8 @@ public class RoboBlueTest extends LinearOpMode {
         leftBack = hardwareMap.dcMotor.get("leftBack");
         rightFront = hardwareMap.dcMotor.get("rightFront");
         rightBack = hardwareMap.dcMotor.get("rightBack");
-//        liftLeft = hardwareMap.dcMotor.get("liftLeft");
-//        liftRight = hardwareMap.dcMotor.get("liftRight");
+        liftLeft = hardwareMap.dcMotor.get("liftLeft");
+        liftRight = hardwareMap.dcMotor.get("liftRight");
         leftIntake = hardwareMap.dcMotor.get("leftIntake");
         rightIntake = hardwareMap.dcMotor.get("rightIntake");
 
@@ -82,6 +121,7 @@ public class RoboBlueTest extends LinearOpMode {
         // Color sensors
         colorSensor_left = hardwareMap.get(ColorRangeSensor.class, "colorSensor_left");
         colorSensor_right = hardwareMap.get(ColorRangeSensor.class, "colorSensor_right");
+        bucketSensor = hardwareMap.get(ColorRangeSensor.class, "bucketSensor");
 
         // Intake
         double highSweepPower = 0.8;
@@ -117,8 +157,8 @@ public class RoboBlueTest extends LinearOpMode {
         int shared_targetFar = 280;
 
         // Reset encoders
-//        liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
-//        liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
+        liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -133,30 +173,13 @@ public class RoboBlueTest extends LinearOpMode {
         double intakeCaptureDistance = 6.0;
         double intakeEjectDistance = 30.0;
         int intakeFlipUpTime = 250;
-        /*
-        0 = not moving
-        1 = flip down + intaking
-        2 = detected cube + flip up + open flap
-        3 = transfering
-        4 = transfered + flap closed
-        */
+
         int liftState = 0;
         int liftPosition = 0;
         int liftExtendError = 100;
         int liftRetractError = 10;
         ElapsedTime liftTime = new ElapsedTime();
-        /*
-        0 = down
-        12 = shared close
-        13 = shared mid
-        14 = shared far
-        15 = alliance mid
-        16 = alliance bal
-        17 = aliance tip
-        20-? = retracting
-        ? = retracted
-        30-? manual control
-        */
+
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
         for (LynxModule module : allHubs) {
@@ -174,10 +197,12 @@ public class RoboBlueTest extends LinearOpMode {
                 module.clearBulkCache();
             }
 
-            i_topLeft.setPosition(i_maxRange_topLeft);
-            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
-            i_topRight.setPosition(i_maxRange_topRight);
-            i_bottomRight.setPosition(i_maxRange_bottomRight);
+//            i_topLeft.setPosition(i_maxRange_topLeft);
+//            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+//            i_topRight.setPosition(i_maxRange_topRight);
+//            i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+//            bucket.setPosition(bucket_down);
 
             /** Combined Functions **/
 
@@ -187,9 +212,11 @@ public class RoboBlueTest extends LinearOpMode {
 
             switch (intakeState) {
 
-                case I_STATIONARY:
+                case IS_STATIONARY:
 
                     if (gamepad1.left_bumper) {
+
+                        intakeHand = IntakeHand.IH_LEFT;
 
                         // left intake flips down
                         i_topLeft.setPosition(i_minRange_topLeft);
@@ -200,139 +227,532 @@ public class RoboBlueTest extends LinearOpMode {
 
                         rightIntake.setPower(0);
 
-                        // start left intake
-                        leftIntake.setPower(highSweepPower);
-
-                        // keep bucket down
-                        bucket.setPosition(bucket_down);
-
-                        intakeState = IntakeState.I_INTAKE;
-
-                    }
-//                    else if (gamepad1.right_bumper) {
-//
-//                        // right intake flips down
-//                        i_topRight.setPosition(i_minRange_topRight);
-//                        i_bottomRight.setPosition(i_minRange_bottomRight);
-//
-//                        i_topLeft.setPosition(i_maxRange_topLeft);
-//                        i_bottomLeft.setPosition(i_maxRange_bottomLeft);
-//
-//                        leftIntake.setPower(0);
-//
-//                        // start right intake
-//                        rightIntake.setPower(highSweepPower);
-//
-//                        // turn bucket down
-//                        bucket.setPosition(bucket_down);
-//
-//                        intakeState = IntakeState.I_INTAKE;
-//
-//                    }
-                   else {
-
-                        intakeState = IntakeState.I_STATIONARY;
-                    }
-
-                    break;
-
-                case I_INTAKE:
-
-                    if (colorSensor_left.alpha() > 500) {
-
-                        // hold elements in intake
-                        leftIntake.setPower(0.25);
-
-                        // left intake flips up
-                        i_topLeft.setPosition(i_maxRange_topLeft);
-                        i_bottomLeft.setPosition(i_maxRange_bottomLeft);
-
-                        intakeState = IntakeState.I_CAPTURE;
-
-                    }
-//                    else if (colorSensor_right.alpha() > 500) {
-//
-//                        // hold elements in intake
-//                        rightIntake.setPower(0.25);
-//
-//                        // right intake flips up
-//                        i_topLeft.setPosition(i_maxRange_topLeft);
-//                        i_bottomLeft.setPosition(i_maxRange_bottomLeft);
-//
-//                        intakeState = IntakeState.I_CAPTURE;
-//
-//                    }
-                    else {
-
-                        intakeState = IntakeState.I_INTAKE;
-                    }
-
-                    break;
-
-                case I_CAPTURE:
-
-                    if (i_topLeft.getPosition() == i_maxRange_topLeft) {
-
-                        // stop left intake
-                        leftIntake.setPower(0);
-
                         // turn bucket left
                         bucket.setPosition(bucket_left);
 
-                        intakeState = IntakeState.I_TRANSFER;
+                        bucketHand = BucketHand.BH_LEFT;
 
-                    }
-//                    else if (i_topRight.getPosition() == i_maxRange_topRight) {
-//
-//                        // stop left intake
-//                        rightIntake.setPower(0);
-//
-//                        // turn bucket left
-//                        bucket.setPosition(bucket_right);
-//
-//                        intakeState = IntakeState.I_TRANSFER;
-//
-//                    }
-                    else {
+                        intakeState = IntakeState.IS_INTAKE;
 
-                        intakeState = IntakeState.I_TRANSFER;
+                    } else if (gamepad1.right_bumper) {
+
+                        intakeHand = IntakeHand.IH_RIGHT;
+                        intakeState = IntakeState.IS_SETUP;
+
                     }
 
                     break;
 
-                case I_TRANSFER:
+                case IS_SETUP:
 
-                    if (bucket.getPosition() == bucket_left) {
+                    if (intakeHand == IntakeHand.IH_RIGHT) {
 
-                        // ex-take element
+                        // right intake flips down
+                        i_topRight.setPosition(i_minRange_topRight);
+                        i_bottomRight.setPosition(i_minRange_bottomRight);
+
+                        i_topLeft.setPosition(i_maxRange_topLeft);
+                        i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                        leftIntake.setPower(0);
+
+                        // start right intake
+                        rightIntake.setPower(highSweepPower);
+
+                        // turn bucket left
+                        bucket.setPosition(bucket_right);
+
+                        bucketHand = BucketHand.BH_RIGHT;
+
+                        intakeState = IntakeState.IS_INTAKE;
+                    }
+
+                    break;
+
+                case IS_INTAKE:
+
+                    if (intakeHand == IntakeHand.IH_LEFT) {
+
+                        if (colorSensor_left.alpha() > 500) {
+
+
+                            // hold elements in intake
+                            leftIntake.setPower(0.25);
+
+                            // left intake flips up
+                            i_topLeft.setPosition(i_maxRange_topLeft);
+                            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                            intakeState = IntakeState.IS_CAPTURE;
+
+                        }
+
+                    } else if (intakeHand == IntakeHand.IH_RIGHT) {
+
+                        if (colorSensor_right.alpha() > 500) {
+
+                            // hold elements in intake
+                            rightIntake.setPower(0.25);
+
+                            // left intake flips up
+                            i_topRight.setPosition(i_maxRange_topRight);
+                            i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                            intakeState = IntakeState.IS_CAPTURE;
+
+                        }
+                    }
+
+                    break;
+
+                case IS_CAPTURE:
+
+                    if (intakeHand == IntakeHand.IH_LEFT) {
+
+                        if (i_topLeft.getPosition() == i_maxRange_topLeft) {
+
+                            // stop left intake
+                            leftIntake.setPower(0);
+
+                            intakeState = IntakeState.IS_TRANSFER;
+
+                        }
+
+                    } else if (intakeHand == IntakeHand.IH_RIGHT) {
+
+                        if (i_topRight.getPosition() == i_maxRange_topRight) {
+
+                            // stop left intake
+                            rightIntake.setPower(0);
+
+                            intakeState = IntakeState.IS_TRANSFER;
+
+                        }
+                    }
+
+                    break;
+
+
+                case IS_TRANSFER:
+
+                    if (intakeHand == IntakeHand.IH_LEFT) {
+
                         leftIntake.setPower(-highSweepPower);
 
-                        intakeState = IntakeState.I_COMPLETE;
+                        if (colorSensor_right.alpha() < 100) {
 
-                    }
-//                    else if (bucket.getPosition() == bucket_right) {
-//
-//                        // ex-take element
-//                        rightIntake.setPower(-highSweepPower);
-//
-//                        intakeState = IntakeState.I_COMPLETE;
-//
-//                    }
-                    else {
+                            leftIntake.setPower(0);
+                            intakeState = IntakeState.IS_COMPLETE;
 
-                        intakeState = IntakeState.I_TRANSFER;
+                        }
+
+                    } else if (intakeHand == IntakeHand.IH_RIGHT) {
+
+                        if (i_topRight.getPosition() == i_maxRange_topRight) {
+
+                            intakeState = IntakeState.IS_OUT;
+
+                        }
                     }
 
                     break;
 
-                case I_COMPLETE:
+                case IS_OUT:
 
-                    intakeState = IntakeState.I_STATIONARY;
+                    if (intakeHand == IntakeHand.IH_RIGHT) {
+
+                        Thread.sleep(500);
+
+                        rightIntake.setPower(-highSweepPower);
+
+                        if (bucketSensor.alpha() > 200) {
+
+                            rightIntake.setPower(0);
+                            intakeState = IntakeState.IS_COMPLETE;
+
+                        }
+                    }
+
+                    break;
+
+                case IS_COMPLETE:
+
+                    if (intakeHand == IntakeHand.IH_LEFT) {
+
+                        bucket.setPosition(bucket_down);
+                        bucketHand = BucketHand.BH_CENTER;
+                        intakeState = IntakeState.IS_STATIONARY;
+                        intakeHand = IntakeHand.IH_NEITHER;
+
+                    } else if (intakeHand == IntakeHand.IH_RIGHT) {
+
+                            bucket.setPosition(bucket_down);
+                            bucketHand = BucketHand.BH_CENTER;
+                            intakeState = IntakeState.IS_STATIONARY;
+                            intakeHand = IntakeHand.IH_NEITHER;
+                    }
+
+                    break;
             }
 
-//            /** Lift **/
+
+            /** Lift **/
 //
 //            // Motor tick count is equal to 384.5
+//
+//            switch (liftState) {
+//                case LIFT_EXTENDING:
+//
+//                    // Check if button was pressed
+//                    if (gamepad2.dpad_up) {
+//
+//                        // Run lift
+//                        liftFront.setTargetPosition(-TARGET_TIPPED);
+//                        liftBack.setTargetPosition(-TARGET_TIPPED);
+//                        liftFront.setPower(-1.0);
+//                        liftBack.setPower(-1.0);
+//
+//                        // "10" is arbitrary - might need to be adjusted
+//                        if ((Math.abs(liftFront.getCurrentPosition() - TARGET_TIPPED)) > 10) {
+//
+//                            // Run lift
+//                            liftFront.setTargetPosition(-TARGET_TIPPED);
+//                            liftBack.setTargetPosition(-TARGET_TIPPED);
+//                            liftFront.setPower(-1.0);
+//                            liftBack.setPower(-1.0);
+//
+//                            // Ensure movement of drivetrain during while loop
+//                            y = -gamepad1.right_stick_x; // Reversed
+//                            x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
+//                            rx = -gamepad1.left_stick_y; // Forward/Backward
+//
+//                            denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+//                            leftFrontPower = (y + x - rx) / denominator;
+//                            leftBackPower = (y - x - rx) / denominator;
+//                            rightFrontPower = (y - x + rx) / denominator;
+//                            rightBackPower = (y + x + rx) / denominator;
+//
+//                            leftFront.setPower(leftBackPower);
+//                            leftBack.setPower(leftFrontPower);
+//                            rightFront.setPower(rightFrontPower);
+//                            rightBack.setPower(rightBackPower);
+//
+//                            // Set lift state to target
+//                            liftState = LiftState.LIFT_TARGET;
+//
+//                        } else {
+//
+//                            liftState = LiftState.LIFT_EXTENDING;
+//                        }
+//
+//                        break;
+//
+//                    } else if (gamepad2.dpad_left) {
+//
+//                        // Run lift
+//                        liftFront.setTargetPosition(-TARGET_TIPPED);
+//                        liftBack.setTargetPosition(-TARGET_TIPPED);
+//                        liftFront.setPower(-1.0);
+//                        liftBack.setPower(-1.0);
+//
+//                        // "10" is arbitrary - might need to be adjusted
+//                        if ((Math.abs(liftFront.getCurrentPosition() - TARGET_BALANCED)) > 10) {
+//
+//                            // Run lift
+//                            liftFront.setPower(-1.0);
+//                            liftBack.setPower(-1.0);
+//                            liftFront.setTargetPosition(-TARGET_BALANCED);
+//                            liftBack.setTargetPosition(-TARGET_BALANCED);
+//
+//                            // Ensure movement of drivetrain during while loop
+//                            y = -gamepad1.right_stick_x; // Reversed
+//                            x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
+//                            rx = -gamepad1.left_stick_y; // Forward/Backward
+//
+//                            denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+//                            leftFrontPower = (y + x - rx) / denominator;
+//                            leftBackPower = (y - x - rx) / denominator;
+//                            rightFrontPower = (y - x + rx) / denominator;
+//                            rightBackPower = (y + x + rx) / denominator;
+//
+//                            leftFront.setPower(leftBackPower);
+//                            leftBack.setPower(leftFrontPower);
+//                            rightFront.setPower(rightFrontPower);
+//                            rightBack.setPower(rightBackPower);
+//
+//                            // Set lift state to target
+//                            liftState = LiftState.LIFT_TARGET;
+//
+//                        } else {
+//
+//                            liftState = LiftState.LIFT_EXTENDING;
+//                        }
+//
+//                        break;
+//
+//                    } else if (gamepad2.y) {
+//
+//                        // Run lift
+//                        liftFront.setTargetPosition(-TARGET_TIPPED);
+//                        liftBack.setTargetPosition(-TARGET_TIPPED);
+//                        liftFront.setPower(-1.0);
+//                        liftBack.setPower(-1.0);
+//
+//                        // "10" is arbitrary - might need to be adjusted
+//                        if ((Math.abs(liftFront.getCurrentPosition() - TARGET_FAR) > 5)) {
+//
+//                            // Run lift
+//                            liftFront.setTargetPosition(-TARGET_FAR);
+//                            liftBack.setTargetPosition(-TARGET_FAR);
+//                            liftFront.setPower(-1.0);
+//                            liftBack.setPower(-1.0);
+//
+//                            // Ensure movement of drivetrain during while loop
+//                            y = -gamepad1.right_stick_x; // Reversed
+//                            x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
+//                            rx = -gamepad1.left_stick_y; // Forward/Backward
+//
+//                            denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+//                            leftFrontPower = (y + x - rx) / denominator;
+//                            leftBackPower = (y - x - rx) / denominator;
+//                            rightFrontPower = (y - x + rx) / denominator;
+//                            rightBackPower = (y + x + rx) / denominator;
+//
+//                            leftFront.setPower(leftBackPower);
+//                            leftBack.setPower(leftFrontPower);
+//                            rightFront.setPower(rightFrontPower);
+//                            rightBack.setPower(rightBackPower);
+//
+//                            // Set lift state to target
+//                            liftState = LiftState.LIFT_TARGET;
+//
+//                        } else {
+//
+//                            liftState = LiftState.LIFT_EXTENDING;
+//                        }
+//
+//                        break;
+//
+//                    } else if (gamepad2.b) {
+//
+//                        // Run lift
+//                        liftFront.setTargetPosition(-TARGET_TIPPED);
+//                        liftBack.setTargetPosition(-TARGET_TIPPED);
+//                        liftFront.setPower(-1.0);
+//                        liftBack.setPower(-1.0);
+//
+//                        // "10" is arbitrary - might need to be adjusted
+//                        if ((Math.abs(liftFront.getCurrentPosition() - TARGET_MIDDLE)) > 5) {
+//
+//                            // Run lift
+//                            liftFront.setTargetPosition(-TARGET_MIDDLE);
+//                            liftBack.setTargetPosition(-TARGET_MIDDLE);
+//                            liftFront.setPower(-1.0);
+//                            liftBack.setPower(-1.0);
+//
+//                            // Ensure movement of drivetrain during while loop
+//                            y = -gamepad1.right_stick_x; // Reversed
+//                            x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
+//                            rx = -gamepad1.left_stick_y; // Forward/Backward
+//
+//                            denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+//                            leftFrontPower = (y + x - rx) / denominator;
+//                            leftBackPower = (y - x - rx) / denominator;
+//                            rightFrontPower = (y - x + rx) / denominator;
+//                            rightBackPower = (y + x + rx) / denominator;
+//
+//                            leftFront.setPower(leftBackPower);
+//                            leftBack.setPower(leftFrontPower);
+//                            rightFront.setPower(rightFrontPower);
+//                            rightBack.setPower(rightBackPower);
+//
+//                            // Set lift state to target
+//                            liftState = LiftState.LIFT_TARGET;
+//
+//                        } else {
+//
+//                            liftState = LiftState.LIFT_EXTENDING;
+//
+//                        }
+//
+//                        break;
+//
+//                    } else if (gamepad2.a) {
+//
+//                        // Run lift
+//                        liftFront.setTargetPosition(-TARGET_TIPPED);
+//                        liftBack.setTargetPosition(-TARGET_TIPPED);
+//                        liftFront.setPower(-1.0);
+//                        liftBack.setPower(-1.0);
+//
+//                        // "10" is arbitrary - might need to be adjusted
+//                        if ((Math.abs(liftFront.getCurrentPosition() - TARGET_NEAR) > 5)) {
+//
+//                            // Run lift
+//                            liftFront.setTargetPosition(-TARGET_NEAR);
+//                            liftBack.setTargetPosition(-TARGET_NEAR);
+//                            liftFront.setPower(-1.0);
+//                            liftBack.setPower(-1.0);
+//
+//                            // Ensure movement of drivetrain during while loop
+//                            y = -gamepad1.right_stick_x; // Reversed
+//                            x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
+//                            rx = -gamepad1.left_stick_y; // Forward/Backward
+//
+//                            denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+//                            leftFrontPower = (y + x - rx) / denominator;
+//                            leftBackPower = (y - x - rx) / denominator;
+//                            rightFrontPower = (y - x + rx) / denominator;
+//                            rightBackPower = (y + x + rx) / denominator;
+//
+//                            leftFront.setPower(leftBackPower);
+//                            leftBack.setPower(leftFrontPower);
+//                            rightFront.setPower(rightFrontPower);
+//                            rightBack.setPower(rightBackPower);
+//
+//                            // Set lift state to target
+//                            liftState = LiftState.LIFT_TARGET;
+//
+//                        } else {
+//
+//                            liftState = LiftState.LIFT_EXTENDING;
+//                        }
+//
+//                        break;
+//                    }
+//
+//                case LIFT_TARGET:
+//
+//                    // Check if the lift has fully extended
+//                    if (gamepad2.dpad_up && (Math.abs(liftFront.getCurrentPosition() - TARGET_TIPPED)) < 10) {
+//
+//                        // Set state to depositing
+//                        liftState = LiftState.LIFT_DEPOSITING;
+//                        break;
+//
+//                    } else if (gamepad2.dpad_left && (Math.abs(liftFront.getCurrentPosition() - TARGET_BALANCED)) < 10) {
+//
+//                        // Set state to depositing
+//                        liftState = LiftState.LIFT_DEPOSITING;
+//                        break;
+//
+//                    } else if (gamepad2.y && (Math.abs(liftFront.getCurrentPosition() - TARGET_FAR)) < 5) {
+//
+//                        // Set state to depositing
+//                        liftState = LiftState.LIFT_DEPOSITING;
+//                        break;
+//
+//                    } else if (gamepad2.b && (Math.abs(liftFront.getCurrentPosition() - TARGET_MIDDLE)) < 5) {
+//
+//                        // Set state to depositing
+//                        liftState = LiftState.LIFT_DEPOSITING;
+//                        break;
+//
+//                    } else if (gamepad2.a && (Math.abs(liftFront.getCurrentPosition() - TARGET_NEAR)) < 5) {
+//
+//                        // Set state to depositing
+//                        liftState = LiftState.LIFT_DEPOSITING;
+//                        break;
+//                    }
+//
+//                case LIFT_DEPOSITING:
+//                    if (gamepad2.dpad_right || gamepad2.x) {
+//
+//                        d_open.setPosition(d_open_top);
+//
+//                        if (depositTimer.milliseconds() <= 500) {
+//
+//                            d_open.setPosition(d_open_top);
+//
+//                            // Keep lift in place while depositing
+//                            liftFront.setTargetPosition(0);
+//                            liftBack.setTargetPosition(0);
+//                            liftFront.setPower(-1.0);
+//                            liftBack.setPower(-1.0);
+//
+//                            // Ensure movement of drivetrain during while loop
+//                            y = -gamepad1.right_stick_x; // Reversed
+//                            x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
+//                            rx = -gamepad1.left_stick_y; // Forward/Backward
+//
+//                            denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+//                            leftFrontPower = (y + x - rx) / denominator;
+//                            leftBackPower = (y - x - rx) / denominator;
+//                            rightFrontPower = (y - x + rx) / denominator;
+//                            rightBackPower = (y + x + rx) / denominator;
+//
+//                            leftFront.setPower(leftBackPower);
+//                            leftBack.setPower(leftFrontPower);
+//                            rightFront.setPower(rightFrontPower);
+//                            rightBack.setPower(rightBackPower);
+//
+//                        }
+//
+//                        d_open.setPosition(d_open_minRange);
+//
+//                        depositTimer.reset();
+//                        // Set lift state to released
+//                        liftState = LiftState.LIFT_RELEASED;
+//
+//                        break;
+//                    }
+//
+//                case LIFT_RELEASED:
+//                    if (d_open.getPosition() == d_open_minRange) {
+//
+//                        // Retract lift
+//                        liftFront.setTargetPosition(0);
+//                        liftFront.setTargetPosition(0);
+//                        liftFront.setPower(1.0);
+//                        liftFront.setPower(1.0);
+//
+//                        if ((Math.abs(liftFront.getCurrentPosition() - LIFT_IDLE)) != 0) {
+//
+//                            // Retract lift
+//                            liftFront.setTargetPosition(0);
+//                            liftFront.setTargetPosition(0);
+//                            liftFront.setPower(1.0);
+//                            liftFront.setPower(1.0);
+//
+//                            // Ensure movement of drivetrain during while loop
+//                            y = -gamepad1.right_stick_x; // Reversed
+//                            x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
+//                            rx = -gamepad1.left_stick_y; // Forward/Backward
+//
+//                            denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+//                            leftFrontPower = (y + x - rx) / denominator;
+//                            leftBackPower = (y - x - rx) / denominator;
+//                            rightFrontPower = (y - x + rx) / denominator;
+//                            rightBackPower = (y + x + rx) / denominator;
+//
+//                            leftFront.setPower(leftBackPower);
+//                            leftBack.setPower(leftFrontPower);
+//                            rightFront.setPower(rightFrontPower);
+//                            rightBack.setPower(rightBackPower);
+//
+//
+//                            // Set lift state to retracting
+//                            liftState = LiftState.LIFT_RETRACTING;
+//
+//                        } else {
+//
+//                            liftState = LiftState.LIFT_RELEASED;
+//                        }
+//
+//                        break;
+//                    }
+//
+//                case LIFT_RETRACTING:
+//                    // Check if lift is fully retracted
+//                    if ((Math.abs(liftFront.getCurrentPosition() - LIFT_IDLE)) == 0) {
+//
+//                        // Set lift state to empty
+//                        liftState = LiftState.LIFT_EXTENDING;
+//
+//                        break;
+//                    }
+//            }
+
 //            if (liftState == 0) {
 //
 //                if (gamepad2.a) {
@@ -675,6 +1095,23 @@ public class RoboBlueTest extends LinearOpMode {
 
                 c_Left.setPower(-(0.5 * b));
                 c_Right.setPower(-(0.5 * b));
+
+            } else {
+
+                c_Left.setPower(0);
+                c_Right.setPower(0);
+            }
+
+            if (gamepad2.left_bumper) {
+
+                c_Left.setPower(1);
+                c_Right.setPower(1);
+
+            } else if (gamepad2.right_bumper) {
+
+                c_Left.setPower(-1);
+                c_Right.setPower(-1);
+
             } else {
 
                 c_Left.setPower(0);
@@ -685,28 +1122,25 @@ public class RoboBlueTest extends LinearOpMode {
 
             float c = gamepad2.left_stick_y;
 
-//            while (gamepad2.left_stick_y != 0) {
-//
-//                if (c > 0) {
-//                    liftLeft.setTargetPosition(-590 * (int) c);
-//                    liftRight.setTargetPosition(-590 * (int) c);
-//                    liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    liftLeft.setPower(-1.0);
-//                    liftRight.setPower(-1.0);
-//                }
-//
-//                if (c < 0) {
-//                    liftLeft.setTargetPosition(0);
-//                    liftRight.setTargetPosition(0);
-//                    liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    liftLeft.setPower(1.0);
-//                    liftRight.setPower(1.0);
-//                }
-//            }
+            if (c > 0) {
 
-            // carousel.setPower(Math.max(0, Math.min(1, b-a)));
+                liftLeft.setTargetPosition(-590 * (int) c);
+                liftRight.setTargetPosition(-590 * (int) c);
+                liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                liftLeft.setPower(-1.0);
+                liftRight.setPower(-1.0);
+
+            } else if (c < 0) {
+
+                liftLeft.setTargetPosition(0);
+                liftRight.setTargetPosition(0);
+                liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                liftLeft.setPower(1.0);
+                liftRight.setPower(1.0);
+
+            }
 
             /** Reset Encoders **/
 
@@ -721,6 +1155,7 @@ public class RoboBlueTest extends LinearOpMode {
                     leftFrontPower, leftBackPower, rightFrontPower, rightBackPower);
             telemetry.addData("Left Sensor: ", colorSensor_left.alpha());
             telemetry.addData("Right Sensor: ", colorSensor_right.alpha());
+            telemetry.addData("BucketSensor: ", bucketSensor.alpha());
             telemetry.addData("Intake State: ", intakeState);
 //            telemetry.addData("Lift - Front:", liftLeft.getCurrentPosition());
 //            telemetry.addData("Lift - Back:", liftRight.getCurrentPosition());
