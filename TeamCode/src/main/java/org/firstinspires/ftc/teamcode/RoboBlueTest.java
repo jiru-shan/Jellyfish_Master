@@ -56,7 +56,6 @@ public class RoboBlueTest extends LinearOpMode {
         IS_TRANSFER,
         IS_OUT,
         IS_COMPLETE,
-        IS_RESET,
         IS_LIFT
     }
 
@@ -72,6 +71,12 @@ public class RoboBlueTest extends LinearOpMode {
         BH_LEFT,
         BH_RIGHT,
         BH_CENTER
+    }
+
+    enum BumperState {
+
+        BS_OFF,
+        BS_ON
     }
 
     //    enum LiftState {
@@ -95,6 +100,7 @@ public class RoboBlueTest extends LinearOpMode {
     IntakeState intakeState = IntakeState.IS_STATIONARY;
     IntakeHand intakeHand = IntakeHand.IH_NEITHER;
     BucketHand bucketHand = BucketHand.BH_CENTER;
+    BumperState bumperState = BumperState.BS_OFF;
 
     public void runOpMode() throws InterruptedException {
 
@@ -216,7 +222,23 @@ public class RoboBlueTest extends LinearOpMode {
 
                     if (gamepad1.left_bumper) {
 
+                        bumperState = BumperState.BS_ON;
                         intakeHand = IntakeHand.IH_LEFT;
+                        intakeState = IntakeState.IS_SETUP;
+
+                    } else if (gamepad1.right_bumper) {
+
+                        bumperState = BumperState.BS_ON;
+                        intakeHand = IntakeHand.IH_RIGHT;
+                        intakeState = IntakeState.IS_SETUP;
+
+                    }
+
+                    break;
+
+                case IS_SETUP:
+
+                    if (intakeHand == IntakeHand.IH_LEFT) {
 
                         // left intake flips down
                         i_topLeft.setPosition(i_minRange_topLeft);
@@ -227,6 +249,8 @@ public class RoboBlueTest extends LinearOpMode {
 
                         rightIntake.setPower(0);
 
+                        leftIntake.setPower(highSweepPower);
+
                         // turn bucket left
                         bucket.setPosition(bucket_left);
 
@@ -234,18 +258,7 @@ public class RoboBlueTest extends LinearOpMode {
 
                         intakeState = IntakeState.IS_INTAKE;
 
-                    } else if (gamepad1.right_bumper) {
-
-                        intakeHand = IntakeHand.IH_RIGHT;
-                        intakeState = IntakeState.IS_SETUP;
-
-                    }
-
-                    break;
-
-                case IS_SETUP:
-
-                    if (intakeHand == IntakeHand.IH_RIGHT) {
+                    } else if (intakeHand == IntakeHand.IH_RIGHT) {
 
                         // right intake flips down
                         i_topRight.setPosition(i_minRange_topRight);
@@ -275,7 +288,6 @@ public class RoboBlueTest extends LinearOpMode {
 
                         if (colorSensor_left.alpha() > 500) {
 
-
                             // hold elements in intake
                             leftIntake.setPower(0.25);
 
@@ -284,6 +296,22 @@ public class RoboBlueTest extends LinearOpMode {
                             i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
                             intakeState = IntakeState.IS_CAPTURE;
+
+                        } else if (gamepad1.left_bumper) {
+
+                            bumperState = BumperState.BS_OFF;
+
+                            i_topLeft.setPosition(i_maxRange_topLeft);
+                            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                            leftIntake.setPower(0);
+
+                            // turn bucket left
+                            bucket.setPosition(bucket_down);
+
+                            bucketHand = BucketHand.BH_CENTER;
+
+                            intakeState = IntakeState.IS_STATIONARY;
 
                         }
 
@@ -300,6 +328,21 @@ public class RoboBlueTest extends LinearOpMode {
 
                             intakeState = IntakeState.IS_CAPTURE;
 
+                        } else if (gamepad1.right_bumper) {
+
+                            bumperState = BumperState.BS_OFF;
+
+                            i_topRight.setPosition(i_maxRange_topRight);
+                            i_bottomRight.setPosition(i_maxRange_bottomRight);
+
+                            rightIntake.setPower(0);
+
+                            // turn bucket left
+                            bucket.setPosition(bucket_down);
+
+                            bucketHand = BucketHand.BH_CENTER;
+
+                            intakeState = IntakeState.IS_STATIONARY;
                         }
                     }
 
@@ -337,12 +380,10 @@ public class RoboBlueTest extends LinearOpMode {
 
                     if (intakeHand == IntakeHand.IH_LEFT) {
 
-                        leftIntake.setPower(-highSweepPower);
+                        if (i_topLeft.getPosition() == i_maxRange_topLeft) {
 
-                        if (colorSensor_right.alpha() < 100) {
-
-                            leftIntake.setPower(0);
-                            intakeState = IntakeState.IS_COMPLETE;
+                            intakeState = IntakeState.IS_OUT;
+                            leftIntakeTime.reset();
 
                         }
 
@@ -351,6 +392,7 @@ public class RoboBlueTest extends LinearOpMode {
                         if (i_topRight.getPosition() == i_maxRange_topRight) {
 
                             intakeState = IntakeState.IS_OUT;
+                            rightIntakeTime.reset();
 
                         }
                     }
@@ -359,17 +401,32 @@ public class RoboBlueTest extends LinearOpMode {
 
                 case IS_OUT:
 
-                    if (intakeHand == IntakeHand.IH_RIGHT) {
+                    if (intakeHand == IntakeHand.IH_LEFT) {
 
-                        Thread.sleep(500);
+                        if (leftIntakeTime.milliseconds() > 500) {
 
-                        rightIntake.setPower(-highSweepPower);
+                            leftIntake.setPower(-highSweepPower);
 
-                        if (bucketSensor.alpha() > 200) {
+                            if (bucketSensor.alpha() > 200) {
 
-                            rightIntake.setPower(0);
-                            intakeState = IntakeState.IS_COMPLETE;
+                                leftIntake.setPower(0);
+                                intakeState = IntakeState.IS_COMPLETE;
 
+                            }
+                        }
+
+                    } else if (intakeHand == IntakeHand.IH_RIGHT) {
+
+                        if (rightIntakeTime.milliseconds() > 800) {
+
+                            rightIntake.setPower(-highSweepPower);
+
+                            if (bucketSensor.alpha() > 200) {
+
+                                rightIntake.setPower(0);
+                                intakeState = IntakeState.IS_COMPLETE;
+
+                            }
                         }
                     }
 
