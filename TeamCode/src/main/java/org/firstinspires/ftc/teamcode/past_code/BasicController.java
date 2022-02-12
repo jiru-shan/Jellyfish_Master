@@ -1,10 +1,10 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.past_code;
 
 import com.qualcomm.robotcore.util.Range;
 
 //Controls motor powers. Incomplete
 
-public class BasicController extends Controller{
+public class BasicController extends Controller {
     @Override
     public double getDriveMotorPowers(double reference, double state, double maxSpeed) {
         return 0;

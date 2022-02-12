@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.past_code;
 
 import android.os.SystemClock;
 
@@ -56,6 +56,7 @@ public class colorSensorTest extends LinearOpMode
     double i_maxRange_topLeft = 0.85;
     double i_minRange_bottomLeft = 0.9;
     double i_maxRange_bottomLeft = 0.15;
+    int num=0;
 
     @Override
     public void runOpMode() throws InterruptedException
@@ -74,6 +75,8 @@ public class colorSensorTest extends LinearOpMode
         i_bottomLeft = hardwareMap.servo.get("i_bottomLeft");
         i_topRight = hardwareMap.servo.get("i_topRight");
         i_bottomRight = hardwareMap.servo.get("i_bottomRight");
+        sensorRange1 = hardwareMap.get(ColorRangeSensor.class, "colorSensor_right");
+        sensorRange2 = hardwareMap.get(ColorRangeSensor.class, "colorSensor_left");
 
 
 
@@ -87,9 +90,32 @@ public class colorSensorTest extends LinearOpMode
         i_bottomLeft.setPosition(i_maxRange_bottomLeft);
         while(opModeIsActive())
         {
-            telemetry.addData(">", pain.getDistance(DistanceUnit.CM));
-            telemetry.update();
+            if(hasBlock())
+            {
+                num++;
+            }
+            else
+                {
+                   num--;
+                }
+            telemetry.addData(">", num);
 
+            telemetry.addData("1:", rgbAvg(sensorRange1));
+            telemetry.addData("2:", rgbAvg(sensorRange2));
+            telemetry.update();
         }
+
+    }
+    public boolean hasBlock()
+    {
+
+        if (sensorRange1.getDistance(DistanceUnit.MM) < 55 || sensorRange2.getDistance(DistanceUnit.MM) < 55) {
+            return true;
+        }
+        return false;
+    }
+    public double rgbAvg(ColorRangeSensor pain)
+    {
+        return (pain.green()+pain.blue()+pain.red())/3;
     }
 }

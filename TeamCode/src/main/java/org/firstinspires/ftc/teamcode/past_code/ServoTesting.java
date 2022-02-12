@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.past_code;
 
 import android.os.SystemClock;
 
@@ -66,20 +66,11 @@ public class ServoTesting extends LinearOpMode
 
         rightIntake = hardwareMap.dcMotor.get("rightIntake");
 
-        i_bottomLeft.setDirection(Servo.Direction.REVERSE);
-        i_topLeft.setDirection(Servo.Direction.REVERSE);
+        i_bottomLeft.setPosition(i_minRange_bottomLeft);
+        i_topLeft.setPosition(i_minRange_topLeft);
 
         d_open.resetDeviceConfigurationForOpMode();
         waitForStart();
-
-        //d_open.setDirection(Servo.Direction.REVERSE);
-        servoController.pwmEnable();
-        servoController.setServoPosition(port, d_open_minRange);
-        while(true)
-        {
-            telemetry.addData(">", servoController.getServoPosition(port));
-            telemetry.update();
-        }
 
     }
 }

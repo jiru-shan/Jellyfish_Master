@@ -1,9 +1,9 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.past_code;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
 
-public class Lift extends SingleMotorMechanism{
+public class Lift extends SingleMotorMechanism {
 
     private static final int[] ARM_POSITIONS={0, 100, 200}; //temp values
 

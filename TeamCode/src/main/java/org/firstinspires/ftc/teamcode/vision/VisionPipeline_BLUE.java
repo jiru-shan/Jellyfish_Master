@@ -127,6 +127,8 @@ public class VisionPipeline_BLUE extends OpenCvPipeline
         region1_Cr = Cr.submat(new Rect(region1_pointA, region1_pointB));
         region2_Cr = Cr.submat(new Rect(region2_pointA, region2_pointB));
         region3_Cr = Cr.submat(new Rect(region3_pointA, region3_pointB));
+
+
     }
 
     @Override
@@ -179,6 +181,9 @@ public class VisionPipeline_BLUE extends OpenCvPipeline
          * pixel value of the 3-channel image, and referenced the value
          * at index 2 here.
          */
+
+
+
         avg1 = (int) (0.8*Core.mean(region1_Cb).val[0])+(int) Core.mean(region1_Cr).val[0];
         avg2 = (int) (0.8*Core.mean(region2_Cb).val[0])+(int) Core.mean(region2_Cr).val[0];
         avg3 = (int) (0.8*Core.mean(region3_Cb).val[0])+(int) Core.mean(region3_Cr).val[0];

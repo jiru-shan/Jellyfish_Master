@@ -33,10 +33,19 @@ public class MeepMeepTesting
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(new Pose2d(0, 0, 0))
                                 //.setReversed(true)
-                                .strafeRight(15)
-                                .lineToConstantHeading(new Vector2d(0,0))
+                               // .strafeRight(15)
+                                //.lineToConstantHeading(new Vector2d(0,2))
                                 //.addTrajectory(traj)
-
+                                .splineTo(new Vector2d(49, -1), Math.toRadians(-5))
+                                .splineTo(new Vector2d(73, -2.25), Math.toRadians(-10))
+                                .setReversed(true)
+                                .splineTo(new Vector2d(49, 13), Math.toRadians(180))
+                                .addDisplacementMarker(()->
+                                {
+                                    drive.setPoseEstimate(new Pose2d(49, 0, 0));
+                                })
+                                //.setReversed(false)
+                                .splineTo(new Vector2d(0,0), Math.toRadians(180))
                                 //.setReversed(true)
                                 //.lineToConstantHeading(new Vector2d(-42, -1))
                                 //.splineTo(new Vector2d(-42, -1), Math.toRadians(5))

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.past_code;
 
 import android.os.SystemClock;
 
@@ -9,7 +9,6 @@ import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -24,7 +23,6 @@ import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDriveCancelable;
 import org.firstinspires.ftc.teamcode.vision.VisionPipeline_BLUE;
-import org.firstinspires.ftc.teamcode.vision.VisionPipeline_RED;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -52,7 +50,7 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
 
 
     // Deposit servo positions
-    double d_open_minRange = 0.65; // it was 0.59
+    double d_open_minRange = 0.59; // it was 0.59
     double d_open_top = 0.4;
     double d_open_clamp=0.66;
     double d_minRange_bendLeft = 0.96;      // need to fix bend values
@@ -69,16 +67,18 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
     double d_minRange_coverLeft = 0.55;
     double d_maxRange_coverLeft = 0.15;
     double d_minRange_coverRight = 0.45;
+    double intakePower=1;
 
-    double prevTimer;
     ElapsedTime intakeTimer=new ElapsedTime();
 
     OpenCvWebcam camera;
     VisionPipeline_BLUE pipeline;
 
     double CYCLE_TIME=8;
+    int cycleAmount;
     double past_lift_value;
-    boolean cubeCheck;
+    int cubeCheck;
+    boolean timeCheck;
 
     enum GrabbingState {GETTING,
         RETURNING,
@@ -94,12 +94,10 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
     }
     enum IntakeState
     {
-        INTO_DEPOSIT, STALLING, EXTENDING_LIFT,  DONE
+        INTO_DEPOSIT, STALLING, EXTENDING_LIFT, DONE
     }
 
-    int alliance_targetTipped = 1000;
-    double intakeTarget=0;
-    double intakeEjectDistance=30.0;
+    int alliance_targetTipped = 625;
 
     SampleMecanumDriveCancelable drive;
 
@@ -157,19 +155,20 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
         d_open.setPosition(d_open_clamp);
         d_bendLeft.setPosition(d_minRange_bendLeft);
         d_bendRight.setPosition(d_minRange_bendRight);
-
         d_coverLeft.setPosition(d_minRange_coverLeft);
         d_coverRight.setPosition(d_minRange_coverRight);
-        d_open.setPosition(d_open_minRange);
-        d_open.setPosition(d_open_minRange);
-        d_open.setPosition(d_open_minRange);
-        d_open.setPosition(d_open_minRange);
-        d_open.setPosition(d_open_minRange);
-        d_open.setPosition(d_open_minRange);
 
         waitForStart();
 
+
         cubePos= pipeline.getAnalysis();
+
+        overallTime.reset();
+        while(overallTime.milliseconds()<3000)
+        {
+            //stall
+        }
+
 
         Trajectory prepreTrajectory = drive.trajectoryBuilder(startPose)
                 .back(7+12.25)
@@ -180,7 +179,7 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
         //run roadrunner code to deposit in correct place and then return to starting pos
         visionDeposit(cubePos);
 
-        while(30-overallTime.seconds()>CYCLE_TIME+3)
+        while(cycleAmount<2)
         {
         drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(0)));
         lowerIntakes();
@@ -189,7 +188,7 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
             d_open.setPosition(d_open_minRange);
         double pathChange=0;
         GState = GrabbingState.GETTING;
-        cubeCheck=false;
+        cubeCheck=0;
         goingTrajectory = drive.trajectoryBuilder(startPose)
 
                 .splineTo(new Vector2d(49, -1), Math.toRadians(-5))
@@ -241,7 +240,7 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
                     drive.cancelFollowing();
                     leftIntake.setPower(0);
                     returningTrajectory = drive.trajectoryBuilder(drive.getPoseEstimate())
-                            .lineToSplineHeading(new Pose2d(49, 8, Math.toRadians(0)))
+                            .lineToSplineHeading(new Pose2d(49, 13, Math.toRadians(0)))
                             .build();
                     drive.followTrajectoryAsync(returningTrajectory);
                     GState= EvenLessScuffedAuton_BLUE.GrabbingState.HAS_CUBE_2;
@@ -250,12 +249,16 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
                 case HAS_CUBE_2:
                     if(hasBlock())
                     {
-                        cubeCheck=true;
+                        cubeCheck+=3;
+                    }
+                    else if(!hasBlock())
+                    {
+                        cubeCheck--;
                     }
                     if(!drive.isBusy())
                     {
                         drive.setPoseEstimate(new Pose2d(drive.getPoseEstimate().getX(), 0, 0));
-                        if(cubeCheck)
+                        if(cubeCheck>0)
                         {
                             GState= EvenLessScuffedAuton_BLUE.GrabbingState.DONE;
                         }
@@ -277,7 +280,6 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
         RState = ReturningState.LING;
         IState=IntakeState.INTO_DEPOSIT;
         intakeTimer.reset();
-        prevTimer=100;
         d_open.setPosition(d_open_minRange);
         Trajectory lineTrajectory = drive.trajectoryBuilder(drive.getPoseEstimate())
                 .lineToSplineHeading(startPose, SampleMecanumDrive.getVelocityConstraint(25,
@@ -292,12 +294,7 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
                     if (onColor())
                     {
                         RState = ReturningState.RETURNING;
-                        drive.cancelFollowing();
                         drive.setPoseEstimate(new Pose2d(31.5, 0, 0));
-                        Trajectory returnTrajectory = drive.trajectoryBuilder(drive.getPoseEstimate())
-                                .lineTo(new Vector2d(0, 0))
-                                .build();
-                        drive.followTrajectoryAsync(returnTrajectory);
                     }
                     else if(!drive.isBusy())
                     {
@@ -317,11 +314,14 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
             drive.update();
             putInDeposit();
         }
+        cycleAmount++;
          }
-        Trajectory park=drive.trajectoryBuilder(drive.getPoseEstimate())
-                .lineToSplineHeading(new Pose2d(50, 0, Math.toRadians(0)))
-                .build();
-        drive.followTrajectory(park);
+
+            Trajectory park = drive.trajectoryBuilder(drive.getPoseEstimate())
+                    .lineToSplineHeading(new Pose2d(60, 0, Math.toRadians(0)))
+                    .build();
+            drive.followTrajectory(park);
+
     }
     public void raiseIntakes()
     {
@@ -367,14 +367,14 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
                     d_bendRight.setPosition(d_minRange_bendRight);
                     d_coverLeft.setPosition(d_maxRange_coverLeft);
                     d_coverRight.setPosition(d_minRange_coverRight);
-                    leftIntake.setPower(-1);
+                    leftIntake.setPower(-intakePower);
                     if (depositCube()) {
                         IState = IntakeState.STALLING;
                         intakeTimer.reset();
                     }
                     break;
                 case STALLING:
-                    leftIntake.setPower(-1);
+                    leftIntake.setPower(-intakePower);
                     if(intakeTimer.milliseconds()>50) {
                         d_open.setPosition(d_open_clamp);
                     }
@@ -394,6 +394,7 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
                     break;
                 case EXTENDING_LIFT:
                     //pain
+
                     lift_front.setPower(-1.0);
                     lift_back.setPower(-1.0);
                     if (checkLift())
@@ -469,7 +470,7 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
             past_lift_value=lift_front.getCurrentPosition();
             time.reset();
         }
-        if(change<7.5)
+        if(change<6)
         {
             return true;
         }
@@ -495,7 +496,7 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
             @Override
             public void onOpened()
             {
-                camera.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
+                camera.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
             }
 
             @Override
@@ -506,12 +507,39 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
             }
         });
     }
+    public void checkForExit()
+    {
+        if(overallTime.seconds()>=25)
+        {
+            timeCheck=false;
+            d_coverLeft.setPosition(d_minRange_coverLeft);
+            d_coverRight.setPosition(d_minRange_coverRight);
+            d_open.setPosition(d_open_minRange);
+            d_bendLeft.setPosition(d_minRange_bendLeft);
+            d_bendRight.setPosition(d_minRange_bendRight);
+            drive.cancelFollowing();
+            Trajectory park=drive.trajectoryBuilder(drive.getPoseEstimate())
+                    .lineToSplineHeading(new Pose2d(60, 0, Math.toRadians(0)))
+                    .build();
+            drive.followTrajectoryAsync(park);
+            lift_back.setTargetPosition(0);
+            lift_front.setTargetPosition(0);
+            lift_back.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            lift_front.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            while(!checkLift())
+            {
+                lift_front.setPower(1);
+                lift_back.setPower(1);
+                drive.update();
+            }
+        }
+    }
     public void visionDeposit(int level)
     {
         if(level==1)
         {
             Trajectory strafeTrajectory = drive.trajectoryBuilder(new Pose2d())
-                    .strafeRight(28)
+                    .strafeRight(25)
                     .build();
             drive.followTrajectory(strafeTrajectory);
             lift_front.setTargetPosition(-200);
@@ -568,7 +596,7 @@ public class EvenLessScuffedAuton_BLUE extends LinearOpMode
             d_coverRight.setPosition(d_minRange_coverRight);
 
             Trajectory strafeBack=drive.trajectoryBuilder(drive.getPoseEstimate())
-                    .lineToConstantHeading(new Vector2d(0,0))
+                    .lineToConstantHeading(new Vector2d(0,3))
                     .build();
 
             drive.followTrajectory(strafeBack);
