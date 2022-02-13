@@ -38,6 +38,7 @@ public class RoboDrive extends LinearOpMode {
     CRServo c_Right;
     Servo bucket;
     Servo arm;
+    Servo turret;
 
     // Color sensors
     ColorRangeSensor colorSensor_left;
@@ -66,6 +67,7 @@ public class RoboDrive extends LinearOpMode {
         i_bottomRight = hardwareMap.servo.get("i_bottomRight");
         bucket = hardwareMap.servo.get("bucket");
         arm = hardwareMap.servo.get("arm");
+        turret = hardwareMap.servo.get("turret");
         c_Left = hardwareMap.crservo.get("c_Left");
         c_Right = hardwareMap.crservo.get("c_Right");
 
@@ -73,18 +75,6 @@ public class RoboDrive extends LinearOpMode {
         colorSensor_left = hardwareMap.get(ColorRangeSensor.class, "colorSensor_left");
         colorSensor_right = hardwareMap.get(ColorRangeSensor.class, "colorSensor_right");
         bucketSensor = hardwareMap.get(ColorRangeSensor.class, "bucketSensor");
-
-        // Intake
-        double highSweepPower = 0.8;
-        // double lowSweepPower = 0.4;
-
-        // Deposit servo positions
-        double bucket_down = 0.55;
-        double bucket_left = 0.27;
-        double bucket_right = 0.83;
-        double arm_forward = 0.30;   // temporary
-        double arm_backward = 0.87;
-        double turret_center = 0.5;
 
         double i_minRange_topLeft = 0.15;   // 0.08
         double i_maxRange_topLeft = 0.92;
@@ -95,18 +85,6 @@ public class RoboDrive extends LinearOpMode {
         double i_minRange_bottomRight = 0.16;   // 0.08
         double i_maxRange_bottomRight = 0.87;
 
-        // Carousel
-        double maxSpinPower = 0.5;
-
-        // Factor
-        double normalSpeed = 1.0;
-        int alliance_targetTipped = 625;
-        int alliance_targetBalanced = 575;   // Fix this value
-        int alliance_middle = 550;   // Fix this value
-        int shared_targetClose = 120;
-        int shared_targetMiddle = 200;
-        int shared_targetFar = 280;
-
         // Reset encoders
         liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
         liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -115,21 +93,6 @@ public class RoboDrive extends LinearOpMode {
         leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        boolean objectCaptured = false;
-
-        ElapsedTime leftIntakeTime = new ElapsedTime();
-        ElapsedTime rightIntakeTime = new ElapsedTime();
-
-        double intakeCaptureDistance = 6.0;
-        double intakeEjectDistance = 30.0;
-        int intakeFlipUpTime = 250;
-
-        int liftState = 0;
-        int liftPosition = 0;
-        int liftExtendError = 100;
-        int liftRetractError = 10;
-        ElapsedTime liftTime = new ElapsedTime();
 
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
@@ -158,7 +121,7 @@ public class RoboDrive extends LinearOpMode {
             // intuitive controls in respect to the blue side of the field
             double y = -gamepad1.right_stick_x; // Reversed
             double x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
-            double rx = -gamepad1.left_stick_y; // Forward/Backward
+            double rx = gamepad1.left_stick_y; // Forward/Backward
 
             /** Denominator is the largest motor power (absolute value) or 1
              * This ensures all the powers maintain the same ratio, but only when
