@@ -28,8 +28,8 @@ public class LiftAsync
 
     public LiftAsync(HardwareMap hwMap, int target)
     {
-        this.motor1=hwMap.get(DcMotorEx.class, "lift_left");
-        this.motor2=hwMap.get(DcMotorEx.class, "lift_right");
+        this.motor1=hwMap.get(DcMotorEx.class, "liftLeft");
+        this.motor2=hwMap.get(DcMotorEx.class, "liftRight");
 
         motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
