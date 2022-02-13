@@ -19,7 +19,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 
-@Autonomous
+//@Autonomous
 
 /* TO DO
 * Create/test a path
