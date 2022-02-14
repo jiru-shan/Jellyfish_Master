@@ -130,7 +130,8 @@ public class RoboBlue extends LinearOpMode {
         LH_MIDDLE,
         LH_NEAR,
         LH_CENTER,
-        LH_FAR
+        LH_FAR,
+        LH_RETRACT
     }
 
     IntakeState intakeState = IntakeState.IS_STATIONARY;
@@ -174,12 +175,12 @@ public class RoboBlue extends LinearOpMode {
         double highSweepPower = 0.8;
 
         // Deposit servo positions
-        double bucket_down = 0.55;
-        double bucket_left = 0.27;
-        double bucket_right = 0.83;
+        double bucket_down = 0.48;
+        double bucket_left = 0.20                                                                                              ;
+        double bucket_right = 0.76;
         double arm_forward = 0.30;   // temporary
-        double arm_backward = 0.87;
-        double turret_center = 0.5;
+        double arm_backward = 0.92;  // 0.92
+        double turret_center = 0.47;
 
         double i_minRange_topLeft = 0.15;
         double i_maxRange_topLeft = 0.92;
@@ -195,12 +196,12 @@ public class RoboBlue extends LinearOpMode {
 
         // Factor
         double normalSpeed = 1.0;
-        int TARGET_TIPPED = 625;
-        int TARGET_BALANCED = 350;
+        int TARGET_TIPPED = 420;
+        int TARGET_BALANCED = 380;
         int TARGET_MIDDLE = 550;
-        int TARGET_NEAR = 120;
-        int TARGET_CENTER = 200;
-        int TARGET_FAR = 280;
+        int TARGET_NEAR = 80;
+        int TARGET_CENTER = 120;
+        int TARGET_FAR = 160;
 
         // Reset encoders
         liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
@@ -210,6 +211,10 @@ public class RoboBlue extends LinearOpMode {
         leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        bucket.setPosition(bucket_down);
+        arm.setPosition(arm_backward);
+        turret.setPosition(turret_center);
 
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
@@ -227,6 +232,9 @@ public class RoboBlue extends LinearOpMode {
             for (LynxModule module : allHubs) {
                 module.clearBulkCache();
             }
+
+//            i_topLeft.setPosition(i_maxRange_topLeft);
+//            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
 //            i_topLeft.setPosition(i_maxRange_topLeft);
 //            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
@@ -510,8 +518,10 @@ public class RoboBlue extends LinearOpMode {
 //                        liftHand = LiftHand.LH_TIPPED;
 //
 //                        // Run lift
-//                        liftLeft.setTargetPosition(-TARGET_TIPPED);
-//                        liftRight.setTargetPosition(-TARGET_TIPPED);
+//                        liftLeft.setTargetPosition(TARGET_TIPPED);
+//                        liftRight.setTargetPosition(TARGET_TIPPED);
+//                        liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                        liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //                        liftLeft.setPower(-1.0);
 //                        liftRight.setPower(-1.0);
 //
@@ -522,8 +532,10 @@ public class RoboBlue extends LinearOpMode {
 //                        liftHand = liftHand.LH_BALANCED;
 //
 //                        // Run lift
-//                        liftLeft.setTargetPosition(-TARGET_BALANCED);
-//                        liftRight.setTargetPosition(-TARGET_BALANCED);
+//                        liftLeft.setTargetPosition(TARGET_BALANCED);
+//                        liftRight.setTargetPosition(TARGET_BALANCED);
+//                        liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                        liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //                        liftLeft.setPower(-1.0);
 //                        liftRight.setPower(-1.0);
 //
@@ -534,8 +546,10 @@ public class RoboBlue extends LinearOpMode {
 //                        liftHand = LiftHand.LH_FAR;
 //
 //                        // Run lift
-//                        liftLeft.setTargetPosition(-TARGET_FAR);
-//                        liftRight.setTargetPosition(-TARGET_FAR);
+//                        liftLeft.setTargetPosition(TARGET_FAR);
+//                        liftRight.setTargetPosition(TARGET_FAR);
+//                        liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                        liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //                        liftLeft.setPower(-1.0);
 //                        liftRight.setPower(-1.0);
 //
@@ -546,8 +560,10 @@ public class RoboBlue extends LinearOpMode {
 //                        liftHand = LiftHand.LH_CENTER;
 //
 //                        // Run lift
-//                        liftLeft.setTargetPosition(-TARGET_CENTER);
-//                        liftRight.setTargetPosition(-TARGET_CENTER);
+//                        liftLeft.setTargetPosition(TARGET_CENTER);
+//                        liftRight.setTargetPosition(TARGET_CENTER);
+//                        liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                        liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //                        liftLeft.setPower(-1.0);
 //                        liftRight.setPower(-1.0);
 //
@@ -558,8 +574,10 @@ public class RoboBlue extends LinearOpMode {
 //                        liftHand = LiftHand.LH_NEAR;
 //
 //                        // Run lift
-//                        liftLeft.setTargetPosition(-TARGET_NEAR);
-//                        liftRight.setTargetPosition(-TARGET_NEAR);
+//                        liftLeft.setTargetPosition(TARGET_NEAR);
+//                        liftRight.setTargetPosition(TARGET_NEAR);
+//                        liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                        liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //                        liftLeft.setPower(-1.0);
 //                        liftRight.setPower(-1.0);
 //
@@ -574,25 +592,35 @@ public class RoboBlue extends LinearOpMode {
 //                    // Check if the lift has fully extended
 //                    if (liftHand == LiftHand.LH_TIPPED && (Math.abs(liftLeft.getCurrentPosition() - TARGET_TIPPED)) < 10) {
 //
+//                        arm.setPosition(arm_forward);
+//
 //                        // Set state to depositing
 //                        liftState = LiftState.LS_DEPOSITING;
 //
 //                    } else if (liftHand == LiftHand.LH_BALANCED && (Math.abs(liftLeft.getCurrentPosition() - TARGET_BALANCED)) < 10) {
+//
+//                        arm.setPosition(arm_forward);
 //
 //                        // Set state to depositing
 //                        liftState = LiftState.LS_DEPOSITING;
 //
 //                    } else if (liftHand == LiftHand.LH_FAR && (Math.abs(liftLeft.getCurrentPosition() - TARGET_FAR)) < 5) {
 //
+//                        arm.setPosition(arm_forward);
+//
 //                        // Set state to depositing
 //                        liftState = LiftState.LS_DEPOSITING;
 //
 //                    } else if (liftHand == LiftHand.LH_CENTER && (Math.abs(liftLeft.getCurrentPosition() - TARGET_MIDDLE)) < 5) {
 //
+//                        arm.setPosition(arm_forward);
+//
 //                        // Set state to depositing
 //                        liftState = LiftState.LS_DEPOSITING;
 //
 //                    } else if (liftHand == LiftHand.LH_NEAR && (Math.abs(liftLeft.getCurrentPosition() - TARGET_NEAR)) < 5) {
+//
+//                        arm.setPosition(arm_forward);
 //
 //                        // Set state to depositing
 //                        liftState = LiftState.LS_DEPOSITING;
@@ -601,68 +629,61 @@ public class RoboBlue extends LinearOpMode {
 //                case LS_DEPOSITING:
 //                    if (gamepad2.dpad_right || gamepad2.x) {
 //
+//                        liftHand = LiftHand.LH_RETRACT;
+//
 //                        depositTimer.reset();
 //
-//                        d_open.setPosition(d_open_top);
+//                        bucket.setPosition(bucket_right);
 //
 //                        if (depositTimer.milliseconds() <= 500) {
 //
-//                            d_open.setPosition(d_open_top);
-//
-//                            // Keep lift in place while depositing
-//                            liftFront.setTargetPosition(0);
-//                            liftBack.setTargetPosition(0);
-//                            liftFront.setPower(-1.0);
-//                            liftBack.setPower(-1.0);
-//
-//                        }
-//
-//                        d_open.setPosition(d_open_minRange);
-//
-//                        depositTimer.reset();
-//                        // Set lift state to released
-//                        liftState = LiftState.LIFT_RELEASED;
-//
-//                        break;
-//                    }
-//
-//                case LIFT_RELEASED:
-//                    if (d_open.getPosition() == d_open_minRange) {
-//
-//                        // Retract lift
-//                        liftFront.setTargetPosition(0);
-//                        liftFront.setTargetPosition(0);
-//                        liftFront.setPower(1.0);
-//                        liftFront.setPower(1.0);
-//
-//                        if ((Math.abs(liftFront.getCurrentPosition() - LIFT_IDLE)) != 0) {
-//
-//                            // Retract lift
-//                            liftFront.setTargetPosition(0);
-//                            liftFront.setTargetPosition(0);
-//                            liftFront.setPower(1.0);
-//                            liftFront.setPower(1.0);
-//
-//                            // Set lift state to retracting
-//                            liftState = LiftState.LIFT_RETRACTING;
+//                            bucket.setPosition(bucket_right);
 //
 //                        } else {
 //
-//                            liftState = LiftState.LIFT_RELEASED;
-//                        }
+//                            bucket.setPosition(bucket_down);
 //
-//                        break;
+//                            // Set lift state to released
+//                            liftState = LiftState.LS_RELEASED;
+//                        }
 //                    }
 //
-//                case LIFT_RETRACTING:
+//                    break;
+//
+//                case LS_RELEASED:
+//
+//                    if (bucket.getPosition() == bucket_down) {
+//
+//                        if ((Math.abs(liftLeft.getCurrentPosition())) < -5) {
+//
+//                            arm.setPosition(arm_backward);
+//
+//                            // Retract lift
+//                            liftLeft.setTargetPosition(-5);
+//                            liftRight.setTargetPosition(-5);
+//                            liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                            liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                            liftLeft.setPower(-1.0);
+//                            liftLeft.setPower(-1.0);
+//
+//                            // Set lift state to retracting
+//                            liftState = LiftState.LS_RETRACTING;
+//
+//                        }
+//                    }
+//
+//                    break;
+//
+//                case LS_RETRACTING:
 //                    // Check if lift is fully retracted
-//                    if ((Math.abs(liftFront.getCurrentPosition() - LIFT_IDLE)) == 0) {
+//                    if ((Math.abs(liftLeft.getCurrentPosition() - 0)) < 5) {
 //
 //                        // Set lift state to empty
-//                        liftState = LiftState.LIFT_EXTENDING;
+//                        liftState = LiftState.LS_EXTENDING;
 //
-//                        break;
 //                    }
+//
+//                    break;
 //            }
 
             // drivetrain
@@ -689,129 +710,165 @@ public class RoboBlue extends LinearOpMode {
 
             /** Carousel **/
 
-            switch (carouselState) {
-
-                case CS_STATIONARY:
-
-                    if (gamepad2.left_bumper) {
-
-                        carouselTimer.reset();
-
-                        carouselHand = CarouselHand.CH_LEFT;
-
-                        carouselState = CarouselState.CS_TURNING_LEFT;
-
-                    } else if (gamepad2.right_bumper) {
-
-                        carouselTimer.reset();
-
-                        carouselHand = CarouselHand.CH_RIGHT;
-
-                        carouselState = CarouselState.CS_TURNING_RIGHT;
-                    }
-
-                    break;
-
-                case CS_TURNING_LEFT:
-
-                    if (carouselTimer.milliseconds() < 3000) {
-
-                        c_Left.setPower(0.3);
-                        c_Right.setPower(0.3);
-
-                    } else if (carouselTimer.milliseconds() < 4000 && carouselTimer.milliseconds() > 3000) {
-
-                        c_Left.setPower(0.5);
-                        c_Right.setPower(0.5);
-
-                    } else if (carouselTimer.milliseconds() < 6000 && carouselTimer.milliseconds() > 4000) {
-
-                        c_Left.setPower(1.0);
-                        c_Right.setPower(1.0);
-
-                    } else {
-
-                        c_Left.setPower(0);
-                        c_Right.setPower(0);
-
-                        carouselState = CarouselState.CS_STATIONARY;
-                    }
-
-                case CS_TURNING_RIGHT:
-
-                    if (carouselTimer.milliseconds() < 3000) {
-
-                        c_Left.setPower(-0.3);
-                        c_Right.setPower(-0.3);
-
-                    } else if (carouselTimer.milliseconds() < 4000 && carouselTimer.milliseconds() > 3000) {
-
-                        c_Left.setPower(-0.5);
-                        c_Right.setPower(-0.5);
-
-                    } else if (carouselTimer.milliseconds() < 6000 && carouselTimer.milliseconds() > 4000) {
-
-                        c_Left.setPower(-1.0);
-                        c_Right.setPower(-1.0);
-
-                    } else {
-
-                        c_Left.setPower(0);
-                        c_Right.setPower(0);
-                    }
-
-                    break;
-            }
-
             float a = gamepad2.left_trigger;
             float b = gamepad2.right_trigger;
+//
+//            switch (carouselState) {
+//
+//                case CS_STATIONARY:
+//
+//                    if (gamepad2.left_trigger > 0.05) {
+//
+//                        carouselTimer.reset();
+//
+//                        carouselHand = CarouselHand.CH_LEFT;
+//
+//                        carouselState = CarouselState.CS_TURNING_LEFT;
+//
+//                    } else if (gamepad2.right_trigger > 0.05) {
+//
+//                        carouselTimer.reset();
+//
+//                        carouselHand = CarouselHand.CH_RIGHT;
+//
+//                        carouselState = CarouselState.CS_TURNING_RIGHT;
+//                    }
+//
+//                    break;
+//
+//                case CS_TURNING_LEFT:
+//
+//                    if (carouselTimer.milliseconds() < 3000) {
+//
+//                        c_Left.setPower(0.3 * a);
+//                        c_Right.setPower(0.3 * a);
+//
+//                    } else if (carouselTimer.milliseconds() < 4000 && carouselTimer.milliseconds() > 3000) {
+//
+//                        c_Left.setPower();
+//                        c_Right.setPower(0.5);
+//
+//                    } else if (carouselTimer.milliseconds() < 6000 && carouselTimer.milliseconds() > 4000) {
+//
+//                        c_Left.setPower(1.0);
+//                        c_Right.setPower(1.0);
+//
+//                    } else {
+//
+//                        c_Left.setPower(0);
+//                        c_Right.setPower(0);
+//
+//                        carouselState = CarouselState.CS_STATIONARY;
+//                    }
+//
+//                case CS_TURNING_RIGHT:
+//
+//                    if (carouselTimer.milliseconds() < 3000) {
+//
+//                        c_Left.setPower(-0.3);
+//                        c_Right.setPower(-0.3);
+//
+//                    } else if (carouselTimer.milliseconds() < 4000 && carouselTimer.milliseconds() > 3000) {
+//
+//                        c_Left.setPower(-0.5);
+//                        c_Right.setPower(-0.5);
+//
+//                    } else if (carouselTimer.milliseconds() < 6000 && carouselTimer.milliseconds() > 4000) {
+//
+//                        c_Left.setPower(-1.0);
+//                        c_Right.setPower(-1.0);
+//
+//                    } else {
+//
+//                        c_Left.setPower(0);
+//                        c_Right.setPower(0);
+//                    }
+//
+//                    break;
+//            }
 
-            if (gamepad2.left_trigger > 0.05) {
+//            if (gamepad2.left_trigger != 0) {
+//
+//                c_Left.setPower(Math.max(0, Math.min(1, (5 * Math.pow(x - 0.5, 3) + 0.7))));
+//                c_Right.setPower(Math.max(0, Math.min(1, (5 * Math.pow(x - 0.5, 3) + 0.7))));
+//
+//            } else if (gamepad2.right_trigger != 0) {
+//
+//                    c_Left.setPower(-(Math.max(0, Math.min(1, (5 * Math.pow(x - 0.5, 3) + 0.7)))));
+//                    c_Right.setPower(-(Math.max(0, Math.min(1, (5 * Math.pow(x - 0.5, 3) + 0.7)))));
+//
+//            } else {
+//
+//                c_Left.setPower(0);
+//                c_Right.setPower(0);
+//
+//            }
 
-                c_Left.setPower(0.5 * a);
-                c_Right.setPower(0.5 * a);
-
-            } else if (gamepad2.right_trigger > 0.05) {
-
-                c_Left.setPower(-(0.5 * b));
-                c_Right.setPower(-(0.5 * b));
-
-            } else {
-
-                c_Left.setPower(0);
-                c_Right.setPower(0);
-            }
+//
+//            if (gamepad2.left_trigger > 0.05) {
+//
+//                c_Left.setPower(0.5 * a);
+//                c_Right.setPower(0.5 * a);
+//
+//            } else if (gamepad2.right_trigger > 0.05) {
+//
+//                c_Left.setPower(-(0.5 * b));
+//                c_Right.setPower(-(0.5 * b));
+//
+//            } else {
+//
+//                c_Left.setPower(0);
+//                c_Right.setPower(0);
+//            }
 
             // Manual Lift
 
             float c = gamepad2.right_stick_y;
+            // float d = gamepad2.left_stick_y;
 
-            if (c > 0) {
+            if (c > 0.0) {
 
-                liftLeft.setTargetPosition(400);
-                liftRight.setTargetPosition(400);
+                liftLeft.setTargetPosition(300);
+                liftRight.setTargetPosition(300);
                 liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 liftLeft.setPower(-1.0);
                 liftRight.setPower(-1.0);
 
-            } else if (c < 0) {
+                arm.setPosition(arm_forward);
 
-                liftLeft.setTargetPosition(0);
-                liftRight.setTargetPosition(0);
+            }
+
+            if (gamepad2.x) {
+
+                bucket.setPosition(bucket_left);
+            }
+
+            if (c < 0.0) {
+
+                liftLeft.setTargetPosition(-300);
+                liftRight.setTargetPosition(-300);
                 liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 liftLeft.setPower(1.0);
                 liftRight.setPower(1.0);
 
+                arm.setPosition(arm_backward);
+                bucket.setPosition(bucket_down);
+
+                if (Math.abs(liftLeft.getCurrentPosition()) < 5) {
+
+                    liftLeft.setPower(0);
+                    liftRight.setPower(0);
+                }
             }
 
             /** Reset Encoders **/
 
             if (gamepad2.right_trigger != 0) {
 
-//                liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
-//                liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
+                liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             }
 
             telemetry.addData("Status", "Run Time: " + runtime.toString());
@@ -826,7 +883,7 @@ public class RoboBlue extends LinearOpMode {
             telemetry.addData("C_Left: ", c_Left.getPower());
             telemetry.addData("C_Right: ", c_Right.getPower());
             telemetry.addData("Lift State: ", liftState);
-//            telemetry.addData("Lift Position: ", liftPosition);
+            telemetry.addData("Lift Encoders: ", liftLeft.getCurrentPosition());
             telemetry.addData("C: ", c);
             telemetry.update();
         }
