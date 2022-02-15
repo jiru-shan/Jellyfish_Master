@@ -179,8 +179,9 @@ public class RoboBlue extends LinearOpMode {
         double bucket_left = 0.20                                                                                              ;
         double bucket_right = 0.76;
         double arm_forward = 0.30;   // temporary
+        double arm_intermediate = 0.70;
         double arm_backward = 0.92;  // 0.92
-        double turret_center = 0.47;
+        double turret_center = 0.49;
 
         double i_minRange_topLeft = 0.15;
         double i_maxRange_topLeft = 0.92;
@@ -210,7 +211,7 @@ public class RoboBlue extends LinearOpMode {
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         bucket.setPosition(bucket_down);
         arm.setPosition(arm_backward);
@@ -712,7 +713,7 @@ public class RoboBlue extends LinearOpMode {
 
             float a = gamepad2.left_trigger;
             float b = gamepad2.right_trigger;
-//
+
 //            switch (carouselState) {
 //
 //                case CS_STATIONARY:
@@ -804,7 +805,7 @@ public class RoboBlue extends LinearOpMode {
 //
 //            }
 
-//
+
 //            if (gamepad2.left_trigger > 0.05) {
 //
 //                c_Left.setPower(0.5 * a);
@@ -824,27 +825,8 @@ public class RoboBlue extends LinearOpMode {
             // Manual Lift
 
             float c = gamepad2.right_stick_y;
-            // float d = gamepad2.left_stick_y;
 
             if (c > 0.0) {
-
-                liftLeft.setTargetPosition(300);
-                liftRight.setTargetPosition(300);
-                liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                liftLeft.setPower(-1.0);
-                liftRight.setPower(-1.0);
-
-                arm.setPosition(arm_forward);
-
-            }
-
-            if (gamepad2.x) {
-
-                bucket.setPosition(bucket_left);
-            }
-
-            if (c < 0.0) {
 
                 liftLeft.setTargetPosition(-300);
                 liftRight.setTargetPosition(-300);
@@ -853,10 +835,50 @@ public class RoboBlue extends LinearOpMode {
                 liftLeft.setPower(1.0);
                 liftRight.setPower(1.0);
 
-                arm.setPosition(arm_backward);
+                turret.setPosition(turret_center);
+                arm.setPosition(arm_forward);
+
+                Thread.sleep(300);
+
+                bucket.setPosition(bucket_right);
+            }
+
+            if (gamepad1.y) {
+
+                arm.setPosition(arm_forward);
+
+                Thread.sleep(300);
+
+                bucket.setPosition(bucket_right);
+            }
+
+            if (gamepad1.a) {
+
                 bucket.setPosition(bucket_down);
 
-                if (Math.abs(liftLeft.getCurrentPosition()) < 5) {
+                arm.setPosition(arm_backward);
+            }
+
+            if (c < 0.0) {
+
+                liftLeft.setTargetPosition(0);
+                liftRight.setTargetPosition(0);
+                liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                liftRight.setPower(-1.0);
+                liftLeft.setPower(-1.0);
+
+                turret.setPosition(turret_center);
+                arm.setPosition(arm_intermediate);
+
+                Thread.sleep(500);
+
+                bucket.setPosition(bucket_down);
+                arm.setPosition(arm_backward);
+
+                Thread.sleep(300);
+
+                if (liftLeft.getCurrentPosition() > -400) {
 
                     liftLeft.setPower(0);
                     liftRight.setPower(0);
@@ -883,7 +905,8 @@ public class RoboBlue extends LinearOpMode {
             telemetry.addData("C_Left: ", c_Left.getPower());
             telemetry.addData("C_Right: ", c_Right.getPower());
             telemetry.addData("Lift State: ", liftState);
-            telemetry.addData("Lift Encoders: ", liftLeft.getCurrentPosition());
+            telemetry.addData("Lift Left Encoders: ", liftLeft.getCurrentPosition());
+            telemetry.addData("Lift Right Encoders: ", liftRight.getCurrentPosition());
             telemetry.addData("C: ", c);
             telemetry.update();
         }
