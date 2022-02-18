@@ -37,9 +37,9 @@ public class MeepMeepTesting
                                 //.lineToConstantHeading(new Vector2d(0,2))
                                 //.addTrajectory(traj)
                                 .splineTo(new Vector2d(49, -1), Math.toRadians(-5))
-                                .splineTo(new Vector2d(73, -2.25), Math.toRadians(-10))
+                                .splineTo(new Vector2d(73, -3.1), Math.toRadians(-7.8))
                                 .setReversed(true)
-                                .splineTo(new Vector2d(49, 13), Math.toRadians(180))
+                                .splineTo(new Vector2d(44, 7), Math.toRadians(180))
                                 .addDisplacementMarker(()->
                                 {
                                     drive.setPoseEstimate(new Pose2d(49, 0, 0));

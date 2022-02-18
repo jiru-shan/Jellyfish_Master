@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -20,9 +21,9 @@ public class LiftAsync
     int integralSum=0;
 
     //define kP, kI, and kD by actually testing
-    double kP=5;
-    double kI=0.2;
-    double kD=1.1;
+    double kP=2.5;
+    double kI=0.025;
+    double kD=0.025;
 
     ElapsedTime timer;
 
@@ -30,6 +31,8 @@ public class LiftAsync
     {
         this.motor1=hwMap.get(DcMotorEx.class, "liftLeft");
         this.motor2=hwMap.get(DcMotorEx.class, "liftRight");
+
+        motor1.setDirection(DcMotorSimple.Direction.REVERSE);
 
         motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -48,29 +51,42 @@ public class LiftAsync
 
     public void adjustLift()
     {
-        currentPos=motor1.getCurrentPosition();
+        currentPos=Math.abs(motor2.getCurrentPosition());
 
         error=targetPos-currentPos;
-        integralSum+=error*timer.milliseconds();
-        derivative=(error-previousError)/timer.milliseconds();
+        integralSum+=error*timer.seconds();
+        derivative=(error-previousError)/timer.seconds();
 
-        motorPower=(error*kP)+(integralSum*kI)+(derivative*kD);
-        motor1.setPower(motorPower/100);
-        motor2.setPower(motorPower/100);
+        motorPower=(error*kP)+(integralSum*kI)+(derivative*kD)/100;
+        motor1.setPower(-motorPower);
+        motor2.setPower(motorPower);
 
         previousError=error;
         timer.reset();
     }
     public boolean isBusy()
     {
-        if(Math.abs(motor1.getCurrentPosition()-targetPos)<5)
+        if(Math.abs(Math.abs(motor2.getCurrentPosition())-targetPos)<5)
         {
             return false;
         }
         return true;
     }
+    public double currentPower()
+    {
+        return motorPower;
+    }
     public void resetLiftTimer()
     {
         timer.reset();
+    }
+
+    public int getPos1()
+    {
+        return motor1.getCurrentPosition();
+    }
+    public int getPos2()
+    {
+        return motor2.getCurrentPosition();
     }
 }

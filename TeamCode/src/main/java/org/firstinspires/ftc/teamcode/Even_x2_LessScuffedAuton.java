@@ -2,8 +2,11 @@ package org.firstinspires.ftc.teamcode;
 
 import android.os.SystemClock;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -16,6 +19,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
+@Autonomous
 public class Even_x2_LessScuffedAuton extends OpMode
 {
     //enum definitions
@@ -39,7 +43,7 @@ public class Even_x2_LessScuffedAuton extends OpMode
         RESET, GOING, RETURNING, DEPOSITING
     }
     //static variables for positions
-    final static int LIFT_EXTENDED=0;
+    final static int LIFT_EXTENDED=160;
 
     //changing variables that are used for stuff
     int cubePos;
@@ -64,6 +68,10 @@ public class Even_x2_LessScuffedAuton extends OpMode
     OpenCvWebcam camera;
     VisionPipeline_BLUE pipeline;
 
+    //Dashboard stuff
+    FtcDashboard dashboard;
+    TelemetryPacket packet;
+
     //Other, custom objects
     SampleMecanumDriveCancelable drive;
     LiftAsync lift;
@@ -78,6 +86,9 @@ public class Even_x2_LessScuffedAuton extends OpMode
         rightIntake = hardwareMap.dcMotor.get("rightIntake");
 
         OState=OverallState.RESET;
+
+        dashboard=FtcDashboard.getInstance();
+        packet=new TelemetryPacket();
 
         drive=new SampleMecanumDriveCancelable(hardwareMap);
         lift=new LiftAsync(hardwareMap, 0);
@@ -101,7 +112,7 @@ public class Even_x2_LessScuffedAuton extends OpMode
         globalTimer.reset();
         cubePos= pipeline.getAnalysis();
 
-        drive.followTrajectory(trajGen.preTrajectory(-19.25));
+        //drive.followTrajectory(trajGen.preTrajectory(-19.25));
         drive.setPoseEstimate(new Pose2d(0, 0, 0));
 
         visionDeposit(cubePos);
@@ -124,7 +135,7 @@ public class Even_x2_LessScuffedAuton extends OpMode
                 pathChange=0;
                 OState=OverallState.GOING;
                 GState=GrabbingState.GETTING;
-                drive.followTrajectoryAsync(trajGen.firstGoingTrajectory(49, -1, -5, 73, -2.25, -10));
+                drive.followTrajectoryAsync(trajGen.firstGoingTrajectory(49, -1, -5, 73, -3.1, -7.8));
                 break;
 
             case GOING:
@@ -135,9 +146,10 @@ public class Even_x2_LessScuffedAuton extends OpMode
                         leftIntake.setPower(1);
                         if(sensorController.hasBlock())
                         {
-                            tempTarget= SystemClock.uptimeMillis()+300;
+                            tempTarget= SystemClock.uptimeMillis()+500;
                             GState=GrabbingState.HAS_CUBE;
                             servoControl.raiseIntakes();
+                            servoControl.openDepositIntake();
                         }
                         else if(!drive.isBusy())
                         {
@@ -159,29 +171,29 @@ public class Even_x2_LessScuffedAuton extends OpMode
                         if(!drive.isBusy())
                         {
                                 GState = GrabbingState.GETTING;
-                                drive.followTrajectoryAsync(trajGen.goingTrajectory(73 + 2 * pathChange, -2.25 - pathChange, Math.toRadians(-10 - (2.5 * pathChange))));
+                                drive.followTrajectoryAsync(trajGen.goingTrajectory(73 + 2 * pathChange, -3.1 - pathChange, Math.toRadians(-7.8 - (2.5 * pathChange))));
                         }
                         break;
                     case HAS_CUBE:
                         if(SystemClock.uptimeMillis()<tempTarget)
                         {
-                            leftIntake.setPower(1);
+                            leftIntake.setPower(0.7);
                         }
                         else
                             {
                                 drive.cancelFollowing();
                                 leftIntake.setPower(0);
-                                servoControl.openDeposit();
+                                //servoControl.openDepositIntake();
                                 IState=IntakeState.INTO_DEPOSIT;
-                                drive.followTrajectoryAsync(trajGen.realReturnTrajectory(49, 13, 0));
+                                drive.followTrajectoryAsync(trajGen.realReturnTrajectory(44, 13, 70));
                                 GState=GrabbingState.DONE;
                                 OState=OverallState.RETURNING;
                                 RState=ReturningState.LING;
+                                tempTarget=SystemClock.uptimeMillis()+500;
                             }
                         break;
                     case DONE:
                         break;
-
                 }
             break;
             case RETURNING:
@@ -190,7 +202,9 @@ public class Even_x2_LessScuffedAuton extends OpMode
                     case LING:
                         if(sensorController.onColor())
                         {
-                            drive.setPoseEstimate(new Pose2d(31.5, 0, 0));
+                            telemetry.addData("status: ", "using color sensor");
+                            telemetry.update();
+                            drive.setPoseEstimate(new Pose2d(31.5, 0, Math.toRadians(180)));
                         }
                         if(!drive.isBusy()&&IState==IntakeState.DONE)
                         {
@@ -206,10 +220,17 @@ public class Even_x2_LessScuffedAuton extends OpMode
                 switch(IState)
                 {
                     case INTO_DEPOSIT:
-                        leftIntake.setPower(-1);
+                        if(SystemClock.uptimeMillis()>tempTarget)
+                        {
+                            leftIntake.setPower(-1);
+                        }
+                        else
+                            {
+                                leftIntake.setPower(1);
+                            }
                         if(sensorController.depositCube())
                         {
-                            servoControl.closeDeposit();
+                            servoControl.prepDeposit();
                             leftIntake.setPower(0);
                             lift.setPosition(LIFT_EXTENDED);
                             servoControl.flipOut();
@@ -227,13 +248,18 @@ public class Even_x2_LessScuffedAuton extends OpMode
                 }
                 break;
             case DEPOSITING:
-                if(SystemClock.uptimeMillis()>tempTarget)
+                if(SystemClock.uptimeMillis()<tempTarget)
                 {
-                    OState=OverallState.RESET;
+                    //OState=OverallState.RESET;
+                    requestOpModeStop();
                 }
                 break;
 
         }
+        packet.put("OState ", OState);
+        packet.put("GState ", GState);
+        packet.put("RState ", RState);
+        dashboard.sendTelemetryPacket(packet);
         drive.update();
         lift.adjustLift();
     }
@@ -283,8 +309,8 @@ public class Even_x2_LessScuffedAuton extends OpMode
             @Override
             public void onError(int errorCode)
             {
-                telemetry.addData("Status:", "pain");
-                telemetry.update();
+                //telemetry.addData("Status:", "pain");
+                //telemetry.update();
             }
         });
     }

@@ -57,7 +57,7 @@ public class TrajectoryGen
                 .addDisplacementMarker(()->
                 {
                     //align into wall and reset pose estimate for y and heading
-                    drive.setPoseEstimate(new Pose2d(drive.getPoseEstimate().getX(), 0, 0));
+                    drive.setPoseEstimate(new Pose2d(drive.getPoseEstimate().getX(), 0, drive.getPoseEstimate().getHeading()));
                 })
                 .splineTo(new Vector2d(0,0), Math.toRadians(180), SampleMecanumDrive.getVelocityConstraint(velocity,
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
