@@ -53,6 +53,7 @@ public class RoboBlueTest extends LinearOpMode {
     ElapsedTime rightIntakeTimer = new ElapsedTime();
     ElapsedTime carouselTimer = new ElapsedTime();
     ElapsedTime depositTimer = new ElapsedTime();
+    ElapsedTime turretTimer = new ElapsedTime();
 
     enum IntakeState {
 
@@ -135,7 +136,8 @@ public class RoboBlueTest extends LinearOpMode {
         LH_NEAR,
         LH_CENTER,
         LH_FAR,
-        LH_RETRACT
+        LH_RETRACT_ALLIANCE,
+        LH_RETRACT_SHARED
     }
 
     IntakeState intakeState = IntakeState.IS_STATIONARY;
@@ -193,16 +195,16 @@ public class RoboBlueTest extends LinearOpMode {
         double i_minRange_bottomLeft = 0.90;
         double i_maxRange_bottomLeft = 0.13;
         double i_minRange_topRight = 0.92;
-        double i_maxRange_topRight = 0.12;
+        double i_maxRange_topRight = 0.16;
         double i_minRange_bottomRight = 0.12;
-        double i_maxRange_bottomRight = 0.92;
+        double i_maxRange_bottomRight = 0.88;
 
         // Carousel
         double maxSpinPower = 0.5;
 
         // Factor
         double normalSpeed = 1.0;
-        int TARGET_TIPPED = 250;
+        int TARGET_TIPPED = 300;
         int TARGET_BALANCED = 230;
         int TARGET_MIDDLE = 210;
         int TARGET_NEAR = 80;
@@ -219,8 +221,8 @@ public class RoboBlueTest extends LinearOpMode {
         rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         bucket.setPosition(bucket_down);
-        arm.setPosition(arm_backward);
-        turret.setPosition(turret_center);
+//        arm.setPosition(arm_backward);
+        turret.setPosition(turret_target);
 
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
@@ -553,6 +555,8 @@ public class RoboBlueTest extends LinearOpMode {
 
                     } else if (gamepad2.y) {
 
+                        turretTimer.reset();
+
                         liftHand = LiftHand.LH_FAR;
 
                         // Run lift
@@ -565,9 +569,17 @@ public class RoboBlueTest extends LinearOpMode {
 
                         arm.setPosition(arm_forward);
 
-                        liftState = LiftState.LS_TARGET;
+                        turret.setPosition(turret_target);
+
+                        if (turretTimer.milliseconds() > 1000) {
+
+                            liftState = LiftState.LS_TARGET;
+
+                        }
 
                     } else if (gamepad2.b) {
+
+                        turretTimer.reset();
 
                         liftHand = LiftHand.LH_CENTER;
 
@@ -581,9 +593,17 @@ public class RoboBlueTest extends LinearOpMode {
 
                         arm.setPosition(arm_forward);
 
-                        liftState = LiftState.LS_TARGET;
+                        if (turretTimer.milliseconds() > 1000) {
+
+                            turret.setPosition(turret_target);
+
+                            liftState = LiftState.LS_TARGET;
+
+                        }
 
                     } else if (gamepad2.a) {
+
+                        turretTimer.reset();
 
                         liftHand = LiftHand.LH_NEAR;
 
@@ -597,8 +617,13 @@ public class RoboBlueTest extends LinearOpMode {
 
                         arm.setPosition(arm_forward);
 
-                        // Set lift state to target
-                        liftState = LiftState.LS_TARGET;
+                        if (turretTimer.milliseconds() > 1000) {
+
+                            turret.setPosition(turret_target);
+
+                            liftState = LiftState.LS_TARGET;
+
+                        }
                     }
 
                     break;
@@ -611,42 +636,56 @@ public class RoboBlueTest extends LinearOpMode {
                         depositTimer.reset();
 
                         // Set state to depositing
-                        liftState = LiftState.LS_DEPOSITING;
+                        liftState = LiftState.LS_DEPOSITING_ALLIANCE;
 
                     } else if (liftHand == LiftHand.LH_BALANCED && (Math.abs(liftLeft.getCurrentPosition() - TARGET_BALANCED)) < 10) {
 
                         depositTimer.reset();
 
                         // Set state to depositing
-                        liftState = LiftState.LS_DEPOSITING;
+                        liftState = LiftState.LS_DEPOSITING_ALLIANCE;
 
                     } else if (liftHand == LiftHand.LH_FAR && (Math.abs(liftLeft.getCurrentPosition() - TARGET_FAR)) < 5) {
 
                         depositTimer.reset();
 
                         // Set state to depositing
-                        liftState = LiftState.LS_DEPOSITING;
+                        liftState = LiftState.LS_DEPOSITING_SHARED;
 
                     } else if (liftHand == LiftHand.LH_CENTER && (Math.abs(liftLeft.getCurrentPosition() - TARGET_MIDDLE)) < 5) {
 
                         depositTimer.reset();
 
                         // Set state to depositing
-                        liftState = LiftState.LS_DEPOSITING;
+                        liftState = LiftState.LS_DEPOSITING_SHARED;
 
                     } else if (liftHand == LiftHand.LH_NEAR && (Math.abs(liftLeft.getCurrentPosition() - TARGET_NEAR)) < 5) {
 
                         depositTimer.reset();
 
                         // Set state to depositing
-                        liftState = LiftState.LS_DEPOSITING;
+                        liftState = LiftState.LS_DEPOSITING_SHARED;
                     }
 
-                case LS_DEPOSITING:
+                    break;
 
-                    if (gamepad2.dpad_right || gamepad2.x) {
+                case LS_DEPOSITING_ALLIANCE:
 
-                        liftHand = LiftHand.LH_RETRACT;
+                    if (gamepad2.dpad_right) {
+
+                        liftHand = LiftHand.LH_RETRACT_ALLIANCE;
+
+                        liftState = LiftState.LS_RELEASED;
+
+                    }
+
+                    break;
+
+                case LS_DEPOSITING_SHARED:
+
+                    if (gamepad2.x) {
+
+                        liftHand = LiftHand.LH_RETRACT_SHARED;
 
                         liftState = LiftState.LS_RELEASED;
 
@@ -656,9 +695,22 @@ public class RoboBlueTest extends LinearOpMode {
 
                 case LS_RELEASED:
 
-                    if (liftHand == LiftHand.LH_RETRACT) {
+                    if (liftHand == LiftHand.LH_RETRACT_ALLIANCE) {
 
                         bucket.setPosition(bucket_right);
+
+                        if (depositTimer.milliseconds() > 1000) {
+
+                            bucket.setPosition(bucket_down);
+
+                            // Set lift state to released
+                            liftState = LiftState.LS_RETRACTING;
+
+                        }
+
+                    } else if (liftHand == LiftHand.LH_RETRACT_SHARED) {
+
+                        bucket.setPosition(bucket_left);
 
                         if (depositTimer.milliseconds() > 1000) {
 

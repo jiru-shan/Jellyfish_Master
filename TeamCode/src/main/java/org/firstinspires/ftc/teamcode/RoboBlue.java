@@ -200,7 +200,7 @@ public class RoboBlue extends LinearOpMode {
 
         // Factor
         double normalSpeed = 1.0;
-        int TARGET_TIPPED = 250;
+        int TARGET_TIPPED = 300;
         int TARGET_BALANCED = 230;
         int TARGET_MIDDLE = 210;
         int TARGET_NEAR = 80;
