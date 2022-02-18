@@ -1,7 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.os.SystemClock;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -13,35 +17,43 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-public class Even_x2_LessScuffedAuton_copy extends LinearOpMode
+@Autonomous
+public class Even_x2_LessScuffedAuton_copy extends OpMode
 {
     //enum definitions
     enum GrabbingState {GETTING,
         RETURNING,
         HAS_CUBE,
-        HAS_CUBE_2,
         DONE
     }
     enum ReturningState
     {
         LING, //Ling arknights :)
-        RETURNING,
         DONE
     }
     enum IntakeState
     {
-        INTO_DEPOSIT, STALLING, EXTENDING_LIFT, DONE
+        INTO_DEPOSIT, EXTENDING_LIFT, DONE
     }
 
+    enum OverallState
+    {
+        RESET, GOING, RETURNING, DEPOSITING
+    }
     //static variables for positions
+    final static int LIFT_EXTENDED=160;
 
     //changing variables that are used for stuff
     int cubePos;
+    boolean askStop;
+    double pathChange;
+    double tempTarget;
 
     //instances of enums
     GrabbingState GState;
     ReturningState RState;
     IntakeState IState;
+    OverallState OState;
 
     //Motors
     DcMotor leftIntake;
@@ -61,15 +73,13 @@ public class Even_x2_LessScuffedAuton_copy extends LinearOpMode
     ServoControl servoControl;
     TrajectoryGen trajGen;
 
-
-
-
-
     @Override
-    public void runOpMode()
+    public void init()
     {
         leftIntake = hardwareMap.dcMotor.get("leftIntake");
         rightIntake = hardwareMap.dcMotor.get("rightIntake");
+
+        OState=OverallState.RESET;
 
         drive=new SampleMecanumDriveCancelable(hardwareMap);
         lift=new LiftAsync(hardwareMap, 0);
@@ -84,33 +94,178 @@ public class Even_x2_LessScuffedAuton_copy extends LinearOpMode
 
         webcamInit();
 
-        //initialize servos to correct starting position
+        servoControl.startingPos();
+    }
 
-        waitForStart();
-
-        //globalTimer.reset();
-
+    @Override
+    public void start()
+    {
+        globalTimer.reset();
         cubePos= pipeline.getAnalysis();
 
         drive.followTrajectory(trajGen.preTrajectory(-19.25));
         drive.setPoseEstimate(new Pose2d(0, 0, 0));
 
         visionDeposit(cubePos);
-
-        //run cycles 6 times
-        for(int i=0; i<6; i++)
+    }
+    @Override
+    public void loop()
+    {
+        if(globalTimer.seconds()>27)
         {
-            drive.setPoseEstimate(new Pose2d(0,0,0));
-            servoControl.lowerIntakes();
-            //change some other positions
+            askStop=true;
+            requestOpModeStop();
+        }
+        switch(OState)
+        {
+            case RESET:
+                drive.setPoseEstimate(new Pose2d(0, 0, 0));
+                lift.setPosition(0);
+                servoControl.startingPos();
+                servoControl.lowerIntakes();
+                pathChange=0;
+                OState=OverallState.GOING;
+                GState=GrabbingState.GETTING;
+                drive.followTrajectoryAsync(trajGen.firstGoingTrajectory(49, -1, -5, 73, -2.25, -10));
+                break;
 
-            
+            case GOING:
 
+                switch(GState)
+                {
+                    case GETTING:
+                        leftIntake.setPower(1);
+                        if(sensorController.hasBlock())
+                        {
+                            tempTarget= SystemClock.uptimeMillis()+300;
+                            GState=GrabbingState.HAS_CUBE;
+                            servoControl.raiseIntakes();
+                        }
+                        else if(!drive.isBusy())
+                        {
+                            pathChange++;
+                            if(pathChange<6)
+                            {
+                                GState = GrabbingState.RETURNING;
+                                drive.followTrajectoryAsync(trajGen.returningTrajectory(49, -1, -5));
+                            }
+                            else
+                            {
+                                tempTarget= SystemClock.uptimeMillis();
+                                GState=GrabbingState.HAS_CUBE;
+                                servoControl.raiseIntakes();
+                            }
+                        }
+                        break;
+                    case RETURNING:
+                        if(!drive.isBusy())
+                        {
+                            GState = GrabbingState.GETTING;
+                            drive.followTrajectoryAsync(trajGen.goingTrajectory(73 + 2 * pathChange, -2.25 - pathChange, Math.toRadians(-10 - (2.5 * pathChange))));
+                        }
+                        break;
+                    case HAS_CUBE:
+                        if(SystemClock.uptimeMillis()<tempTarget)
+                        {
+                            leftIntake.setPower(1);
+                        }
+                        else
+                        {
+                            drive.cancelFollowing();
+                            leftIntake.setPower(0);
+                            servoControl.openDepositIntake();
+                            IState=IntakeState.INTO_DEPOSIT;
+                            drive.followTrajectoryAsync(trajGen.realReturnTrajectory(49, 13, 0));
+                            GState=GrabbingState.DONE;
+                            OState=OverallState.RETURNING;
+                            RState=ReturningState.LING;
+                        }
+                        break;
+                    case DONE:
+                        break;
 
+                }
+                break;
+            case RETURNING:
+                switch(RState)
+                {
+                    case LING:
+                        if(sensorController.onColor())
+                        {
+                            drive.setPoseEstimate(new Pose2d(31.5, 0, 0));
+                        }
+                        if(!drive.isBusy()&&IState==IntakeState.DONE)
+                        {
+                            OState=OverallState.DEPOSITING;
+                            RState=ReturningState.DONE;
+                            servoControl.openDepositIntake();
+                            tempTarget=SystemClock.uptimeMillis()+500;
+                        }
+                        break;
+                    case DONE:
+                        break;
+                }
+                switch(IState)
+                {
+                    case INTO_DEPOSIT:
+                        leftIntake.setPower(-1);
+                        if(sensorController.depositCube())
+                        {
+                            servoControl.closeDeposit();
+                            leftIntake.setPower(0);
+                            lift.setPosition(LIFT_EXTENDED);
+                            servoControl.flipOut();
+                            IState=IntakeState.EXTENDING_LIFT;
+                        }
+                        break;
+                    case EXTENDING_LIFT:
+                        if(!lift.isBusy())
+                        {
+                            IState=IntakeState.DONE;
+                        }
+                        break;
+                    case DONE:
+                        break;
+                }
+                break;
+            case DEPOSITING:
+                if(SystemClock.uptimeMillis()>tempTarget)
+                {
+                    //OState=OverallState.RESET;
+                    requestOpModeStop();
+                }
+                break;
 
         }
-
+        drive.update();
+        lift.adjustLift();
     }
+
+    @Override
+    public void stop()
+    {
+        if(askStop)
+        {
+            lift.setPosition(0);
+            servoControl.raiseIntakes();
+            servoControl.startingPos();
+            Trajectory park=drive.trajectoryBuilder(drive.getPoseEstimate())
+                    .lineToSplineHeading(new Pose2d(60, 0, Math.toRadians(0)))
+                    .build();
+            drive.followTrajectoryAsync(park);
+            while(globalTimer.milliseconds()<29500)
+            {
+                lift.adjustLift();
+                drive.update();
+            }
+            drive.cancelFollowing();
+        }
+        else
+        {
+            //die
+        }
+    }
+
 
 
     public void webcamInit()
@@ -139,6 +294,7 @@ public class Even_x2_LessScuffedAuton_copy extends LinearOpMode
 
     public void visionDeposit(int level)
     {
+
         //vision deposit code here
     }
 }

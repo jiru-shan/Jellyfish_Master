@@ -80,6 +80,7 @@ public class colorSensorTest extends LinearOpMode
 
 
 
+
         waitForStart();
         d_open.setPosition(d_open_minRange);
         d_bendLeft.setPosition(d_minRange_bendLeft);
@@ -102,6 +103,7 @@ public class colorSensorTest extends LinearOpMode
 
             telemetry.addData("1:", rgbAvg(sensorRange1));
             telemetry.addData("2:", rgbAvg(sensorRange2));
+
             telemetry.update();
         }
 

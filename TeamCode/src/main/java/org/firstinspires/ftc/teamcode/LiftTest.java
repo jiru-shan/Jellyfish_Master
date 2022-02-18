@@ -2,47 +2,112 @@ package org.firstinspires.ftc.teamcode;
 
 import android.os.SystemClock;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 @Config
 @TeleOp
 public class LiftTest extends LinearOpMode
 {
     LiftAsync lift;
+    ServoControl servoControl;
     ElapsedTime timer;
-    public static int position=300;
     DcMotorEx motor1, motor2;
+    public static int position=160;
+    FtcDashboard dashboard;
+    TelemetryPacket packet;
 
     @Override
     public void runOpMode() throws InterruptedException
     {
+        dashboard=FtcDashboard.getInstance();
+        packet=new TelemetryPacket();
         motor1=hardwareMap.get(DcMotorEx.class, "liftLeft");
         motor2=hardwareMap.get(DcMotorEx.class, "liftRight");
+        motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor1.setDirection(DcMotorSimple.Direction.REVERSE);
+
+
+
         timer=new ElapsedTime();
         lift=new LiftAsync(hardwareMap, 0);
-        lift.setPosition(position);
-        timer.reset();
-        while(!lift.isBusy())
+        servoControl=new ServoControl(hardwareMap, ServoControl.Side.LEFT);
+
+        servoControl.closeDeposit();
+        servoControl.startingPos();
+        servoControl.raiseAllIntakes();
+        waitForStart();
+
+        servoControl.flipOut();
+        servoControl.prepDeposit();
+        /*timer.reset();
+
+        servoControl.flipOut();
+        motor1.setTargetPosition(-position);
+        motor2.setTargetPosition(position);
+
+        while(Math.abs(Math.abs(motor1.getCurrentPosition())-position)>5)
         {
-            lift.adjustLift();
-            if(timer.milliseconds()>2500)
-            {
-                requestOpModeStop();
-            }
+            motor2.setPower(1);
+            motor1.setPower(-1);
+
+            packet.put("motor 1:", motor1.getCurrentPosition());
+            packet.put("motor 2:", motor2.getCurrentPosition());
+
+            dashboard.sendTelemetryPacket(packet);
+            telemetry.addData(">1: ", motor1.getCurrentPosition());
+            telemetry.addData(">2: ", motor2.getCurrentPosition());
+            telemetry.update();
+        }
+        servoControl.openDeposit();
+        motor1.setPower(0);
+        motor2.setPower(0);
+
+        timer.reset();
+        while(timer.milliseconds()<5000)
+        {
+
         }
 
+        servoControl.startingPos();
+        motor1.setTargetPosition(0);
+        motor2.setTargetPosition(0);
+        while(Math.abs(motor1.getCurrentPosition())>5)
+        {
+            motor2.setPower(-1);
+            motor1.setPower(1);
+        }
+        motor1.setPower(0);
+        motor2.setPower(0);*/
+        lift.setPosition(position);
+       // timer.reset();
+        while(lift.isBusy())
+        {
+            packet.put("pow", lift.motorPower);
+
+            dashboard.sendTelemetryPacket(packet);
+
+            telemetry.addData(">", lift.getPos1());
+            telemetry.addData(">2", lift.getPos2());
+            telemetry.update();
+            lift.adjustLift();
+        }
+        servoControl.openDeposit();
         double target= SystemClock.uptimeMillis()+500;
         while(SystemClock.uptimeMillis()<target)
         {
-            lift.adjustLift();
+            //lift.adjustLift();
         }
-
+        servoControl.startingPos();
         lift.setPosition(0);
-        while(!lift.isBusy())
+        while(lift.isBusy())
         {
             lift.adjustLift();
         }
