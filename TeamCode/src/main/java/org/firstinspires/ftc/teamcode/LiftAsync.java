@@ -18,12 +18,14 @@ public class LiftAsync
     double derivative;
     double motorPower;
     int previousError=0;
+    int previousPosition;
     int integralSum=0;
+    boolean brake=false;
 
     //define kP, kI, and kD by actually testing
-    double kP=2.5;
-    double kI=0.025;
-    double kD=0.025;
+    //double kP=2.5;
+    //double kI=0.025;
+    //double kD=0.025;
 
     ElapsedTime timer;
 
@@ -46,12 +48,28 @@ public class LiftAsync
 
     public void setPosition(int target)
     {
+        //resetLiftTimer();
+        brake=false;
         targetPos=target;
+        timer.reset();
+        previousPosition=Math.abs(motor1.getCurrentPosition());
     }
 
     public void adjustLift()
     {
-        currentPos=Math.abs(motor2.getCurrentPosition());
+        if(!brake)
+        {
+            error = targetPos - Math.abs(motor1.getCurrentPosition());
+            motorPower = Math.signum(error)*(0.7 + 0.3 * (Math.abs(error) / 300));
+            motor1.setPower(-motorPower);
+            motor2.setPower(motorPower);
+        }
+        else
+            {
+                motor1.setPower(0);
+                motor2.setPower(0);
+            }
+        /*currentPos=Math.abs(motor2.getCurrentPosition());
 
         error=targetPos-currentPos;
         integralSum+=error*timer.seconds();
@@ -62,23 +80,51 @@ public class LiftAsync
         motor2.setPower(motorPower);
 
         previousError=error;
-        timer.reset();
+        timer.reset();*/
     }
     public boolean isBusy()
     {
-        if(Math.abs(Math.abs(motor2.getCurrentPosition())-targetPos)<5)
+        if(targetPos==0&Math.abs(motor1.getCurrentPosition())<10)
+        {
+            return false;
+        }
+        else if(Math.abs(motor1.getCurrentPosition())>targetPos)
         {
             return false;
         }
         return true;
     }
+    public void brake()
+    {
+        brake=true;
+    }
     public double currentPower()
     {
         return motorPower;
     }
-    public void resetLiftTimer()
+
+    public void setPower(double pow)
     {
-        timer.reset();
+        motor1.setPower(pow);
+        motor2.setPower(pow);
+    }
+    public boolean stalling()
+    {
+        if(timer.milliseconds()>750)
+        {
+            if(Math.abs(Math.abs(motor1.getCurrentPosition())-previousPosition)<15)
+            {
+                timer.reset();
+                previousPosition=Math.abs(motor1.getCurrentPosition());
+                return true;
+            }
+            else
+                {
+                    timer.reset();
+                    previousPosition=Math.abs(motor1.getCurrentPosition());
+                }
+        }
+        return false;
     }
 
     public int getPos1()

@@ -43,7 +43,7 @@ public class Even_x2_LessScuffedAuton extends OpMode
         RESET, GOING, RETURNING, DEPOSITING
     }
     //static variables for positions
-    final static int LIFT_EXTENDED=160;
+    final static int LIFT_EXTENDED=350;
 
     //changing variables that are used for stuff
     int cubePos;
@@ -146,7 +146,7 @@ public class Even_x2_LessScuffedAuton extends OpMode
                         leftIntake.setPower(1);
                         if(sensorController.hasBlock())
                         {
-                            tempTarget= SystemClock.uptimeMillis()+500;
+                            tempTarget= SystemClock.uptimeMillis()+250;
                             GState=GrabbingState.HAS_CUBE;
                             servoControl.raiseIntakes();
                             servoControl.openDepositIntake();
@@ -185,7 +185,7 @@ public class Even_x2_LessScuffedAuton extends OpMode
                                 leftIntake.setPower(0);
                                 //servoControl.openDepositIntake();
                                 IState=IntakeState.INTO_DEPOSIT;
-                                drive.followTrajectoryAsync(trajGen.realReturnTrajectory(44, 13, 70));
+                                drive.followTrajectoryAsync(trajGen.realReturnTrajectory());
                                 GState=GrabbingState.DONE;
                                 OState=OverallState.RETURNING;
                                 RState=ReturningState.LING;
@@ -204,14 +204,14 @@ public class Even_x2_LessScuffedAuton extends OpMode
                         {
                             telemetry.addData("status: ", "using color sensor");
                             telemetry.update();
-                            drive.setPoseEstimate(new Pose2d(31.5, 0, Math.toRadians(180)));
+                            drive.setPoseEstimate(new Pose2d(28.5, 13, Math.toRadians(180)));
                         }
                         if(!drive.isBusy()&&IState==IntakeState.DONE)
                         {
                             OState=OverallState.DEPOSITING;
                             RState=ReturningState.DONE;
                             servoControl.openDeposit();
-                            tempTarget=SystemClock.uptimeMillis()+500;
+                            tempTarget=SystemClock.uptimeMillis()+1000;
                         }
                         break;
                     case DONE:
@@ -233,13 +233,18 @@ public class Even_x2_LessScuffedAuton extends OpMode
                             servoControl.prepDeposit();
                             leftIntake.setPower(0);
                             lift.setPosition(LIFT_EXTENDED);
-                            servoControl.flipOut();
+                            servoControl.flipMedium();
                             IState=IntakeState.EXTENDING_LIFT;
                         }
                         break;
                     case EXTENDING_LIFT:
+                        if(lift.getPos2()>100)
+                        {
+                            servoControl.openTurret();
+                        }
                         if(!lift.isBusy())
                         {
+                            lift.brake();
                             IState=IntakeState.DONE;
                         }
                         break;

@@ -26,6 +26,8 @@ public class SensorTesting extends LinearOpMode
             packet.put("intake 1 ", pain[0]);
             packet.put("intake 2 ", pain[1]);
             packet.put("deposit ", pain[2]);
+            packet.put("drive left ", pain[3]);
+            packet.put("drive right ", pain[4]);
             packet.put("white line: ", sensorController.onColor());
 
             dashboard.sendTelemetryPacket(packet);

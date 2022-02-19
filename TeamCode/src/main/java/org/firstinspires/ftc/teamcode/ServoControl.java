@@ -15,15 +15,14 @@ public class ServoControl
         };
     Side side;
 
-    double i_minRange_topRight = 0.87;
+    double i_minRange_topLeft = 0.13;
+    double i_maxRange_topLeft = 0.96;
+    double i_minRange_bottomLeft = 0.92;
+    double i_maxRange_bottomLeft = 0.09;
+    double i_minRange_topRight = 0.96;
     double i_maxRange_topRight = 0.16;
-    double i_minRange_bottomRight = 0.16;
-    double i_maxRange_bottomRight = 0.87;
-
-    double i_minRange_topLeft = 0.15;
-    double i_maxRange_topLeft = 0.92;
-    double i_minRange_bottomLeft = 0.9;
-    double i_maxRange_bottomLeft = 0.13;
+    double i_minRange_bottomRight = 0.08;
+    double i_maxRange_bottomRight = 0.88;
 
     double d_open_center=0.48;
     double d_open_partial_left=0.32;
@@ -31,11 +30,14 @@ public class ServoControl
     double d_open_partial_right=0.64;
     double d_open_right=0.76;
 
-    double d_arm_default=0.95;
+    double d_arm_default=0.9;
+    double d_arm_medium=0.67;
     double d_arm_out=0.30;
 
 
     double d_turret_center=0.5;
+    double d_turret_open_left=0.35;
+    double d_turret_open_right;
 
     public ServoControl(HardwareMap map, Side side)
     {
@@ -130,6 +132,20 @@ public class ServoControl
         {
             d_open.setPosition(d_open_partial_left);
         }
+    }
+    public void openTurret()
+    {
+        if(side==Side.LEFT) {
+            d_turret.setPosition(d_turret_open_left);
+        }
+        else if(side==Side.RIGHT)
+        {
+            d_turret.setPosition(d_turret_open_right);
+        }
+    }
+    public void flipMedium()
+    {
+        d_arm.setPosition(d_arm_medium);
     }
     public void closeDeposit()
     {

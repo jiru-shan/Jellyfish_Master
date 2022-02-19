@@ -51,7 +51,8 @@ public class SensorController
 
     public double[] getData()
     {
-        double[] pain={intakeRange1.getDistance(DistanceUnit.MM), intakeRange2.getDistance(DistanceUnit.MM), depositSensor.getDistance(DistanceUnit.MM)};
+        double[] pain={intakeRange1.getDistance(DistanceUnit.MM), intakeRange2.getDistance(DistanceUnit.MM),
+                depositSensor.getDistance(DistanceUnit.MM), rgbAvg(driveLeft), rgbAvg(driveRight)};
         return pain;
     }
 
