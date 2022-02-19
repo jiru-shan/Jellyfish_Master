@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.os.SystemClock;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -19,7 +17,8 @@ public class LiftTest extends LinearOpMode
     ServoControl servoControl;
     ElapsedTime timer;
     DcMotorEx motor1, motor2;
-    public static int position=160;
+    public static int position=350;
+    public static double turretPos=0.35;
     FtcDashboard dashboard;
     TelemetryPacket packet;
 
@@ -42,19 +41,24 @@ public class LiftTest extends LinearOpMode
 
         servoControl.closeDeposit();
         servoControl.startingPos();
+        //servoControl.setTurret(turretPos);
         servoControl.raiseAllIntakes();
         waitForStart();
 
-        servoControl.flipOut();
+        //servoControl.flipOut();
         servoControl.prepDeposit();
-        /*timer.reset();
+        timer.reset();
 
-        servoControl.flipOut();
+        servoControl.flipMedium();
         motor1.setTargetPosition(-position);
         motor2.setTargetPosition(position);
 
-        while(Math.abs(Math.abs(motor1.getCurrentPosition())-position)>5)
+        while(Math.abs(motor1.getCurrentPosition())<position)
         {
+            if(motor2.getCurrentPosition()>100)
+            {
+                servoControl.openTurret();
+            }
             motor2.setPower(1);
             motor1.setPower(-1);
 
@@ -71,7 +75,7 @@ public class LiftTest extends LinearOpMode
         motor2.setPower(0);
 
         timer.reset();
-        while(timer.milliseconds()<5000)
+        while(timer.milliseconds()<500)
         {
 
         }
@@ -85,8 +89,8 @@ public class LiftTest extends LinearOpMode
             motor1.setPower(1);
         }
         motor1.setPower(0);
-        motor2.setPower(0);*/
-        lift.setPosition(position);
+        motor2.setPower(0);
+       /* lift.setPosition(position);
        // timer.reset();
         while(lift.isBusy())
         {
@@ -103,6 +107,10 @@ public class LiftTest extends LinearOpMode
         double target= SystemClock.uptimeMillis()+500;
         while(SystemClock.uptimeMillis()<target)
         {
+            packet.put("motor 1", lift.getPos1());
+            packet.put("motor 2", lift.getPos2());
+            dashboard.sendTelemetryPacket(packet);
+            lift.setPower(0);
             //lift.adjustLift();
         }
         servoControl.startingPos();
@@ -110,6 +118,6 @@ public class LiftTest extends LinearOpMode
         while(lift.isBusy())
         {
             lift.adjustLift();
-        }
+        }*/
     }
 }

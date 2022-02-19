@@ -65,4 +65,12 @@ public class TrajectoryGen
         return realReturn;
     }
 
+    public Trajectory realReturnTrajectory()
+    {
+        Trajectory realReturn=drive.trajectoryBuilder(drive.getPoseEstimate())
+                .lineToSplineHeading(new Pose2d(0, 13, Math.toRadians(0)))
+                .build();
+        return realReturn;
+    }
+
 }
