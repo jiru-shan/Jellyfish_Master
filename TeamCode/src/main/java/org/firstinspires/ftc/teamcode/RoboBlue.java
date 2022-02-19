@@ -183,24 +183,24 @@ public class RoboBlue extends LinearOpMode {
         double bucket_right = 0.76;
         double arm_forward = 0.30;   // temporary
         double arm_intermediate = 0.70;
-        double arm_backward = 0.92;  // 0.92
+        double arm_backward = 0.90;  // 0.92
         double turret_center = 0.49;
 
-        double i_minRange_topLeft = 0.15;
-        double i_maxRange_topLeft = 0.92;
-        double i_minRange_bottomLeft = 0.90;
-        double i_maxRange_bottomLeft = 0.13;
-        double i_minRange_topRight = 0.92;
-        double i_maxRange_topRight = 0.12;
-        double i_minRange_bottomRight = 0.12;
-        double i_maxRange_bottomRight = 0.92;
+        double i_minRange_topLeft = 0.13;
+        double i_maxRange_topLeft = 0.96;
+        double i_minRange_bottomLeft = 0.92;
+        double i_maxRange_bottomLeft = 0.09;
+        double i_minRange_topRight = 0.96;
+        double i_maxRange_topRight = 0.16;
+        double i_minRange_bottomRight = 0.08;
+        double i_maxRange_bottomRight = 0.88;
 
         // Carousel
         double maxSpinPower = 0.5;
 
         // Factor
         double normalSpeed = 1.0;
-        int TARGET_TIPPED = 250;
+        int TARGET_TIPPED = 300;
         int TARGET_BALANCED = 230;
         int TARGET_MIDDLE = 210;
         int TARGET_NEAR = 80;
@@ -225,6 +225,12 @@ public class RoboBlue extends LinearOpMode {
         for (LynxModule module : allHubs) {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
+
+        i_topLeft.setPosition(i_maxRange_topLeft);
+        i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+        i_topRight.setPosition(i_maxRange_topRight);
+        i_bottomRight.setPosition(i_maxRange_bottomRight);
 
         waitForStart();
 
@@ -900,10 +906,9 @@ public class RoboBlue extends LinearOpMode {
             }
 
             if (gamepad1.a) {
+                arm.setPosition(arm_backward);
 
                 bucket.setPosition(bucket_down);
-
-                arm.setPosition(arm_backward);
             }
 
             /** Reset Encoders **/

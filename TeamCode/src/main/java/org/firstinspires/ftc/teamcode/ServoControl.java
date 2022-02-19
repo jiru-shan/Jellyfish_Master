@@ -15,21 +15,22 @@ public class ServoControl
         };
     Side side;
 
-    double i_minRange_topRight = 0.87;
+    double i_minRange_topLeft = 0.13;
+    double i_maxRange_topLeft = 0.96;
+    double i_minRange_bottomLeft = 0.92;
+    double i_maxRange_bottomLeft = 0.09;
+    double i_minRange_topRight = 0.96;
     double i_maxRange_topRight = 0.16;
-    double i_minRange_bottomRight = 0.16;
-    double i_maxRange_bottomRight = 0.87;
+    double i_minRange_bottomRight = 0.08;
+    double i_maxRange_bottomRight = 0.88;
 
-    double i_minRange_topLeft = 0.15;
-    double i_maxRange_topLeft = 0.87;
-    double i_minRange_bottomLeft = 0.9;
-    double i_maxRange_bottomLeft = 0.18;
+    double d_open_center=0.48;
+    double d_open_partial_left=0.32;
+    double d_open_left=0.2;
+    double d_open_partial_right=0.64;
+    double d_open_right=0.76;
 
-    double d_open_center=0.55;
-    double d_open_left=0.27;
-    double d_open_right=0.83;
-
-    double d_arm_default=0.87;
+    double d_arm_default=0.95;
     double d_arm_out=0.30;
 
 
@@ -43,9 +44,9 @@ public class ServoControl
         i_topRight = hwMap.servo.get("i_topRight");
         i_bottomRight = hwMap.servo.get("i_bottomRight");
 
-        d_turret=hwMap.servo.get("d_turret");
-        d_open = hwMap.servo.get("d_open");
-        d_arm = hwMap.servo.get("d_arm");
+        d_turret=hwMap.servo.get("turret");
+        d_open = hwMap.servo.get("bucket");
+        d_arm = hwMap.servo.get("arm");
         this.side=side;
     }
 
@@ -62,6 +63,13 @@ public class ServoControl
             i_bottomRight.setPosition(i_minRange_bottomRight);
         }
     }
+    public void lowerAllIntakes()
+    {
+        i_topLeft.setPosition(i_minRange_topLeft);
+        i_bottomLeft.setPosition(i_minRange_bottomLeft);
+        i_topRight.setPosition(i_minRange_topRight);
+        i_bottomRight.setPosition(i_minRange_bottomRight);
+    }
     public void raiseIntakes()
     {
         if(side==Side.LEFT)
@@ -75,13 +83,21 @@ public class ServoControl
             i_bottomRight.setPosition(i_maxRange_bottomRight);
         }
     }
+    public void raiseAllIntakes()
+    {
+        i_topLeft.setPosition(i_maxRange_topLeft);
+        i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+        i_topRight.setPosition(i_maxRange_topRight);
+        i_bottomRight.setPosition(i_maxRange_bottomRight);
+    }
     public void startingPos()
     {
+        //raiseAllIntakes();
         d_arm.setPosition(d_arm_default);
         d_turret.setPosition(d_turret_center);
         closeDeposit();
     }
-    public void openDeposit()
+    public void openDepositIntake()
     {
         if(side==Side.LEFT)
         {
@@ -90,6 +106,28 @@ public class ServoControl
         else if(side==Side.RIGHT)
         {
             d_open.setPosition(d_open_right);
+        }
+    }
+    public void openDeposit()
+    {
+        if(side==Side.LEFT)
+        {
+            d_open.setPosition(d_open_right);
+        }
+        else if(side==Side.RIGHT)
+        {
+            d_open.setPosition(d_open_left);
+        }
+    }
+    public void prepDeposit()
+    {
+        if(side==Side.LEFT)
+        {
+            d_open.setPosition(d_open_partial_right);
+        }
+        else if(side==Side.RIGHT)
+        {
+            d_open.setPosition(d_open_partial_left);
         }
     }
     public void closeDeposit()

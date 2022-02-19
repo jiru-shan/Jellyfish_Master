@@ -19,7 +19,7 @@ public class SensorController
         intakeRange2 = hwMap.get(ColorRangeSensor.class, "colorSensor_left");
         driveLeft=hwMap.get(ColorRangeSensor.class, "driveSensor1");
         driveRight=hwMap.get(ColorRangeSensor.class, "driveSensor2");
-        depositSensor=hwMap.get(ColorRangeSensor.class, "depositSensor");
+        depositSensor=hwMap.get(ColorRangeSensor.class, "bucketSensor");
     }
 
     public boolean hasBlock()
@@ -33,7 +33,7 @@ public class SensorController
 
     public boolean onColor()
     {
-        if(rgbAvg(driveLeft)>175&&rgbAvg(driveRight)>175)
+        if(rgbAvg(driveLeft)>175||rgbAvg(driveRight)>175)
         {
             return true;
         }
@@ -42,13 +42,18 @@ public class SensorController
 
     public boolean depositCube()
     {
-        if(depositSensor.getDistance(DistanceUnit.MM)<55)
+        if(depositSensor.getDistance(DistanceUnit.MM)<85)
         {
             return true;
         }
         return false;
     }
 
+    public double[] getData()
+    {
+        double[] pain={intakeRange1.getDistance(DistanceUnit.MM), intakeRange2.getDistance(DistanceUnit.MM), depositSensor.getDistance(DistanceUnit.MM)};
+        return pain;
+    }
 
     private double rgbAvg(ColorRangeSensor pain)
     {
