@@ -83,28 +83,9 @@ public class RoboBlueTest extends LinearOpMode {
         BH_CENTER
     }
 
-    enum BumperState {
-
-        BS_OFF,
-        BS_ON
-    }
-
-    enum CarouselState {
-
-        CS_STATIONARY,
-        CS_TURNING_LEFT,
-        CS_TURNING_RIGHT
-    }
-
-    enum CarouselHand {
-
-        CH_LEFT,
-        CH_RIGHT,
-        CH_NEITHER
-    }
-
     enum LiftState {
 
+        LS_STATIONARY,
         LS_EXTENDING,
         LS_EXTENDING_BALANCED,
         LS_EXTENDING_TIPPED,
@@ -112,6 +93,9 @@ public class RoboBlueTest extends LinearOpMode {
         LS_EXTENDING_NEAR,
         LS_EXTENDING_CENTER,
         LS_EXTENDING_FAR,
+        LS_TURRET_DOWN,
+        LS_TURRET_UP,
+        LS_TURRET_CHECK,
         LS_TARGET,
         LS_TARGET_BALANCED,
         LS_TARGET_TIPPED,
@@ -123,8 +107,14 @@ public class RoboBlueTest extends LinearOpMode {
         LS_DEPOSITING_SHARED,
         LS_RELEASED,
         LS_RETRACTING,
-        LS_IDLE,
-        LS_RESET
+        LS_IDLE
+    }
+
+    enum ManualLiftState {
+
+        MLS_STATIONARY,
+        MLS_EXTENDING,
+        MLS_IDLE
     }
 
     enum LiftHand {
@@ -140,14 +130,13 @@ public class RoboBlueTest extends LinearOpMode {
         LH_RETRACT_SHARED
     }
 
+    // State Declarations
     IntakeState intakeState = IntakeState.IS_STATIONARY;
     IntakeHand intakeHand = IntakeHand.IH_NEITHER;
     BucketHand bucketHand = BucketHand.BH_CENTER;
-    BumperState bumperState = BumperState.BS_OFF;
-    CarouselState carouselState = CarouselState.CS_STATIONARY;
-    CarouselHand carouselHand = CarouselHand.CH_NEITHER;
-    LiftState liftState = LiftState.LS_EXTENDING;
+    LiftState liftState = LiftState.LS_STATIONARY;
     LiftHand liftHand = LiftHand.LH_IDLE;
+    ManualLiftState manualLiftState = ManualLiftState.MLS_STATIONARY;
 
     public void runOpMode() throws InterruptedException {
 
@@ -182,14 +171,16 @@ public class RoboBlueTest extends LinearOpMode {
 
         // Deposit servo positions
         double bucket_down = 0.48;
-        double bucket_left = 0.20                                                                                              ;
+        double bucket_left = 0.20;
         double bucket_right = 0.76;
-        double arm_forward = 0.30;   // temporary
+        double arm_forward_alliance = 0.30;
+        double arm_forward_shared = 0.10;
         double arm_intermediate = 0.70;
         double arm_backward = 0.92;  // 0.92
         double turret_center = 0.49;
         double turret_target = 0.20;
 
+        // Servo positions
         double i_minRange_topLeft = 0.15;
         double i_maxRange_topLeft = 0.92;
         double i_minRange_bottomLeft = 0.90;
@@ -204,12 +195,14 @@ public class RoboBlueTest extends LinearOpMode {
 
         // Factor
         double normalSpeed = 1.0;
+
+        // Lift Positions
         int TARGET_TIPPED = 300;
         int TARGET_BALANCED = 230;
         int TARGET_MIDDLE = 210;
-        int TARGET_NEAR = 80;
-        int TARGET_CENTER = 120;
-        int TARGET_FAR = 160;
+        int TARGET_NEAR = 120;
+        int TARGET_CENTER = 160;
+        int TARGET_FAR = 200;
 
         // Reset encoders
         liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
@@ -221,8 +214,8 @@ public class RoboBlueTest extends LinearOpMode {
         rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         bucket.setPosition(bucket_down);
-//        arm.setPosition(arm_backward);
-        turret.setPosition(turret_target);
+        arm.setPosition(arm_backward);
+        turret.setPosition(turret_center);
 
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
@@ -350,9 +343,14 @@ public class RoboBlueTest extends LinearOpMode {
 
                             intakeState = IntakeState.IS_CAPTURE;
 
+                        } else if (gamepad1.right_bumper) {
+
+                            intakeHand = IntakeHand.IH_RIGHT;
+                            intakeState = IntakeState.IS_SETUP;
                         }
 
                     } else if (intakeHand == IntakeHand.IH_RIGHT) {
+
 
                         if (colorSensor_right.alpha() > 500) {
 
@@ -365,6 +363,10 @@ public class RoboBlueTest extends LinearOpMode {
 
                             intakeState = IntakeState.IS_CAPTURE;
 
+                        } else if (gamepad1.left_bumper) {
+
+                            intakeHand = IntakeHand.IH_LEFT;
+                            intakeState = IntakeState.IS_SETUP;
                         }
                     }
 
@@ -396,7 +398,6 @@ public class RoboBlueTest extends LinearOpMode {
                     }
 
                     break;
-
 
                 case IS_TRANSFER:
 
@@ -518,12 +519,57 @@ public class RoboBlueTest extends LinearOpMode {
             // Motor tick count is equal to 384.5
 
             switch (liftState) {
-                case LS_EXTENDING:
 
-                    // Check if button was pressed
+                case LS_STATIONARY:
+
                     if (gamepad2.dpad_up) {
 
                         liftHand = LiftHand.LH_TIPPED;
+
+                        arm.setPosition(arm_forward_alliance);
+
+                        liftState = LiftState.LS_EXTENDING;
+
+                    } else if (gamepad2.dpad_left) {
+
+                        liftHand = liftHand.LH_BALANCED;
+
+                        arm.setPosition(arm_forward_alliance);
+
+                        liftState = LiftState.LS_EXTENDING;
+
+                    } else if (gamepad2.y) {
+
+                        liftHand = LiftHand.LH_FAR;
+
+                        arm.setPosition(arm_forward_shared);
+
+                        liftState = LiftState.LS_EXTENDING;
+
+                    } else if (gamepad2.b) {
+
+                        liftHand = LiftHand.LH_CENTER;
+
+                        arm.setPosition(arm_forward_shared);
+
+                        liftState = LiftState.LS_EXTENDING;
+
+                    } else if (gamepad2.a) {
+
+                        liftHand = LiftHand.LH_NEAR;
+
+                        arm.setPosition(arm_forward_shared);
+
+                        liftState = LiftState.LS_EXTENDING;
+
+                    }
+
+                    break;
+
+                case LS_EXTENDING:
+
+                    // Check if button was pressed
+                    if (liftHand == LiftHand.LH_TIPPED) {
 
                         // Run lift
                         liftLeft.setTargetPosition(TARGET_TIPPED);
@@ -533,13 +579,9 @@ public class RoboBlueTest extends LinearOpMode {
                         liftLeft.setPower(1.0);
                         liftRight.setPower(1.0);
 
-                        arm.setPosition(arm_forward);
-
                         liftState = LiftState.LS_TARGET;
 
-                    } else if (gamepad2.dpad_left) {
-
-                        liftHand = liftHand.LH_BALANCED;
+                    } else if (liftHand == liftHand.LH_BALANCED) {
 
                         // Run lift
                         liftLeft.setTargetPosition(TARGET_BALANCED);
@@ -547,17 +589,11 @@ public class RoboBlueTest extends LinearOpMode {
                         liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         liftLeft.setPower(1.0);
-                        liftRight.setPower(-1.0);
-
-                        arm.setPosition(arm_forward);
+                        liftRight.setPower(1.0);
 
                         liftState = LiftState.LS_TARGET;
 
-                    } else if (gamepad2.y) {
-
-                        turretTimer.reset();
-
-                        liftHand = LiftHand.LH_FAR;
+                    } else if (liftHand == LiftHand.LH_FAR) {
 
                         // Run lift
                         liftLeft.setTargetPosition(TARGET_FAR);
@@ -567,21 +603,9 @@ public class RoboBlueTest extends LinearOpMode {
                         liftLeft.setPower(1.0);
                         liftRight.setPower(1.0);
 
-                        arm.setPosition(arm_forward);
+                        liftState = LiftState.LS_TURRET_DOWN;
 
-                        turret.setPosition(turret_target);
-
-                        if (turretTimer.milliseconds() > 1000) {
-
-                            liftState = LiftState.LS_TARGET;
-
-                        }
-
-                    } else if (gamepad2.b) {
-
-                        turretTimer.reset();
-
-                        liftHand = LiftHand.LH_CENTER;
+                    } else if (liftHand == LiftHand.LH_CENTER) {
 
                         // Run lift
                         liftLeft.setTargetPosition(TARGET_CENTER);
@@ -591,21 +615,9 @@ public class RoboBlueTest extends LinearOpMode {
                         liftLeft.setPower(1.0);
                         liftRight.setPower(1.0);
 
-                        arm.setPosition(arm_forward);
+                        liftState = LiftState.LS_TURRET_DOWN;
 
-                        if (turretTimer.milliseconds() > 1000) {
-
-                            turret.setPosition(turret_target);
-
-                            liftState = LiftState.LS_TARGET;
-
-                        }
-
-                    } else if (gamepad2.a) {
-
-                        turretTimer.reset();
-
-                        liftHand = LiftHand.LH_NEAR;
+                    } else if (liftHand == LiftHand.LH_NEAR) {
 
                         // Run lift
                         liftLeft.setTargetPosition(TARGET_NEAR);
@@ -615,56 +627,66 @@ public class RoboBlueTest extends LinearOpMode {
                         liftLeft.setPower(1.0);
                         liftRight.setPower(1.0);
 
-                        arm.setPosition(arm_forward);
-
-                        if (turretTimer.milliseconds() > 1000) {
-
-                            turret.setPosition(turret_target);
-
-                            liftState = LiftState.LS_TARGET;
-
-                        }
+                        liftState = LiftState.LS_TURRET_DOWN;
                     }
+
+                    break;
+
+                case LS_TURRET_DOWN:
+
+                    turret.setPosition(turret_target);
+
+                    liftState = LiftState.LS_TARGET;
 
                     break;
 
                 case LS_TARGET:
 
                     // Check if the lift has fully extended
-                    if (liftHand == LiftHand.LH_TIPPED && (Math.abs(liftLeft.getCurrentPosition() - TARGET_TIPPED)) < 10) {
+                    if (liftHand == LiftHand.LH_TIPPED) {
 
-                        depositTimer.reset();
+                        if ((Math.abs(liftLeft.getCurrentPosition() - TARGET_TIPPED)) < 10) {
 
-                        // Set state to depositing
-                        liftState = LiftState.LS_DEPOSITING_ALLIANCE;
+                            // Set state to depositing
+                            liftState = LiftState.LS_DEPOSITING_ALLIANCE;
 
-                    } else if (liftHand == LiftHand.LH_BALANCED && (Math.abs(liftLeft.getCurrentPosition() - TARGET_BALANCED)) < 10) {
+                        }
 
-                        depositTimer.reset();
+                    } else if (liftHand == LiftHand.LH_BALANCED) {
 
-                        // Set state to depositing
-                        liftState = LiftState.LS_DEPOSITING_ALLIANCE;
+                        if ((Math.abs(liftLeft.getCurrentPosition() - TARGET_BALANCED)) < 10) {
 
-                    } else if (liftHand == LiftHand.LH_FAR && (Math.abs(liftLeft.getCurrentPosition() - TARGET_FAR)) < 5) {
+                            // Set state to depositing
+                            liftState = LiftState.LS_DEPOSITING_ALLIANCE;
 
-                        depositTimer.reset();
+                        }
 
-                        // Set state to depositing
-                        liftState = LiftState.LS_DEPOSITING_SHARED;
+                    } else if (liftHand == LiftHand.LH_FAR) {
 
-                    } else if (liftHand == LiftHand.LH_CENTER && (Math.abs(liftLeft.getCurrentPosition() - TARGET_MIDDLE)) < 5) {
+                        if ((Math.abs(liftLeft.getCurrentPosition() - TARGET_FAR)) < 5) {
 
-                        depositTimer.reset();
+                            // Set state to depositing
+                            liftState = LiftState.LS_DEPOSITING_SHARED;
 
-                        // Set state to depositing
-                        liftState = LiftState.LS_DEPOSITING_SHARED;
+                        }
 
-                    } else if (liftHand == LiftHand.LH_NEAR && (Math.abs(liftLeft.getCurrentPosition() - TARGET_NEAR)) < 5) {
+                    } else if (liftHand == LiftHand.LH_CENTER) {
 
-                        depositTimer.reset();
+                        if ((Math.abs(liftLeft.getCurrentPosition() - TARGET_MIDDLE)) < 5) {
 
-                        // Set state to depositing
-                        liftState = LiftState.LS_DEPOSITING_SHARED;
+                            // Set state to depositing
+                            liftState = LiftState.LS_DEPOSITING_SHARED;
+
+                        }
+
+                    } else if (liftHand == LiftHand.LH_NEAR) {
+
+                        if ((Math.abs(liftLeft.getCurrentPosition() - TARGET_NEAR)) < 5) {
+
+                            // Set state to depositing
+                            liftState = LiftState.LS_DEPOSITING_SHARED;
+
+                        }
                     }
 
                     break;
@@ -672,6 +694,8 @@ public class RoboBlueTest extends LinearOpMode {
                 case LS_DEPOSITING_ALLIANCE:
 
                     if (gamepad2.dpad_right) {
+
+                        bucket.setPosition(bucket_right);
 
                         liftHand = LiftHand.LH_RETRACT_ALLIANCE;
 
@@ -685,6 +709,8 @@ public class RoboBlueTest extends LinearOpMode {
 
                     if (gamepad2.x) {
 
+                        bucket.setPosition(bucket_left);
+
                         liftHand = LiftHand.LH_RETRACT_SHARED;
 
                         liftState = LiftState.LS_RELEASED;
@@ -697,9 +723,7 @@ public class RoboBlueTest extends LinearOpMode {
 
                     if (liftHand == LiftHand.LH_RETRACT_ALLIANCE) {
 
-                        bucket.setPosition(bucket_right);
-
-                        if (depositTimer.milliseconds() > 1000) {
+                        if (bucketSensor.alpha() < 100) {
 
                             bucket.setPosition(bucket_down);
 
@@ -710,16 +734,34 @@ public class RoboBlueTest extends LinearOpMode {
 
                     } else if (liftHand == LiftHand.LH_RETRACT_SHARED) {
 
-                        bucket.setPosition(bucket_left);
-
-                        if (depositTimer.milliseconds() > 1000) {
+                        if (bucketSensor.alpha() < 100) {
 
                             bucket.setPosition(bucket_down);
 
-                            // Set lift state to released
-                            liftState = LiftState.LS_RETRACTING;
+                            liftState = LiftState.LS_TURRET_UP;
 
                         }
+                    }
+
+                    break;
+
+                case LS_TURRET_UP:
+
+                    turretTimer.reset();
+
+                    turret.setPosition(turret_center);
+
+                    arm.setPosition(arm_intermediate);
+
+                    liftState = LiftState.LS_TURRET_CHECK;
+
+                    break;
+
+                case LS_TURRET_CHECK:
+
+                    if (turretTimer.milliseconds() > 2000) {
+
+                        liftState = LiftState.LS_RETRACTING;
                     }
 
                     break;
@@ -727,8 +769,6 @@ public class RoboBlueTest extends LinearOpMode {
                 case LS_RETRACTING:
 
                     if ((Math.abs(liftLeft.getCurrentPosition())) > 5) {
-
-                        arm.setPosition(arm_intermediate);
 
                         // Retract lift
                         liftLeft.setTargetPosition(0);
@@ -739,7 +779,7 @@ public class RoboBlueTest extends LinearOpMode {
                         liftLeft.setPower(-1.0);
 
                         // Set lift state to retracting
-                        liftState = LiftState.LS_IDLE  ;
+                        liftState = LiftState.LS_IDLE;
 
                     }
 
@@ -751,11 +791,12 @@ public class RoboBlueTest extends LinearOpMode {
                     if (Math.abs(liftLeft.getCurrentPosition()) < 5) {
 
                         arm.setPosition(arm_backward);
+
                         liftLeft.setPower(0);
                         liftRight.setPower(0);
 
                         // Set lift state to empty
-                        liftState = LiftState.LS_EXTENDING;
+                        liftState = LiftState.LS_STATIONARY;
 
                     }
 
@@ -786,178 +827,109 @@ public class RoboBlueTest extends LinearOpMode {
 
             /** Carousel **/
 
-            float a = gamepad2.left_trigger;
-            float b = gamepad2.right_trigger;
-
-//            switch (carouselState) {
-//
-//                case CS_STATIONARY:
-//
-//                    if (gamepad2.left_trigger > 0.05) {
-//
-//                        carouselTimer.reset();
-//
-//                        carouselHand = CarouselHand.CH_LEFT;
-//
-//                        carouselState = CarouselState.CS_TURNING_LEFT;
-//
-//                    } else if (gamepad2.right_trigger > 0.05) {
-//
-//                        carouselTimer.reset();
-//
-//                        carouselHand = CarouselHand.CH_RIGHT;
-//
-//                        carouselState = CarouselState.CS_TURNING_RIGHT;
-//                    }
-//
-//                    break;
-//
-//                case CS_TURNING_LEFT:
-//
-//                    if (carouselTimer.milliseconds() < 3000) {
-//
-//                        c_Left.setPower(0.3 * a);
-//                        c_Right.setPower(0.3 * a);
-//
-//                    } else if (carouselTimer.milliseconds() < 4000 && carouselTimer.milliseconds() > 3000) {
-//
-//                        c_Left.setPower();
-//                        c_Right.setPower(0.5);
-//
-//                    } else if (carouselTimer.milliseconds() < 6000 && carouselTimer.milliseconds() > 4000) {
-//
-//                        c_Left.setPower(1.0);
-//                        c_Right.setPower(1.0);
-//
-//                    } else {
-//
-//                        c_Left.setPower(0);
-//                        c_Right.setPower(0);
-//
-//                        carouselState = CarouselState.CS_STATIONARY;
-//                    }
-//
-//                case CS_TURNING_RIGHT:
-//
-//                    if (carouselTimer.milliseconds() < 3000) {
-//
-//                        c_Left.setPower(-0.3);
-//                        c_Right.setPower(-0.3);
-//
-//                    } else if (carouselTimer.milliseconds() < 4000 && carouselTimer.milliseconds() > 3000) {
-//
-//                        c_Left.setPower(-0.5);
-//                        c_Right.setPower(-0.5);
-//
-//                    } else if (carouselTimer.milliseconds() < 6000 && carouselTimer.milliseconds() > 4000) {
-//
-//                        c_Left.setPower(-1.0);
-//                        c_Right.setPower(-1.0);
-//
-//                    } else {
-//
-//                        c_Left.setPower(0);
-//                        c_Right.setPower(0);
-//                    }
-//
-//                    break;
-//            }
-
-//            if (gamepad2.left_trigger != 0) {
-//
-//                c_Left.setPower(Math.max(0, Math.min(1, (5 * Math.pow(x - 0.5, 3) + 0.7))));
-//                c_Right.setPower(Math.max(0, Math.min(1, (5 * Math.pow(x - 0.5, 3) + 0.7))));
-//
-//            } else if (gamepad2.right_trigger != 0) {
-//
-//                    c_Left.setPower(-(Math.max(0, Math.min(1, (5 * Math.pow(x - 0.5, 3) + 0.7)))));
-//                    c_Right.setPower(-(Math.max(0, Math.min(1, (5 * Math.pow(x - 0.5, 3) + 0.7)))));
-//
-//            } else {
-//
-//                c_Left.setPower(0);
-//                c_Right.setPower(0);
-//
-//            }
 
 
-            if (gamepad2.left_trigger > 0.05) {
+            if (gamepad2.right_stick_y > 0.0) {
 
-                c_Left.setPower(0.5 * a);
-                c_Right.setPower(0.5 * a);
+                float e = gamepad1.right_stick_y;
 
-            } else if (gamepad2.right_trigger > 0.05) {
+                c_Left.setPower(Math.max(0, Math.min(1, (5 * Math.pow(e - 0.5, 3) + 0.7))));
+                c_Right.setPower(Math.max(0, Math.min(1, (5 * Math.pow(e - 0.5, 3) + 0.7))));
 
-                c_Left.setPower(-(0.5 * b));
-                c_Right.setPower(-(0.5 * b));
+            } else if (gamepad2.right_stick_y < 0.0) {
+
+                float e = gamepad1.right_stick_y;
+
+                c_Left.setPower(-(Math.max(0, Math.min(1, (5 * Math.pow(e - 0.5, 3) + 0.7)))));
+                c_Right.setPower(-(Math.max(0, Math.min(1, (5 * Math.pow(e - 0.5, 3) + 0.7)))));
 
             } else {
 
                 c_Left.setPower(0);
                 c_Right.setPower(0);
+
             }
 
             // Manual Lift
 
-            float c = gamepad2.right_stick_y;
+            switch (manualLiftState) {
 
-            if (c > 0.0) {
+                case MLS_STATIONARY:
 
-                turret.setPosition(turret_center);
-                arm.setPosition(arm_forward);
+                    if (gamepad2.right_trigger > 0.0) {
 
-                liftLeft.setTargetPosition(250);
-                liftRight.setTargetPosition(250);
-                liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                liftLeft.setPower(1.0);
-                liftRight.setPower(1.0);
+                        manualLiftState = ManualLiftState.MLS_EXTENDING;
+                    }
 
-                Thread.sleep(500);
+                    break;
 
-                bucket.setPosition(bucket_right);
-            }
+                case MLS_EXTENDING:
 
-            if (c < 0.0) {
+                    float c = gamepad2.right_trigger;
 
-                liftLeft.setTargetPosition(0);
-                liftRight.setTargetPosition(0);
-                liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                liftRight.setPower(-1.0);
-                liftLeft.setPower(-1.0);
+                    if (c > 0.0) {
 
-                turret.setPosition(turret_center);
-                arm.setPosition(arm_intermediate);
+                        int d = (int) (350 * c);
 
-                Thread.sleep(500);
+                        turret.setPosition(turret_center);
 
-                bucket.setPosition(bucket_down);
-                arm.setPosition(arm_backward);
+                        if (liftLeft.getCurrentPosition() != d) {
 
-                Thread.sleep(300);
+                            liftLeft.setTargetPosition(d);
+                            liftRight.setTargetPosition(d);
+                            liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            liftLeft.setPower(1.0);
+                            liftRight.setPower(1.0);
+                        }
 
-                if (liftLeft.getCurrentPosition() < 5) {
+                    } else if (c == 0) {
 
-                    liftLeft.setPower(0);
-                    liftRight.setPower(0);
-                }
+                        turret.setPosition(turret_center);
+
+                        liftLeft.setTargetPosition(0);
+                        liftRight.setTargetPosition(0);
+                        liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        liftRight.setPower(-1.0);
+                        liftLeft.setPower(-1.0);
+
+                        manualLiftState = ManualLiftState.MLS_IDLE;
+                    }
+
+                    break;
+
+                case MLS_IDLE:
+
+                    if (liftLeft.getCurrentPosition() < 5) {
+
+                        liftLeft.setPower(0);
+                        liftRight.setPower(0);
+
+                        manualLiftState = ManualLiftState.MLS_STATIONARY;
+                    }
+
+                    break;
             }
 
             if (gamepad1.y) {
 
-                arm.setPosition(arm_forward);
-
-                Thread.sleep(800);
-
-                bucket.setPosition(bucket_right);
+                arm.setPosition(arm_forward_alliance);
             }
 
             if (gamepad1.a) {
 
-                bucket.setPosition(bucket_down);
-
                 arm.setPosition(arm_backward);
+            }
+
+            if (gamepad1.x) {
+
+                bucket.setPosition(bucket_left);
+            }
+
+            if (gamepad1.b) {
+
+                bucket.setPosition(bucket_right);
             }
 
             /** Reset Encoders **/
@@ -982,7 +954,7 @@ public class RoboBlueTest extends LinearOpMode {
             telemetry.addData("Lift State: ", liftState);
             telemetry.addData("Lift Left Encoders: ", liftLeft.getCurrentPosition());
             telemetry.addData("Lift Right Encoders: ", liftRight.getCurrentPosition());
-            telemetry.addData("C: ", c);
+            telemetry.addData("G2 Right Trigger: ", gamepad2.right_trigger);
             telemetry.update();
         }
     }
