@@ -43,7 +43,7 @@ public class Even_x2_LessScuffedAuton extends OpMode
         RESET, GOING, RETURNING, DEPOSITING
     }
     //static variables for positions
-    final static int LIFT_EXTENDED=160;
+    final static int LIFT_EXTENDED=200;
 
     //changing variables that are used for stuff
     int cubePos;
@@ -211,7 +211,7 @@ public class Even_x2_LessScuffedAuton extends OpMode
                             OState=OverallState.DEPOSITING;
                             RState=ReturningState.DONE;
                             servoControl.openDeposit();
-                            tempTarget=SystemClock.uptimeMillis()+500;
+                            tempTarget=SystemClock.uptimeMillis()+1000;
                         }
                         break;
                     case DONE:

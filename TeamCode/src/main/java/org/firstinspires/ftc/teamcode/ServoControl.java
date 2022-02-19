@@ -15,15 +15,14 @@ public class ServoControl
         };
     Side side;
 
-    double i_minRange_topRight = 0.87;
+    double i_minRange_topLeft = 0.13;
+    double i_maxRange_topLeft = 0.96;
+    double i_minRange_bottomLeft = 0.92;
+    double i_maxRange_bottomLeft = 0.09;
+    double i_minRange_topRight = 0.96;
     double i_maxRange_topRight = 0.16;
-    double i_minRange_bottomRight = 0.16;
-    double i_maxRange_bottomRight = 0.87;
-
-    double i_minRange_topLeft = 0.15;
-    double i_maxRange_topLeft = 0.92;
-    double i_minRange_bottomLeft = 0.9;
-    double i_maxRange_bottomLeft = 0.13;
+    double i_minRange_bottomRight = 0.08;
+    double i_maxRange_bottomRight = 0.88;
 
     double d_open_center=0.48;
     double d_open_partial_left=0.32;
