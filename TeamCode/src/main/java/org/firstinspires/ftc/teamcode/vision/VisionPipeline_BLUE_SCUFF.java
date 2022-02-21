@@ -137,8 +137,6 @@ public class VisionPipeline_BLUE_SCUFF extends OpenCvPipeline
 
 
     }
-
-    @Override
     public Mat processFrame(Mat input)
     {
         /*
@@ -189,16 +187,24 @@ public class VisionPipeline_BLUE_SCUFF extends OpenCvPipeline
          * at index 2 here.
          */
 
+        int counter1 = 0, counter2 = 0, counter3 = 0;
+        for(int i = 0; i < REGION_HEIGHT; i++) {
+            for (int j = 0; j < REGION_WIDTH; j++) {
+                if(region1_Red.get(i, j)[0] > 150 && region1_Green.get(i, j)[1] < 100 && region1_Blue.get(i, j)[2] > 135) counter1++;
+                if(region2_Red.get(i, j)[0] > 150 && region2_Green.get(i, j)[1] < 100 && region2_Blue.get(i, j)[2] > 135) counter2++;
+                if(region3_Red.get(i, j)[0] > 150 && region3_Green.get(i, j)[1] < 100 && region3_Blue.get(i, j)[2] > 135) counter3++;
+                //if(region1_Red.get(i, j, region1_Red))
+            }
+        }
 
+        //avg1 = (int) (0.8*Core.mean(region1_Cb).val[0])+(int) Core.mean(region1_Cr).val[0];
+        //avg2 = (int) (0.8*Core.mean(region2_Cb).val[0])+(int) Core.mean(region2_Cr).val[0];
+        //avg3 = (int) (0.8*Core.mean(region3_Cb).val[0])+(int) Core.mean(region3_Cr).val[0];
 
-        avg1 = (int) (0.8*Core.mean(region1_Cb).val[0])+(int) Core.mean(region1_Cr).val[0];
-        avg2 = (int) (0.8*Core.mean(region2_Cb).val[0])+(int) Core.mean(region2_Cr).val[0];
-        avg3 = (int) (0.8*Core.mean(region3_Cb).val[0])+(int) Core.mean(region3_Cr).val[0];
-
-        tel.addData("Area 1", avg1);
-        tel.addData("Area 2", avg2);
-        tel.addData("Area 3", avg3);
-        tel.addData("Test", (int) Core.mean(region1_Cb).val[0]);
+        tel.addData("Area 1", counter1);
+        tel.addData("Area 2", counter2);
+        tel.addData("Area 3", counter3);
+        //tel.addData("Test", (int) Core.mean(region1_Cb).val[0]);
         tel.addData("Spot", getAnalysis());
         tel.update();
         /*
