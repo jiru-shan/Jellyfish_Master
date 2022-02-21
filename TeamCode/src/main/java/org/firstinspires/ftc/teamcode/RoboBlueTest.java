@@ -12,6 +12,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.past_code.Deposit;
+import org.firstinspires.ftc.teamcode.past_code.Lift;
 
 import java.util.List;
 
@@ -19,7 +21,10 @@ import java.util.List;
 @TeleOp
 public class RoboBlueTest extends LinearOpMode {
 
-    // Left and right intake switched in configuration
+    // Deposit fast and slow
+    // Manual turret
+    // Preset and manual states
+    // Carousel Functions
 
     // 8 Motors
     DcMotor leftFront;
@@ -51,9 +56,9 @@ public class RoboBlueTest extends LinearOpMode {
     ElapsedTime runtime = new ElapsedTime();
     ElapsedTime leftIntakeTimer = new ElapsedTime();
     ElapsedTime rightIntakeTimer = new ElapsedTime();
-    ElapsedTime carouselTimer = new ElapsedTime();
-    ElapsedTime depositTimer = new ElapsedTime();
     ElapsedTime turretTimer = new ElapsedTime();
+    ElapsedTime armTimer = new ElapsedTime();
+    ElapsedTime bucketTimer = new ElapsedTime();
 
     enum IntakeState {
 
@@ -64,6 +69,7 @@ public class RoboBlueTest extends LinearOpMode {
         IS_TRANSFER,
         IS_OUT,
         IS_COMPLETE,
+        IS_COMPLETE_SPECIAL,
         IS_RESET_L,
         IS_RESET_R,
         IS_LIFT
@@ -95,6 +101,8 @@ public class RoboBlueTest extends LinearOpMode {
         LS_EXTENDING_FAR,
         LS_TURRET_DOWN,
         LS_TURRET_UP,
+        LS_ARM_UP,
+        LS_ARM_CHECK,
         LS_TURRET_CHECK,
         LS_TARGET,
         LS_TARGET_BALANCED,
@@ -106,8 +114,13 @@ public class RoboBlueTest extends LinearOpMode {
         LS_DEPOSITING_ALLIANCE,
         LS_DEPOSITING_SHARED,
         LS_RELEASED,
+        LS_RELEASED_SLOW_RIGHT_HALF,
+        LS_RELEASED_SLOW_LEFT_HALF,
+        LS_RELEASED_SLOW_RIGHT_DUMP,
+        LS_RELEASED_SLOW_LEFT_DUMP,
         LS_RETRACTING,
-        LS_IDLE
+        LS_IDLE,
+        LS_RESET
     }
 
     enum ManualLiftState {
@@ -132,6 +145,18 @@ public class RoboBlueTest extends LinearOpMode {
         LH_RETRACT_SHARED
     }
 
+    enum DepositHand {
+
+        DH_NORMAL,
+        DH_SLOW
+    }
+
+    enum CheckButtonState {
+
+        CBS_STATIONARY,
+        CBS_PRESSED
+    }
+
     // State Declarations
     IntakeState intakeState = IntakeState.IS_STATIONARY;
     IntakeHand intakeHand = IntakeHand.IH_NEITHER;
@@ -139,6 +164,8 @@ public class RoboBlueTest extends LinearOpMode {
     LiftState liftState = LiftState.LS_STATIONARY;
     LiftHand liftHand = LiftHand.LH_IDLE;
     ManualLiftState manualLiftState = ManualLiftState.MLS_STATIONARY;
+    DepositHand depositHand = DepositHand.DH_NORMAL;
+    CheckButtonState checkButtonState = CheckButtonState.CBS_STATIONARY;
 
     public void runOpMode() throws InterruptedException {
 
@@ -175,22 +202,22 @@ public class RoboBlueTest extends LinearOpMode {
         double bucket_down = 0.48;
         double bucket_left = 0.20;
         double bucket_right = 0.76;
-        double arm_forward_alliance = 0.30;
+        double arm_forward_alliance = 0.35;
         double arm_forward_shared = 0.10;
         double arm_intermediate = 0.70;
-        double arm_backward = 0.92;  // 0.92
-        double turret_center = 0.49;
-        double turret_target = 0.20;
+        double arm_backward = 0.91;  // 0.92
+        double turret_center = 0.51;
+        double turret_target = 0.35;
 
         // Servo positions
         double i_minRange_topLeft = 0.15;
-        double i_maxRange_topLeft = 0.92;
+        double i_maxRange_topLeft = 0.96;
         double i_minRange_bottomLeft = 0.90;
-        double i_maxRange_bottomLeft = 0.13;
-        double i_minRange_topRight = 0.92;
-        double i_maxRange_topRight = 0.16;
-        double i_minRange_bottomRight = 0.12;
-        double i_maxRange_bottomRight = 0.88;
+        double i_maxRange_bottomLeft = 0.09;
+        double i_minRange_topRight = 0.95;
+        double i_maxRange_topRight = 0.08;
+        double i_minRange_bottomRight = 0.09;
+        double i_maxRange_bottomRight = 0.96;
 
         // Carousel
         double maxSpinPower = 0.5;
@@ -199,12 +226,12 @@ public class RoboBlueTest extends LinearOpMode {
         double normalSpeed = 1.0;
 
         // Lift Positions
-        int TARGET_TIPPED = 340;
+        int TARGET_TIPPED = 400;
         int TARGET_BALANCED = 320;
         int TARGET_MIDDLE = 210;
-        int TARGET_NEAR = 120;
-        int TARGET_CENTER = 160;
-        int TARGET_FAR = 200;
+        int TARGET_NEAR = 10;   // 130
+        int TARGET_CENTER = 150;   // 200
+        int TARGET_FAR = 180;   // 270
 
         // Reset encoders
         liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
@@ -216,8 +243,8 @@ public class RoboBlueTest extends LinearOpMode {
         rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         bucket.setPosition(bucket_down);
-        arm.setPosition(arm_backward);
-        turret.setPosition(turret_center);
+//        arm.setPosition(arm_backward);
+//        turret.setPosition(turret_center);
 
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
@@ -256,9 +283,14 @@ public class RoboBlueTest extends LinearOpMode {
 
                 case IS_STATIONARY:
 
-                    if (gamepad1.left_bumper) {
+                    if (bucketSensor.alpha() > 70) {
+
+                        intakeState = IntakeState.IS_COMPLETE_SPECIAL;
+
+                    } else if (gamepad1.left_bumper) {
 
                         intakeHand = IntakeHand.IH_LEFT;
+
                         intakeState = IntakeState.IS_SETUP;
 
                     } else if (gamepad1.right_bumper) {
@@ -476,6 +508,15 @@ public class RoboBlueTest extends LinearOpMode {
 
                     break;
 
+                case IS_COMPLETE_SPECIAL:
+
+                    if (bucketSensor.alpha() < 70) {
+
+                        intakeState = IntakeState.IS_STATIONARY;
+                    }
+
+                    break;
+
                 case IS_RESET_L:
 
                     if (intakeHand == IntakeHand.IH_LEFT) {
@@ -674,7 +715,7 @@ public class RoboBlueTest extends LinearOpMode {
 
                     } else if (liftHand == LiftHand.LH_CENTER) {
 
-                        if ((Math.abs(liftLeft.getCurrentPosition() - TARGET_MIDDLE)) < 5) {
+                        if ((Math.abs(liftLeft.getCurrentPosition() - TARGET_CENTER  )) < 5) {
 
                             // Set state to depositing
                             liftState = LiftState.LS_DEPOSITING_SHARED;
@@ -697,12 +738,25 @@ public class RoboBlueTest extends LinearOpMode {
 
                     if (gamepad2.dpad_right) {
 
-                        bucket.setPosition(bucket_right);
+                        if (depositHand == DepositHand.DH_NORMAL) {
 
-                        liftHand = LiftHand.LH_RETRACT_ALLIANCE;
+                            bucket.setPosition(bucket_right);
 
-                        liftState = LiftState.LS_RELEASED;
+                            liftHand = LiftHand.LH_RETRACT_ALLIANCE;
 
+                            liftState = LiftState.LS_RELEASED;
+
+                        } else if (depositHand == DepositHand.DH_SLOW) {
+
+                            bucketTimer.reset();
+
+                            bucket.setPosition(0.6);
+
+                            liftHand = LiftHand.LH_RETRACT_ALLIANCE;
+
+                            liftState = LiftState.LS_RELEASED_SLOW_RIGHT_HALF;
+
+                        }
                     }
 
                     break;
@@ -711,12 +765,72 @@ public class RoboBlueTest extends LinearOpMode {
 
                     if (gamepad2.x) {
 
+                        if (depositHand == DepositHand.DH_NORMAL) {
+
+                            bucket.setPosition(bucket_left);
+
+                            liftHand = LiftHand.LH_RETRACT_SHARED;
+
+                            liftState = LiftState.LS_RELEASED;
+
+                        } else if (depositHand == DepositHand.DH_SLOW) {
+
+                            bucketTimer.reset();
+
+                            bucket.setPosition(0.4);
+
+                            liftHand = LiftHand.LH_RETRACT_SHARED;
+
+                            liftState = LiftState.LS_RELEASED_SLOW_LEFT_HALF;
+
+                        }
+                    }
+
+                    break;
+
+
+                case LS_RELEASED_SLOW_RIGHT_HALF:
+
+                    if (bucketTimer.milliseconds() > 500) {
+
+                        bucket.setPosition(bucket_right);
+
+                        liftState = LiftState.LS_RELEASED_SLOW_RIGHT_DUMP;
+
+                    }
+
+                    break;
+
+                case LS_RELEASED_SLOW_RIGHT_DUMP:
+
+                    if (bucketTimer.milliseconds() > 1000) {
+
+                        bucket.setPosition(bucket_down);
+
+                        liftState = LiftState.LS_RETRACTING;
+                    }
+
+                    break;
+
+                case LS_RELEASED_SLOW_LEFT_HALF:
+
+                    if (bucketTimer.milliseconds() > 500) {
+
                         bucket.setPosition(bucket_left);
 
-                        liftHand = LiftHand.LH_RETRACT_SHARED;
+                        liftState = LiftState.LS_RELEASED_SLOW_LEFT_DUMP;
+
+                    }
+
+                    break;
+
+                case LS_RELEASED_SLOW_LEFT_DUMP:
+
+                    if (bucketTimer.milliseconds() > 1000) {
+
+                        bucket.setPosition(bucket_down);
 
                         liftState = LiftState.LS_RELEASED;
-
                     }
 
                     break;
@@ -725,7 +839,7 @@ public class RoboBlueTest extends LinearOpMode {
 
                     if (liftHand == LiftHand.LH_RETRACT_ALLIANCE) {
 
-                        if (bucketSensor.alpha() < 60) {
+                        if (bucketSensor.alpha() < 70) {
 
                             bucket.setPosition(bucket_down);
 
@@ -736,13 +850,32 @@ public class RoboBlueTest extends LinearOpMode {
 
                     } else if (liftHand == LiftHand.LH_RETRACT_SHARED) {
 
-                        if (bucketSensor.alpha() < 60) {
+                        if (bucketSensor.alpha() < 70) {
 
                             bucket.setPosition(bucket_down);
 
-                            liftState = LiftState.LS_TURRET_UP;
+                            liftState = LiftState.LS_ARM_UP;
 
                         }
+                    }
+
+                    break;
+
+                case LS_ARM_UP:
+
+                    armTimer.reset();
+
+                    arm.setPosition(arm_intermediate);
+
+                    liftState = LiftState.LS_ARM_CHECK;
+
+                    break;
+
+                case LS_ARM_CHECK:
+
+                    if (turretTimer.milliseconds() > 1000) {
+
+                        liftState = LiftState.LS_TURRET_UP;
                     }
 
                     break;
@@ -753,15 +886,13 @@ public class RoboBlueTest extends LinearOpMode {
 
                     turret.setPosition(turret_center);
 
-                    arm.setPosition(arm_intermediate);
-
                     liftState = LiftState.LS_TURRET_CHECK;
 
                     break;
 
                 case LS_TURRET_CHECK:
 
-                    if (turretTimer.milliseconds() > 2000) {
+                    if (turretTimer.milliseconds() > 1000) {
 
                         liftState = LiftState.LS_RETRACTING;
                     }
@@ -805,7 +936,7 @@ public class RoboBlueTest extends LinearOpMode {
                     break;
             }
 
-            // drivetrain
+            /** Drivetrain **/
 
             // intuitive controls in respect to the blue side of the field
             double y = -gamepad1.right_stick_x; // Reversed
@@ -870,7 +1001,7 @@ public class RoboBlueTest extends LinearOpMode {
 
                     if (c > 0.0) {
 
-                        int d = (int) (350 * c);
+                        int d = (int) (400 * c);
 
                         turret.setPosition(turret_center);
                         arm.setPosition(arm_forward_alliance);
@@ -883,6 +1014,25 @@ public class RoboBlueTest extends LinearOpMode {
                             liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             liftLeft.setPower(1.0);
                             liftRight.setPower(1.0);
+
+                        }
+
+                        if (gamepad1.x) {
+
+                            bucket.setPosition(bucket_left);
+
+                        } else {
+
+                            bucket.setPosition(bucket_down);
+                        }
+
+                        if (gamepad1.b) {
+
+                            bucket.setPosition(bucket_right);
+
+                        } else {
+
+                            bucket.setPosition(bucket_down);
                         }
 
                     } else if (c == 0.0) {
@@ -891,6 +1041,7 @@ public class RoboBlueTest extends LinearOpMode {
                         arm.setPosition(arm_intermediate);
 
                         manualLiftState = ManualLiftState.MLS_RETRACTING;
+
                     }
 
                     break;
@@ -943,23 +1094,54 @@ public class RoboBlueTest extends LinearOpMode {
                 arm.setPosition(arm_backward);
             }
 
-            if (gamepad1.x) {
+//            float g = (float) (((gamepad2.left_stick_y) + 1.0) / 2.0);
+//
+//            if (gamepad2.left_stick_y != 0) {
+//
+//                turret.setPosition(g);
+//
+//            }
 
-                bucket.setPosition(bucket_down);
+            switch (checkButtonState) {
+
+                case CBS_STATIONARY:
+
+                    if (gamepad1.dpad_up) {
+
+                        if (depositHand == DepositHand.DH_NORMAL) {
+
+                            depositHand = DepositHand.DH_SLOW;
+
+                        } else if (depositHand == DepositHand.DH_SLOW) {
+
+                            depositHand = DepositHand.DH_NORMAL;
+                        }
+
+                        checkButtonState = CheckButtonState.CBS_PRESSED;
+
+                    }
+
+                    break;
+
+                case CBS_PRESSED:
+
+                    if (!gamepad1.dpad_up) {
+
+                        checkButtonState = CheckButtonState.CBS_STATIONARY;
+                    }
+
+                    break;
             }
 
-            if (gamepad1.b) {
 
-                bucket.setPosition(bucket_right);
-            }
 
             /** Reset Encoders **/
 
-//            if (gamepad2.right_trigger != 0) {
-//
-//                liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
-//                liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//            }
+            if (gamepad2.left_trigger != 0) {
+
+                liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
+                liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            }
 
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "leftFront (%.2f), leftBack (%.2f), rightFront (%.2f), rightBack (%.2f)",
@@ -976,6 +1158,8 @@ public class RoboBlueTest extends LinearOpMode {
             telemetry.addData("G2 Right Trigger: ", gamepad2.right_trigger);
             telemetry.addData("Manual Lift State: ", manualLiftState);
             telemetry.addData("Joystick: ", gamepad2.right_stick_y);
+            telemetry.addData("Turret: ", turret.getPosition());
+            telemetry.addData("Deposit Speed: ", checkButtonState);
             telemetry.update();
         }
     }

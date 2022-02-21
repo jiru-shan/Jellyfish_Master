@@ -179,7 +179,7 @@ public class RoboBlue2 extends LinearOpMode {
         double arm_forward_shared = 0.10;
         double arm_intermediate = 0.70;
         double arm_backward = 0.92;  // 0.92
-        double turret_center = 0.49;
+        double turret_center = 0.51 ;
         double turret_target = 0.20;
 
         // Servo positions
