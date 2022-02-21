@@ -17,7 +17,7 @@ import java.util.List;
 
 @Config
 @TeleOp
-public class RoboBlueTest extends LinearOpMode {
+public class RoboBlue2 extends LinearOpMode {
 
     // Left and right intake switched in configuration
 
@@ -202,9 +202,9 @@ public class RoboBlueTest extends LinearOpMode {
         int TARGET_TIPPED = 340;
         int TARGET_BALANCED = 320;
         int TARGET_MIDDLE = 210;
-        int TARGET_NEAR = 120;
-        int TARGET_CENTER = 160;
-        int TARGET_FAR = 200;
+        int TARGET_NEAR = 150;
+        int TARGET_CENTER = 200;
+        int TARGET_FAR = 250;
 
         // Reset encoders
         liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
@@ -725,7 +725,7 @@ public class RoboBlueTest extends LinearOpMode {
 
                     if (liftHand == LiftHand.LH_RETRACT_ALLIANCE) {
 
-                        if (bucketSensor.alpha() < 60) {
+                        if (bucketSensor.alpha() < 80) {
 
                             bucket.setPosition(bucket_down);
 
@@ -736,7 +736,7 @@ public class RoboBlueTest extends LinearOpMode {
 
                     } else if (liftHand == LiftHand.LH_RETRACT_SHARED) {
 
-                        if (bucketSensor.alpha() < 60) {
+                        if (bucketSensor.alpha() < 80) {
 
                             bucket.setPosition(bucket_down);
 
@@ -761,7 +761,7 @@ public class RoboBlueTest extends LinearOpMode {
 
                 case LS_TURRET_CHECK:
 
-                    if (turretTimer.milliseconds() > 2000) {
+                    if (turretTimer.milliseconds() > 1000) {
 
                         liftState = LiftState.LS_RETRACTING;
                     }
@@ -829,26 +829,22 @@ public class RoboBlueTest extends LinearOpMode {
 
             /** Carousel **/
 
+            float a = gamepad2.right_stick_y;
 
-            if (gamepad2.right_stick_y > 0.0) {
+            if (gamepad2.right_stick_y > 0) {
 
-                float e = gamepad1.right_stick_y;
+                c_Left.setPower(a);
+                c_Right.setPower(a);
 
-                c_Left.setPower(Math.max(0, Math.min(1, (5 * Math.pow(e - 0.5, 3) + 0.7))));
-                c_Right.setPower(Math.max(0, Math.min(1, (5 * Math.pow(e - 0.5, 3) + 0.7))));
+            } else if (gamepad2.right_stick_y < 0) {
 
-            } else if (gamepad2.right_stick_y < 0.0) {
-
-                float e = gamepad1.right_stick_y;
-
-                c_Left.setPower(-(Math.max(0, Math.min(1, (5 * Math.pow(e - 0.5, 3) + 0.7)))));
-                c_Right.setPower(-(Math.max(0, Math.min(1, (5 * Math.pow(e - 0.5, 3) + 0.7)))));
+                c_Left.setPower(a);
+                c_Right.setPower(a);
 
             } else {
 
                 c_Left.setPower(0);
                 c_Right.setPower(0);
-
             }
 
             // Manual Lift
