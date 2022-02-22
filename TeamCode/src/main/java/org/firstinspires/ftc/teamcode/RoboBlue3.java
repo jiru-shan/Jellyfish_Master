@@ -59,6 +59,8 @@ public class RoboBlue3 extends LinearOpMode {
     ElapsedTime turretTimer = new ElapsedTime();
     ElapsedTime armTimer = new ElapsedTime();
     ElapsedTime bucketTimer = new ElapsedTime();
+    ElapsedTime leftCaptureTimer = new ElapsedTime();
+    ElapsedTime rightCaptureTimer = new ElapsedTime();
 
     enum IntakeState {
 
@@ -214,10 +216,10 @@ public class RoboBlue3 extends LinearOpMode {
         double i_maxRange_topLeft = 0.96;
         double i_minRange_bottomLeft = 0.90;
         double i_maxRange_bottomLeft = 0.09;
-        double i_minRange_topRight = 0.95;
-        double i_maxRange_topRight = 0.08;
-        double i_minRange_bottomRight = 0.09;
-        double i_maxRange_bottomRight = 0.96;
+        double i_minRange_topRight = 0.96; // 0.95, 0.91
+        double i_maxRange_topRight = 0.15;  // 0.08, 0.24, 0.20
+        double i_minRange_bottomRight = 0.15; // 0.09, 0.25
+        double i_maxRange_bottomRight = 0.96; //0.96
 
         // Carousel
         double maxSpinPower = 0.5;
@@ -243,8 +245,13 @@ public class RoboBlue3 extends LinearOpMode {
         rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         bucket.setPosition(bucket_down);
-//        arm.setPosition(arm_backward);
-//        turret.setPosition(turret_center);
+        arm.setPosition(arm_backward);
+        turret.setPosition(turret_center);
+
+        i_topLeft.setPosition(i_maxRange_topLeft);
+        i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+        i_topRight.setPosition(i_maxRange_topRight);
+        i_bottomRight.setPosition(i_maxRange_bottomRight);
 
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
@@ -290,7 +297,6 @@ public class RoboBlue3 extends LinearOpMode {
                     } else if (gamepad1.left_bumper) {
 
                         intakeHand = IntakeHand.IH_LEFT;
-
                         intakeState = IntakeState.IS_SETUP;
 
                     } else if (gamepad1.right_bumper) {
@@ -325,6 +331,8 @@ public class RoboBlue3 extends LinearOpMode {
                         arm.setPosition(arm_backward);
                         turret.setPosition(turret_center);
 
+                        leftCaptureTimer.reset();
+
                         intakeState = IntakeState.IS_INTAKE;
 
                     } else if (intakeHand == IntakeHand.IH_RIGHT) {
@@ -349,6 +357,8 @@ public class RoboBlue3 extends LinearOpMode {
                         arm.setPosition(arm_backward);
                         turret.setPosition(turret_center);
 
+                        rightCaptureTimer.reset();
+
                         intakeState = IntakeState.IS_INTAKE;
                     }
 
@@ -366,16 +376,20 @@ public class RoboBlue3 extends LinearOpMode {
 
                     } else if (intakeHand == IntakeHand.IH_LEFT) {
 
-                        if (colorSensor_left.alpha() > 500) {
+                        if (colorSensor_left.alpha() > 800) {
 
-                            // hold elements in intake
-                            leftIntake.setPower(0.25);
+                            if (leftCaptureTimer.milliseconds() > 500) {
 
-                            // left intake flips up
-                            i_topLeft.setPosition(i_maxRange_topLeft);
-                            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+                                // hold elements in intake
+                                leftIntake.setPower(0.25);
 
-                            intakeState = IntakeState.IS_CAPTURE;
+                                // left intake flips up
+                                i_topLeft.setPosition(i_maxRange_topLeft);
+                                i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+
+                                intakeState = IntakeState.IS_CAPTURE;
+
+                            }
 
                         } else if (gamepad1.right_bumper) {
 
@@ -385,17 +399,20 @@ public class RoboBlue3 extends LinearOpMode {
 
                     } else if (intakeHand == IntakeHand.IH_RIGHT) {
 
+                        if (colorSensor_right.alpha() > 800) {
 
-                        if (colorSensor_right.alpha() > 500) {
+                            if (rightCaptureTimer.milliseconds() > 500) {
 
-                            // hold elements in intake
-                            rightIntake.setPower(-0.25);
+                                // hold elements in intake
+                                rightIntake.setPower(-0.25);
 
-                            // left intake flips up
-                            i_topRight.setPosition(i_maxRange_topRight);
-                            i_bottomRight.setPosition(i_maxRange_bottomRight);
+                                // left intake flips up
+                                i_topRight.setPosition(i_maxRange_topRight);
+                                i_bottomRight.setPosition(i_maxRange_bottomRight);
 
-                            intakeState = IntakeState.IS_CAPTURE;
+                                intakeState = IntakeState.IS_CAPTURE;
+
+                            }
 
                         } else if (gamepad1.left_bumper) {
 
@@ -1160,6 +1177,9 @@ public class RoboBlue3 extends LinearOpMode {
             telemetry.addData("Joystick: ", gamepad2.right_stick_y);
             telemetry.addData("Turret: ", turret.getPosition());
             telemetry.addData("Deposit Speed: ", checkButtonState);
+            telemetry.addData("Bucket Position: ", bucket.getPosition());
+            telemetry.addData("TopRight: ", i_topRight.getPosition());
+            telemetry.addData("BottomRight: ", i_bottomRight.getPosition());
             telemetry.update();
         }
     }
