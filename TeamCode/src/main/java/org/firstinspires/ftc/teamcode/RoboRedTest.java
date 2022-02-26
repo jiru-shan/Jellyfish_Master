@@ -19,7 +19,7 @@ import java.util.List;
 
 @Config
 @TeleOp
-public class RoboBlueTest extends LinearOpMode {
+public class RoboRedTest extends LinearOpMode {
 
     // 8 Motors
     DcMotor leftFront;
@@ -200,7 +200,7 @@ public class RoboBlueTest extends LinearOpMode {
     CheckDepositButtonState checkDepositButtonState = CheckDepositButtonState.CDBS_STATIONARY;
     RobotState robotState = RobotState.RS_AUTO;
     CheckRobotButtonState checkRobotButtonState = CheckRobotButtonState.CRBS_STATIONARY;
-    FieldSide fieldSide = FieldSide.FS_BLUE;
+    FieldSide fieldSide = FieldSide.FS_RED;
 
     public void runOpMode() throws InterruptedException {
 
