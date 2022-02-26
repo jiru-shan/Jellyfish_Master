@@ -245,14 +245,14 @@ public class VisionPipeline_BLUE_SCUFF extends OpenCvPipeline
          * Find the max of the 3 averages
          */
 
-        int max = Math.max(avg1, avg2);
-        int trueMax=Math.max(max, avg3);
+        int max = Math.max(counter1, counter2);
+        int trueMax=Math.max(max, counter3);
 
         /*
          * Now that we found the max, we actually need to go and
          * figure out which sample region that value was from
          */
-        if(trueMax==avg1) // Was it from region 1?
+        if(trueMax==counter1) // Was it from region 1?
         {
             position = SkystonePosition.LEFT; // Record our analysis
             pos=3;
@@ -267,7 +267,7 @@ public class VisionPipeline_BLUE_SCUFF extends OpenCvPipeline
                     GREEN, // The color the rectangle is drawn in
                     -1); // Negative thickness means solid fill
         }
-        else if(trueMax==avg2) // Was it from region 2?
+        else if(trueMax==counter2) // Was it from region 2?
         {
             position = SkystonePosition.CENTER; // Record our analysis
             pos=2;
@@ -283,7 +283,7 @@ public class VisionPipeline_BLUE_SCUFF extends OpenCvPipeline
                     -1); // Negative thickness means solid fill
         }
 
-        else if(trueMax == avg3) // Was it from region 3?
+        else if(trueMax == counter3) // Was it from region 3?
         {
             position = SkystonePosition.RIGHT; // Record our analysis
             pos=1;
