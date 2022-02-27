@@ -188,11 +188,17 @@ public class VisionPipeline_BLUE_SCUFF extends OpenCvPipeline
          */
 
         int counter1 = 0, counter2 = 0, counter3 = 0;
+
+        //int redValue = 0, greenValue = 0, blueValue = 0
         for(int i = 0; i < REGION_HEIGHT; i++) {
             for (int j = 0; j < REGION_WIDTH; j++) {
-                if(region1_Red.get(i, j)[0] > 150 && region1_Green.get(i, j)[1] < 100 && region1_Blue.get(i, j)[2] > 135) counter1++;
-                if(region2_Red.get(i, j)[0] > 150 && region2_Green.get(i, j)[1] < 100 && region2_Blue.get(i, j)[2] > 135) counter2++;
-                if(region3_Red.get(i, j)[0] > 150 && region3_Green.get(i, j)[1] < 100 && region3_Blue.get(i, j)[2] > 135) counter3++;
+                //if(region1_Red.get(i, j)[0] < 125 && region1_Green.get(i, j)[1] > 95 && region1_Blue.get(i, j)[2] > 70) counter1++;
+                //if(region2_Red.get(i, j)[0] > 150 && region2_Green.get(i, j)[1] < 100 && region2_Blue.get(i, j)[2] > 135) counter2++;
+                //if(region3_Red.get(i, j)[0] > 150 && region3_Green.get(i, j)[1] < 100 && region3_Blue.get(i, j)[2] > 135) counter3++;
+                if (region1_Blue.get(i, j)[2] > region1_Green.get(i, j)[1] + region1_Red.get(i, j)[0] && region1_Blue.get(i, j)[2] > 100) counter1++;
+                if (region2_Blue.get(i, j)[2] > region2_Green.get(i, j)[1] + region2_Red.get(i, j)[0] && region2_Blue.get(i, j)[2] > 100) counter2++;
+                if (region3_Blue.get(i, j)[2] > region3_Green.get(i, j)[1] + region3_Red.get(i, j)[0] && region3_Blue.get(i, j)[2] > 100) counter3++;
+
                 //if(region1_Red.get(i, j, region1_Red))
             }
         }
@@ -245,14 +251,14 @@ public class VisionPipeline_BLUE_SCUFF extends OpenCvPipeline
          * Find the max of the 3 averages
          */
 
-        int max = Math.max(counter1, counter2);
-        int trueMax=Math.max(max, counter3);
+        int min = Math.min(counter1, counter2);
+        int trueMin=Math.min(min, counter3);
 
         /*
          * Now that we found the max, we actually need to go and
          * figure out which sample region that value was from
          */
-        if(trueMax==counter1) // Was it from region 1?
+        if(trueMin==counter1) // Was it from region 1?
         {
             position = SkystonePosition.LEFT; // Record our analysis
             pos=3;
@@ -267,7 +273,7 @@ public class VisionPipeline_BLUE_SCUFF extends OpenCvPipeline
                     GREEN, // The color the rectangle is drawn in
                     -1); // Negative thickness means solid fill
         }
-        else if(trueMax==counter2) // Was it from region 2?
+        else if(trueMin==counter2) // Was it from region 2?
         {
             position = SkystonePosition.CENTER; // Record our analysis
             pos=2;
@@ -283,7 +289,7 @@ public class VisionPipeline_BLUE_SCUFF extends OpenCvPipeline
                     -1); // Negative thickness means solid fill
         }
 
-        else if(trueMax == counter3) // Was it from region 3?
+        else if(trueMin == counter3) // Was it from region 3?
         {
             position = SkystonePosition.RIGHT; // Record our analysis
             pos=1;

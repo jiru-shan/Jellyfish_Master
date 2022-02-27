@@ -80,11 +80,13 @@ public class VisionPipeline_RED extends OpenCvPipeline
     /*
      * Working variables
      */
-    Mat region1_Cb, region2_Cb, region3_Cb;
-    Mat region1_Cr, region2_Cr, region3_Cr;
-    Mat YCrCb = new Mat();
-    Mat Cb = new Mat();
-    Mat Cr=new Mat();
+    Mat region1_Red, region2_Red, region3_Red;
+    Mat region1_Blue, region2_Blue, region3_Blue;
+    Mat region1_Green, region2_Green, region3_Green;
+    Mat RGB = new Mat();
+    Mat Red = new Mat();
+    Mat Blue =new Mat();
+    Mat Green =new Mat();
     int avg1, avg2, avg3;
 
     // Volatile since accessed by OpMode thread w/o synchronization
@@ -96,9 +98,10 @@ public class VisionPipeline_RED extends OpenCvPipeline
      */
     void inputToCb(Mat input)
     {
-        Imgproc.cvtColor(input, YCrCb, Imgproc.COLOR_RGB2YCrCb);
-        Core.extractChannel(YCrCb, Cb, 2);
-        Core.extractChannel(YCrCb, Cr, 1);
+        Imgproc.cvtColor(input, RGB, Imgproc.COLOR_RGB2BGR);
+        Core.extractChannel(RGB, Red, 0);
+        Core.extractChannel(RGB, Blue, 1);
+        Core.extractChannel(RGB, Green, 2);
     }
 
     @Override
@@ -120,16 +123,20 @@ public class VisionPipeline_RED extends OpenCvPipeline
          * buffer. Any changes to the child affect the parent, and the
          * reverse also holds true.
          */
-        region1_Cb = Cb.submat(new Rect(region1_pointA, region1_pointB));
-        region2_Cb = Cb.submat(new Rect(region2_pointA, region2_pointB));
-        region3_Cb = Cb.submat(new Rect(region3_pointA, region3_pointB));
+        region1_Red = Red.submat(new Rect(region1_pointA, region1_pointB));
+        region2_Red = Red.submat(new Rect(region2_pointA, region2_pointB));
+        region3_Red = Red.submat(new Rect(region3_pointA, region3_pointB));
 
-        region1_Cr = Cr.submat(new Rect(region1_pointA, region1_pointB));
-        region2_Cr = Cr.submat(new Rect(region2_pointA, region2_pointB));
-        region3_Cr = Cr.submat(new Rect(region3_pointA, region3_pointB));
+        region1_Blue = Blue.submat(new Rect(region1_pointA, region1_pointB));
+        region2_Blue = Blue.submat(new Rect(region2_pointA, region2_pointB));
+        region3_Blue = Blue.submat(new Rect(region3_pointA, region3_pointB));
+
+        region1_Green = Green.submat(new Rect(region1_pointA, region1_pointB));
+        region2_Green = Green.submat(new Rect(region2_pointA, region2_pointB));
+        region3_Green = Green.submat(new Rect(region3_pointA, region3_pointB));
+
+
     }
-
-    @Override
     public Mat processFrame(Mat input)
     {
         /*
@@ -179,14 +186,31 @@ public class VisionPipeline_RED extends OpenCvPipeline
          * pixel value of the 3-channel image, and referenced the value
          * at index 2 here.
          */
-        avg1 = (int) (0.8*Core.mean(region1_Cb).val[0])+(int) Core.mean(region1_Cr).val[0];
-        avg2 = (int) (0.8*Core.mean(region2_Cb).val[0])+(int) Core.mean(region2_Cr).val[0];
-        avg3 = (int) (0.8*Core.mean(region3_Cb).val[0])+(int) Core.mean(region3_Cr).val[0];
 
-        tel.addData("Area 1", avg1);
-        tel.addData("Area 2", avg2);
-        tel.addData("Area 3", avg3);
-        tel.addData("Test", (int) Core.mean(region1_Cb).val[0]);
+        int counter1 = 0, counter2 = 0, counter3 = 0;
+
+        //int redValue = 0, greenValue = 0, blueValue = 0
+        for(int i = 0; i < REGION_HEIGHT; i++) {
+            for (int j = 0; j < REGION_WIDTH; j++) {
+                //if(region1_Red.get(i, j)[0] < 125 && region1_Green.get(i, j)[1] > 95 && region1_Blue.get(i, j)[2] > 70) counter1++;
+                //if(region2_Red.get(i, j)[0] > 150 && region2_Green.get(i, j)[1] < 100 && region2_Blue.get(i, j)[2] > 135) counter2++;
+                //if(region3_Red.get(i, j)[0] > 150 && region3_Green.get(i, j)[1] < 100 && region3_Blue.get(i, j)[2] > 135) counter3++;
+                if (region1_Red.get(i, j)[0] > region1_Green.get(i, j)[1] + region1_Blue.get(i, j)[2] && region1_Red.get(i, j)[0] > 125) counter1++;
+                if (region2_Red.get(i, j)[0] > region2_Green.get(i, j)[1] + region2_Blue.get(i, j)[2] && region2_Red.get(i, j)[0] > 125) counter2++;
+                if (region3_Blue.get(i, j)[0] > region3_Green.get(i, j)[1] + region3_Blue.get(i, j)[2] && region3_Red.get(i, j)[0] > 125) counter3++;
+
+                //if(region1_Red.get(i, j, region1_Red))
+            }
+        }
+
+        //avg1 = (int) (0.8*Core.mean(region1_Cb).val[0])+(int) Core.mean(region1_Cr).val[0];
+        //avg2 = (int) (0.8*Core.mean(region2_Cb).val[0])+(int) Core.mean(region2_Cr).val[0];
+        //avg3 = (int) (0.8*Core.mean(region3_Cb).val[0])+(int) Core.mean(region3_Cr).val[0];
+
+        tel.addData("Area 1", counter1);
+        tel.addData("Area 2", counter2);
+        tel.addData("Area 3", counter3);
+        //tel.addData("Test", (int) Core.mean(region1_Cb).val[0]);
         tel.addData("Spot", getAnalysis());
         tel.update();
         /*
@@ -227,17 +251,17 @@ public class VisionPipeline_RED extends OpenCvPipeline
          * Find the max of the 3 averages
          */
 
-        int max = Math.max(avg1, avg2);
-        int trueMax=Math.max(max, avg3);
+        int min = Math.min(counter1, counter2);
+        int trueMin=Math.min(min, counter3);
 
         /*
          * Now that we found the max, we actually need to go and
          * figure out which sample region that value was from
          */
-        if(trueMax==avg1) // Was it from region 1?
+        if(trueMin==counter1) // Was it from region 1?
         {
             position = SkystonePosition.LEFT; // Record our analysis
-            pos=1;
+            pos=3;
             /*
              * Draw a solid rectangle on top of the chosen region.
              * Simply a visual aid. Serves no functional purpose.
@@ -249,7 +273,7 @@ public class VisionPipeline_RED extends OpenCvPipeline
                     GREEN, // The color the rectangle is drawn in
                     -1); // Negative thickness means solid fill
         }
-        else if(trueMax==avg2) // Was it from region 2?
+        else if(trueMin==counter2) // Was it from region 2?
         {
             position = SkystonePosition.CENTER; // Record our analysis
             pos=2;
@@ -265,10 +289,10 @@ public class VisionPipeline_RED extends OpenCvPipeline
                     -1); // Negative thickness means solid fill
         }
 
-        else if(trueMax == avg3) // Was it from region 3?
+        else if(trueMin == counter3) // Was it from region 3?
         {
             position = SkystonePosition.RIGHT; // Record our analysis
-            pos=3;
+            pos=1;
             /*
              * Draw a solid rectangle on top of the chosen region.
              * Simply a visual aid. Serves no functional purpose.
