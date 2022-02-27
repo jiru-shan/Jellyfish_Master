@@ -100,8 +100,8 @@ public class VisionPipeline_RED extends OpenCvPipeline
     {
         Imgproc.cvtColor(input, RGB, Imgproc.COLOR_RGB2BGR);
         Core.extractChannel(RGB, Red, 0);
-        Core.extractChannel(RGB, Blue, 1);
-        Core.extractChannel(RGB, Green, 2);
+        Core.extractChannel(RGB, Green, 1);
+        Core.extractChannel(RGB, Blue, 2);
     }
 
     @Override
@@ -195,9 +195,9 @@ public class VisionPipeline_RED extends OpenCvPipeline
                 //if(region1_Red.get(i, j)[0] < 125 && region1_Green.get(i, j)[1] > 95 && region1_Blue.get(i, j)[2] > 70) counter1++;
                 //if(region2_Red.get(i, j)[0] > 150 && region2_Green.get(i, j)[1] < 100 && region2_Blue.get(i, j)[2] > 135) counter2++;
                 //if(region3_Red.get(i, j)[0] > 150 && region3_Green.get(i, j)[1] < 100 && region3_Blue.get(i, j)[2] > 135) counter3++;
-                if (region1_Red.get(i, j)[0] > region1_Green.get(i, j)[1] + region1_Blue.get(i, j)[2] && region1_Red.get(i, j)[0] > 125) counter1++;
-                if (region2_Red.get(i, j)[0] > region2_Green.get(i, j)[1] + region2_Blue.get(i, j)[2] && region2_Red.get(i, j)[0] > 125) counter2++;
-                if (region3_Blue.get(i, j)[0] > region3_Green.get(i, j)[1] + region3_Blue.get(i, j)[2] && region3_Red.get(i, j)[0] > 125) counter3++;
+                if (region1_Red.get(i, j)[0] > region1_Green.get(i, j)[0] + region1_Blue.get(i, j)[0] && region1_Red.get(i, j)[0] > 125) counter1++;
+                if (region2_Red.get(i, j)[0] > region2_Green.get(i, j)[0] + region2_Blue.get(i, j)[0] && region2_Red.get(i, j)[0] > 125) counter2++;
+                if (region3_Blue.get(i, j)[0] > region3_Green.get(i, j)[0] + region3_Blue.get(i, j)[0] && region3_Red.get(i, j)[0] > 125) counter3++;
 
                 //if(region1_Red.get(i, j, region1_Red))
             }
