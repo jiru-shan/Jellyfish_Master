@@ -17,7 +17,7 @@ public class RRTest extends LinearOpMode
     @Override
     public void runOpMode() throws InterruptedException {
         drive=new SampleMecanumDriveCancelable(hardwareMap);
-        sensorController=new SensorController(hardwareMap);
+        sensorController=new SensorController(hardwareMap, SensorController.Side.LEFT);
         drive.setPoseEstimate(new Pose2d(30, 0, 0));
 
         waitForStart();

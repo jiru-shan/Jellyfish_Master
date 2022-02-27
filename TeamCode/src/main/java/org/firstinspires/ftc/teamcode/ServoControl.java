@@ -1,7 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+
+@Config
 
 public class ServoControl
 {
@@ -15,29 +18,32 @@ public class ServoControl
         };
     Side side;
 
-    double i_minRange_topLeft = 0.13;
+    double i_minRange_topLeft = 0.15;
     double i_maxRange_topLeft = 0.96;
-    double i_minRange_bottomLeft = 0.92;
+    double i_minRange_bottomLeft = 0.90;
     double i_maxRange_bottomLeft = 0.09;
     double i_minRange_topRight = 0.96;
-    double i_maxRange_topRight = 0.16;
-    double i_minRange_bottomRight = 0.08;
-    double i_maxRange_bottomRight = 0.88;
+    double i_maxRange_topRight = 0.15;
+    double i_minRange_bottomRight = 0.15;
+    double i_maxRange_bottomRight = 0.96;
 
     double d_open_center=0.48;
-    double d_open_partial_left=0.32;
-    double d_open_left=0.2;
-    double d_open_partial_right=0.64;
-    double d_open_right=0.76;
+    double d_open_partial_left=0.56;
+    public static double d_open_left=0.2;
+    double d_open_partial_right=0.36;
+    public static double d_open_right=0.76;
+    public static double d_open_deposit_left=0.91;
+    public static double d_open_deposit_right=0.0;
 
     double d_arm_default=0.9;
-    double d_arm_medium=0.67;
-    double d_arm_out=0.30;
+    double d_arm_middle_level=0.85;
+    public static double d_arm_medium=0.72;
+    public static double d_arm_out=0.30;
 
 
-    double d_turret_center=0.5;
-    double d_turret_open_left=0.35;
-    double d_turret_open_right;
+    public static double d_turret_center=0.52;
+    double d_turret_open_left=0.32;
+    public static double d_turret_open_right=0.72;
 
     public ServoControl(HardwareMap map, Side side)
     {
@@ -96,9 +102,13 @@ public class ServoControl
     public void startingPos()
     {
         //raiseAllIntakes();
-        d_arm.setPosition(d_arm_default);
+       // d_arm.setPosition(d_arm_default);
         d_turret.setPosition(d_turret_center);
         closeDeposit();
+    }
+    public void returnArm()
+    {
+        d_arm.setPosition(d_arm_default);
     }
     public void openDepositIntake()
     {
@@ -115,22 +125,22 @@ public class ServoControl
     {
         if(side==Side.LEFT)
         {
-            d_open.setPosition(d_open_right);
+            d_open.setPosition(d_open_deposit_left);
         }
         else if(side==Side.RIGHT)
         {
-            d_open.setPosition(d_open_left);
+            d_open.setPosition(d_open_deposit_right);
         }
     }
     public void prepDeposit()
     {
         if(side==Side.LEFT)
         {
-            d_open.setPosition(d_open_partial_right);
+            d_open.setPosition(d_open_partial_left);
         }
         else if(side==Side.RIGHT)
         {
-            d_open.setPosition(d_open_partial_left);
+            d_open.setPosition(d_open_partial_right);
         }
     }
     public void openTurret()
@@ -142,6 +152,10 @@ public class ServoControl
         {
             d_turret.setPosition(d_turret_open_right);
         }
+    }
+    public void flipMiddle_level()
+    {
+        d_arm.setPosition(d_arm_middle_level);
     }
     public void flipMedium()
     {

@@ -21,6 +21,7 @@ public class LiftAsync
     int previousPosition;
     int integralSum=0;
     boolean brake=false;
+    double baseVelocity;
 
     //define kP, kI, and kD by actually testing
     //double kP=2.5;
@@ -44,23 +45,37 @@ public class LiftAsync
 
         targetPos=target;
         timer=new ElapsedTime();
+        baseVelocity=0.7;
     }
 
     public void setPosition(int target)
     {
-        //resetLiftTimer();
         brake=false;
         targetPos=target;
         timer.reset();
         previousPosition=Math.abs(motor1.getCurrentPosition());
+        baseVelocity=0.7;
+    }
+    public void setPosition(int target, double vel)
+    {
+        brake=false;
+        targetPos=target;
+        timer.reset();
+        previousPosition=Math.abs(motor1.getCurrentPosition());
+        baseVelocity=vel;
     }
 
     public void adjustLift()
     {
+        if(!checkBusy())
+        {
+            brake=true;
+        }
+
         if(!brake)
         {
             error = targetPos - Math.abs(motor1.getCurrentPosition());
-            motorPower = Math.signum(error)*(0.7 + 0.3 * (Math.abs(error) / 300));
+            motorPower = Math.signum(error)*(baseVelocity + 0.3 * (Math.abs(error) / 300));
             motor1.setPower(-motorPower);
             motor2.setPower(motorPower);
         }
@@ -84,11 +99,22 @@ public class LiftAsync
     }
     public boolean isBusy()
     {
-        if(targetPos==0&Math.abs(motor1.getCurrentPosition())<10)
+        if(brake)
         {
             return false;
         }
-        else if(Math.abs(motor1.getCurrentPosition())>targetPos)
+        return true;
+    }
+    public boolean checkBusy()
+    {
+        if(targetPos==0)
+        {
+            if(Math.abs(motor1.getCurrentPosition())<15)
+            {
+                return false;
+            }
+        }
+        else if(Math.abs(motor1.getCurrentPosition())>(targetPos))
         {
             return false;
         }
