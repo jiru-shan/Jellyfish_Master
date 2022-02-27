@@ -45,51 +45,49 @@ public class LiftTest extends LinearOpMode
         servoControl.raiseAllIntakes();
         waitForStart();
 
-        //servoControl.flipOut();
+        servoControl.flipOut();
         servoControl.prepDeposit();
         timer.reset();
 
-        servoControl.flipMedium();
-        motor1.setTargetPosition(-position);
-        motor2.setTargetPosition(position);
+        lift.setPosition(position);
+        //servoControl.flipMedium();
 
-        while(Math.abs(motor1.getCurrentPosition())<position)
+        while(lift.isBusy())
         {
-            if(motor2.getCurrentPosition()>100)
-            {
-                servoControl.openTurret();
-            }
-            motor2.setPower(1);
-            motor1.setPower(-1);
+            //if(lift.getPos2()>100)
+            //{
+              //  servoControl.openTurret();
+            //}
+            lift.adjustLift();
 
-            packet.put("motor 1:", motor1.getCurrentPosition());
-            packet.put("motor 2:", motor2.getCurrentPosition());
+            packet.put("motor 1:", lift.getPos1());
+            packet.put("motor 2:", lift.getPos2());
 
             dashboard.sendTelemetryPacket(packet);
-            telemetry.addData(">1: ", motor1.getCurrentPosition());
-            telemetry.addData(">2: ", motor2.getCurrentPosition());
+            telemetry.addData(">1: ", lift.getPos1());
+            telemetry.addData(">2: ", lift.getPos2());
             telemetry.update();
         }
         servoControl.openDeposit();
-        motor1.setPower(0);
-        motor2.setPower(0);
+        lift.brake();
 
         timer.reset();
-        while(timer.milliseconds()<500)
+        while(timer.milliseconds()<1000000)
         {
 
         }
 
         servoControl.startingPos();
-        motor1.setTargetPosition(0);
-        motor2.setTargetPosition(0);
-        while(Math.abs(motor1.getCurrentPosition())>5)
+        lift.setPosition(0, 0.4);
+        while(lift.isBusy())
         {
-            motor2.setPower(-1);
-            motor1.setPower(1);
+            if(lift.getPos2()<80)
+            {
+                servoControl.returnArm();
+            }
+            lift.adjustLift();
         }
-        motor1.setPower(0);
-        motor2.setPower(0);
+        //lift.brake();
        /* lift.setPosition(position);
        // timer.reset();
         while(lift.isBusy())

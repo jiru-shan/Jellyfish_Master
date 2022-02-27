@@ -3,29 +3,43 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class SensorController
 {
+    enum Side {LEFT, RIGHT}
+    Side side;
     HardwareMap hwMap;
-    ColorRangeSensor intakeRange1, intakeRange2, driveLeft, driveRight, depositSensor;
+    ColorRangeSensor intakeRange, driveLeft, driveRight, depositSensor;
+    ElapsedTime depositTimer;
 
+    double depositValue;
     
-    public SensorController(HardwareMap map)
+    public SensorController(HardwareMap map, Side side)
     {
+        this.side=side;
         hwMap=map;
-        intakeRange1 = hwMap.get(ColorRangeSensor.class, "colorSensor_right");
-        intakeRange2 = hwMap.get(ColorRangeSensor.class, "colorSensor_left");
+        if(side==Side.LEFT)
+        {
+            intakeRange = hwMap.get(ColorRangeSensor.class, "colorSensor_left");
+        }
+        else {
+            intakeRange = hwMap.get(ColorRangeSensor.class, "colorSensor_right");
+        }
         driveLeft=hwMap.get(ColorRangeSensor.class, "driveSensor1");
         driveRight=hwMap.get(ColorRangeSensor.class, "driveSensor2");
         depositSensor=hwMap.get(ColorRangeSensor.class, "bucketSensor");
+
+        depositTimer=new ElapsedTime();
     }
 
     public boolean hasBlock()
     {
 
-        if (intakeRange1.getDistance(DistanceUnit.MM) < 55 || intakeRange2.getDistance(DistanceUnit.MM) < 55) {
+        if (intakeRange.getDistance(DistanceUnit.MM) < 55)
+        {
             return true;
         }
         return false;
@@ -33,7 +47,7 @@ public class SensorController
 
     public boolean onColor()
     {
-        if(rgbAvg(driveLeft)>175||rgbAvg(driveRight)>175)
+        if(driveLeft.alpha()>400||driveRight.alpha()>400)
         {
             return true;
         }
@@ -42,22 +56,31 @@ public class SensorController
 
     public boolean depositCube()
     {
-        if(depositSensor.getDistance(DistanceUnit.MM)<85)
+        updateDepositValue();
+        if(depositValue<85)
         {
             return true;
         }
         return false;
     }
+    private void updateDepositValue()
+    {
+        if(depositTimer.milliseconds()>300)
+        {
+            depositValue=depositSensor.getDistance(DistanceUnit.MM);
+            depositTimer.reset();
+        }
+    }
 
     public double[] getData()
     {
-        double[] pain={intakeRange1.getDistance(DistanceUnit.MM), intakeRange2.getDistance(DistanceUnit.MM),
-                depositSensor.getDistance(DistanceUnit.MM), rgbAvg(driveLeft), rgbAvg(driveRight)};
+        updateDepositValue();
+        double[] pain={0, depositValue, driveLeft.alpha(), driveRight.alpha()};
         return pain;
     }
-
-    private double rgbAvg(ColorRangeSensor pain)
+    public void closeIntakeSensor()
     {
-        return (pain.green()+pain.blue()+pain.red())/3;
+        intakeRange.close();
     }
+
 }

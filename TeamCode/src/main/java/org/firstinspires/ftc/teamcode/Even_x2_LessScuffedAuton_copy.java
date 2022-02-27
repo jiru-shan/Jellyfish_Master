@@ -83,7 +83,7 @@ public class Even_x2_LessScuffedAuton_copy extends OpMode
 
         drive=new SampleMecanumDriveCancelable(hardwareMap);
         lift=new LiftAsync(hardwareMap, 0);
-        sensorController=new SensorController(hardwareMap);
+        sensorController=new SensorController(hardwareMap, SensorController.Side.LEFT);
         servoControl=new ServoControl(hardwareMap, ServoControl.Side.LEFT);
         trajGen=new TrajectoryGen(drive, 40);
 
