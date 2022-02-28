@@ -303,7 +303,7 @@ public class RoboDrive extends LinearOpMode {
             // intuitive controls in respect to the blue side of the field
             double y = -gamepad1.right_stick_x; // Reversed
             double x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
-            double rx = gamepad1.left_stick_y; // Forward/Backward
+            double rx = -gamepad1.left_stick_y; // Forward/Backward
 
             /** Denominator is the largest motor power (absolute value) or 1
              * This ensures all the powers maintain the same ratio, but only when
