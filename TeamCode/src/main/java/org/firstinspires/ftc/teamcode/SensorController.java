@@ -57,7 +57,7 @@ public class SensorController
     public boolean depositCube()
     {
         updateDepositValue();
-        if(depositValue<85)
+        if(depositValue<100)
         {
             return true;
         }

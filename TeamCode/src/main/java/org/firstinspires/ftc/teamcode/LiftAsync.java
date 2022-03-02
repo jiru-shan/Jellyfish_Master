@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+
 public class LiftAsync
 {
     DcMotorEx motor1;
@@ -45,7 +47,7 @@ public class LiftAsync
 
         targetPos=target;
         timer=new ElapsedTime();
-        baseVelocity=0.7;
+        motorPower=1;
     }
 
     public void setPosition(int target)
@@ -54,7 +56,7 @@ public class LiftAsync
         targetPos=target;
         timer.reset();
         previousPosition=Math.abs(motor1.getCurrentPosition());
-        baseVelocity=0.7;
+        motorPower=1;
     }
     public void setPosition(int target, double vel)
     {
@@ -62,25 +64,28 @@ public class LiftAsync
         targetPos=target;
         timer.reset();
         previousPosition=Math.abs(motor1.getCurrentPosition());
-        baseVelocity=vel;
+        motorPower=vel;
     }
+    public double getVelocity()
+    {
+        //motor1.setVelocity(300);
+        return motor1.getVelocity(AngleUnit.DEGREES);
 
+    }
     public void adjustLift()
     {
-        if(!checkBusy())
-        {
-            brake=true;
-        }
-
+        float dir=Math.signum(targetPos-Math.abs(motor1.getCurrentPosition()));
+        updateBrake();
         if(!brake)
         {
-            error = targetPos - Math.abs(motor1.getCurrentPosition());
-            motorPower = Math.signum(error)*(baseVelocity + 0.3 * (Math.abs(error) / 300));
-            motor1.setPower(-motorPower);
-            motor2.setPower(motorPower);
+            //motor1.get
+            motor1.setVelocity(-dir*motorPower*200);
+            motor2.setVelocity(dir*motorPower*200);
         }
         else
             {
+                motor1.setVelocity(0);
+                motor2.setVelocity(0);
                 motor1.setPower(0);
                 motor2.setPower(0);
             }
@@ -99,26 +104,21 @@ public class LiftAsync
     }
     public boolean isBusy()
     {
-        if(brake)
-        {
-            return false;
-        }
-        return true;
+        return !brake;
     }
-    public boolean checkBusy()
+    public void updateBrake()
     {
         if(targetPos==0)
         {
-            if(Math.abs(motor1.getCurrentPosition())<15)
+            if(Math.abs(motor2.getCurrentPosition())<15)
             {
-                return false;
+                brake=true;
             }
         }
-        else if(Math.abs(motor1.getCurrentPosition())>(targetPos))
+        else if(Math.abs(motor2.getCurrentPosition())>targetPos)
         {
-            return false;
+            brake=true;
         }
-        return true;
     }
     public void brake()
     {
@@ -133,6 +133,11 @@ public class LiftAsync
     {
         motor1.setPower(pow);
         motor2.setPower(pow);
+    }
+    public double getPower()
+    {
+        return motor1.getPower();
+       // return motorPower;
     }
     public boolean stalling()
     {
