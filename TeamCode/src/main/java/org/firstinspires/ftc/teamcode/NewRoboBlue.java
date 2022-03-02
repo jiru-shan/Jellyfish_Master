@@ -967,10 +967,13 @@ public class NewRoboBlue extends LinearOpMode {
 
                 case LS_RESET:
 
-                    if (i_bottomLeft.getPosition() == i_minRange_bottomLeft || i_bottomRight.getPosition() == i_minRange_bottomRight) {
+                    if (gamepad2.left_stick_button/*i_bottomLeft.getPosition() == i_minRange_bottomLeft || i_bottomRight.getPosition() == i_minRange_bottomRight*/) {
 
                         liftLeft.setPower(0);
                         liftRight.setPower(0);
+
+                        liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
+                        liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
                         liftState = LiftState.LS_STATIONARY;
                     }
