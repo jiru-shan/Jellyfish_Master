@@ -393,7 +393,10 @@ public class NewRoboBlue extends LinearOpMode {
                         intakeState = IntakeState.IS_RESET_R;
 
                     } else if (intakeHand == IntakeHand.IH_LEFT) {
-
+                        
+                        //if(bucket.getPosition() != bucket_left) {
+                            bucket.setPosition(bucket_left);
+                        //}
                         if (colorSensor_left.alpha() > 2000) {
 
                             // left intake flips up
@@ -411,7 +414,10 @@ public class NewRoboBlue extends LinearOpMode {
                         }
 
                     } else if (intakeHand == IntakeHand.IH_RIGHT) {
-
+                        
+                        //if(bucket.getPosition() != bucket_right) {
+                            bucket.setPosition(bucket_right);
+                        //}
                         if (colorSensor_right.alpha() > 2000) {
 
                             // left intake flips up
@@ -495,11 +501,13 @@ public class NewRoboBlue extends LinearOpMode {
 
                             if (bucketSensor.alpha() > 200) {
 
+                                bucket.setPosition(bucket_down);
                                 leftIntake.setPower(0);
                                 intakeState = IntakeState.IS_COMPLETE;
 
                             } else if (colorSensor_left.alpha() < 2000) {
 
+                                bucket.setPosition(bucket_down);
                                 leftIntake.setPower(0);
                                 intakeState = IntakeState.IS_SETUP;
                             }
@@ -511,12 +519,14 @@ public class NewRoboBlue extends LinearOpMode {
                         if (rightIntakeTimer.milliseconds() > 500) {
 
                             if (bucketSensor.alpha() > 200) {
-
+                                
+                                bucket.setPosition(bucket_down);
                                 rightIntake.setPower(0);
                                 intakeState = IntakeState.IS_COMPLETE;
 
                             } else if (colorSensor_right.alpha() < 2000) {
 
+                                bucket.setPosition(bucket_down);
                                 rightIntake.setPower(0);
                                 intakeState = IntakeState.IS_SETUP;
                             }
