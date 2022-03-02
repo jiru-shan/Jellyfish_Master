@@ -314,6 +314,11 @@ public class RoboDrive extends LinearOpMode {
             double rightFrontPower = (y - x + rx) / denominator;
             double rightBackPower = (y + x + rx) / denominator;
 
+            leftFront.setPower(leftBackPower);
+            leftBack.setPower(leftFrontPower);
+            rightFront.setPower(rightFrontPower);
+            rightBack.setPower(rightBackPower);
+
             switch (intakeState) {
 
                 case IS_STATIONARY:
@@ -598,16 +603,6 @@ public class RoboDrive extends LinearOpMode {
                     break;
             }
 
-            if (gamepad1.y) {
-
-                arm.setPosition(arm_forward_manual);
-            }
-
-            if (gamepad1.a) {
-
-                arm.setPosition(arm_backward);
-            }
-
             switch (depositState) {
 
                 case DS_STATIONARY:
@@ -659,10 +654,15 @@ public class RoboDrive extends LinearOpMode {
                     break;
             }
 
-            leftFront.setPower(leftBackPower);
-            leftBack.setPower(leftFrontPower);
-            rightFront.setPower(rightFrontPower);
-            rightBack.setPower(rightBackPower);
+            if (gamepad1.y) {
+
+                arm.setPosition(arm_forward_manual);
+            }
+
+            if (gamepad1.a) {
+
+                arm.setPosition(arm_backward);
+            }
 
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "leftFront (%.2f), leftBack (%.2f), rightFront (%.2f), rightBack (%.2f)",
