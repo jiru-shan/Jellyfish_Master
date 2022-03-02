@@ -37,7 +37,7 @@ public class LiftAsync
         this.motor1=hwMap.get(DcMotorEx.class, "liftLeft");
         this.motor2=hwMap.get(DcMotorEx.class, "liftRight");
 
-        motor1.setDirection(DcMotorSimple.Direction.REVERSE);
+        //motor1.setDirection(DcMotorSimple.Direction.REVERSE);
 
         motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -47,7 +47,7 @@ public class LiftAsync
 
         targetPos=target;
         timer=new ElapsedTime();
-        motorPower=1;
+        motorPower=1000;
     }
 
     public void setPosition(int target)
@@ -56,7 +56,7 @@ public class LiftAsync
         targetPos=target;
         timer.reset();
         previousPosition=Math.abs(motor1.getCurrentPosition());
-        motorPower=1;
+        motorPower=1000;
     }
     public void setPosition(int target, double vel)
     {
@@ -79,8 +79,8 @@ public class LiftAsync
         if(!brake)
         {
             //motor1.get
-            motor1.setVelocity(-dir*motorPower*200);
-            motor2.setVelocity(dir*motorPower*200);
+            motor1.setVelocity(dir*-motorPower);
+            motor2.setVelocity(dir*motorPower);
         }
         else
             {
