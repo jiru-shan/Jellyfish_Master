@@ -405,6 +405,8 @@ public class RoboDrive extends LinearOpMode {
 
                     } else if (intakeHand == IntakeHand.IH_LEFT) {
 
+                        bucket.setPosition(bucket_left);
+
                         if (colorSensor_left.alpha() > 2000) {
 
                             // left intake flips up
@@ -422,6 +424,8 @@ public class RoboDrive extends LinearOpMode {
                         }
 
                     } else if (intakeHand == IntakeHand.IH_RIGHT) {
+
+                        bucket.setPosition(bucket_right);
 
                         if (colorSensor_right.alpha() > 2000) {
 

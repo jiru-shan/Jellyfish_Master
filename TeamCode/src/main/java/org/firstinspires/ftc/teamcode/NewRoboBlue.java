@@ -761,6 +761,8 @@ public class NewRoboBlue extends LinearOpMode {
 
                     if (gamepad1.y || gamepad2.dpad_right) {
 
+                        bucketTimer.reset();
+
                         bucket.setPosition(bucket_right);
 
                         liftHand = LiftHand.LH_RETRACT_ALLIANCE;
@@ -784,6 +786,8 @@ public class NewRoboBlue extends LinearOpMode {
                 case LS_DEPOSITING_SHARED:
 
                     if (gamepad1.x || gamepad2.x) {
+
+                        bucketTimer.reset();
 
                         bucket.setPosition(bucket_left);
 
@@ -855,7 +859,7 @@ public class NewRoboBlue extends LinearOpMode {
 
                     if (liftHand == LiftHand.LH_RETRACT_ALLIANCE) {
 
-                        if (bucketSensor.alpha() < 70) {
+                        if (bucketTimer.milliseconds() > 250) {
 
                             bucket.setPosition(bucket_down);
 
@@ -866,7 +870,7 @@ public class NewRoboBlue extends LinearOpMode {
 
                     } else if (liftHand == LiftHand.LH_RETRACT_SHARED) {
 
-                        if (bucketSensor.alpha() < 70) {
+                        if (bucketTimer.milliseconds() > 250) {
 
                             bucket.setPosition(bucket_down);
 
