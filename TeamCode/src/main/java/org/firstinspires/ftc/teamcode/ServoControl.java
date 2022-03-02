@@ -28,14 +28,14 @@ public class ServoControl
     double i_maxRange_bottomRight = 0.96;
 
     double d_open_center=0.48;
-    double d_open_partial_left=0.56;
-    public static double d_open_left=0.2;
-    double d_open_partial_right=0.36;
-    public static double d_open_right=0.76;
-    public static double d_open_deposit_left=0.91;
-    public static double d_open_deposit_right=0.0;
+    double d_open_partial_left=0.55;
+    public static double d_open_left=0.19;
+    double d_open_partial_right=0.33;
+    public static double d_open_right=0.77;
+    public static double d_open_deposit_left=0.72;
+    public static double d_open_deposit_right=0.21;
 
-    double d_arm_default=0.9;
+    double d_arm_default=0.91;
     double d_arm_middle_level=0.85;
     public static double d_arm_medium=0.72;
     public static double d_arm_out=0.30;

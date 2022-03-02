@@ -45,43 +45,50 @@ public class LiftTest extends LinearOpMode
         servoControl.raiseAllIntakes();
         waitForStart();
 
-        servoControl.flipOut();
+        //servoControl.flipOut();
         servoControl.prepDeposit();
         timer.reset();
 
         lift.setPosition(position);
         //servoControl.flipMedium();
-
+        int i=0;
         while(lift.isBusy())
         {
             //if(lift.getPos2()>100)
             //{
               //  servoControl.openTurret();
             //}
+            i++;
             lift.adjustLift();
 
             packet.put("motor 1:", lift.getPos1());
             packet.put("motor 2:", lift.getPos2());
+            packet.put("motor power: ", lift.getPower());
+            packet.put("vel deg: ", lift.getVelocity());
+            packet.put("is busy?: ", lift.isBusy());
+            packet.put("test: ", i);
 
             dashboard.sendTelemetryPacket(packet);
             telemetry.addData(">1: ", lift.getPos1());
             telemetry.addData(">2: ", lift.getPos2());
             telemetry.update();
         }
+        packet.put("is busy?: ", lift.isBusy());
+        dashboard.sendTelemetryPacket(packet);
         servoControl.openDeposit();
         lift.brake();
 
         timer.reset();
-        while(timer.milliseconds()<1000000)
+        while(timer.milliseconds()<10000000)
         {
 
         }
 
         servoControl.startingPos();
-        lift.setPosition(0, 0.4);
+        lift.setPosition(0, 0.8);
         while(lift.isBusy())
         {
-            if(lift.getPos2()<80)
+            if(lift.getPos2()<120)
             {
                 servoControl.returnArm();
             }
