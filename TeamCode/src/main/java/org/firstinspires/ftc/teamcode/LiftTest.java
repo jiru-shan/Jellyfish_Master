@@ -37,7 +37,7 @@ public class LiftTest extends LinearOpMode
 
         timer=new ElapsedTime();
         lift=new LiftAsync(hardwareMap, 0);
-        servoControl=new ServoControl(hardwareMap, ServoControl.Side.LEFT);
+        servoControl=new ServoControl(hardwareMap, ServoControl.Side.RIGHT);
 
         servoControl.closeDeposit();
         servoControl.startingPos();
@@ -45,7 +45,7 @@ public class LiftTest extends LinearOpMode
         servoControl.raiseAllIntakes();
         waitForStart();
 
-        //servoControl.flipOut();
+        servoControl.flipOut();
         servoControl.prepDeposit();
         timer.reset();
 
@@ -79,13 +79,13 @@ public class LiftTest extends LinearOpMode
         lift.brake();
 
         timer.reset();
-        while(timer.milliseconds()<10000000)
+        while(timer.milliseconds()<350)
         {
 
         }
 
         servoControl.startingPos();
-        lift.setPosition(0, 0.8);
+        lift.setPosition(0, 800);
         while(lift.isBusy())
         {
             if(lift.getPos2()<120)
