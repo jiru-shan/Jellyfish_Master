@@ -290,10 +290,10 @@ public class NewRoboBlue extends LinearOpMode {
         turret.setPosition(turret_center);
 
         // Initialize intake positions
-//        i_topLeft.setPosition(i_maxRange_topLeft);
-//        i_bottomLeft.setPosition(i_maxRange_bottomLeft);
-//        i_topRight.setPosition(i_maxRange_topRight);
-//        i_bottomRight.setPosition(i_maxRange_bottomRight);
+        i_topLeft.setPosition(i_maxRange_topLeft);
+        i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+        i_topRight.setPosition(i_maxRange_topRight);
+        i_bottomRight.setPosition(i_maxRange_bottomRight);
 
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
@@ -446,7 +446,7 @@ public class NewRoboBlue extends LinearOpMode {
                         // hold elements in intake
                         leftIntake.setPower(0.25);
 
-                        if (leftCaptureTimer.milliseconds() > 1000) {
+                        if (leftCaptureTimer.milliseconds() > 800) {
 
                             transferTimer.reset();
                             intakeState = IntakeState.IS_TRANSFER;
@@ -458,7 +458,7 @@ public class NewRoboBlue extends LinearOpMode {
                         // hold elements in intake
                         rightIntake.setPower(0.25);
 
-                        if (rightCaptureTimer.milliseconds() > 1000) {
+                        if (rightCaptureTimer.milliseconds() > 800) {
 
                             transferTimer.reset();
                             intakeState = IntakeState.IS_TRANSFER;
@@ -474,7 +474,7 @@ public class NewRoboBlue extends LinearOpMode {
 
                         leftIntake.setPower(-highSweepPower);
 
-                        if (transferTimer.milliseconds() > 250) {
+                        if (transferTimer.milliseconds() > 250 || bucketSensor.alpha() > 200) {
 
                             leftIntakeTimer.reset();
                             intakeState = IntakeState.IS_OUT;
@@ -485,7 +485,7 @@ public class NewRoboBlue extends LinearOpMode {
 
                         rightIntake.setPower(-highSweepPower);
 
-                        if (transferTimer.milliseconds() > 250) {
+                        if (transferTimer.milliseconds() > 250 || bucketSensor.alpha() > 200) {
 
                             rightIntakeTimer.reset();
                             intakeState = IntakeState.IS_OUT;
@@ -496,10 +496,12 @@ public class NewRoboBlue extends LinearOpMode {
                     break;
 
                 case IS_OUT:
+                    
+                    if(bucketSensor.alpha() > 200) bucket.setPosition(bucket_down); // p sure this line actually does nothing but imma jsut add it here
 
                     if (intakeHand == IntakeHand.IH_LEFT) {
 
-                        if (leftIntakeTimer.milliseconds() > 500) {
+                        if (leftIntakeTimer.milliseconds() > 500 || bucketSensor.alpha() > 200) {
 
                             if (bucketSensor.alpha() > 200) {
 
@@ -518,7 +520,7 @@ public class NewRoboBlue extends LinearOpMode {
 
                     } else if (intakeHand == IntakeHand.IH_RIGHT) {
 
-                        if (rightIntakeTimer.milliseconds() > 500) {
+                        if (rightIntakeTimer.milliseconds() > 500 || bucketSensor.alpha() > 200) {
 
                             if (bucketSensor.alpha() > 200) {
 
