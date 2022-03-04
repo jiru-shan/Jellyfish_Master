@@ -395,11 +395,11 @@ public class RoboDrive extends LinearOpMode {
 
                 case IS_INTAKE:
 
-                    if (gamepad1.left_trigger != 0) {
+                    if (gamepad1.left_trigger != 0 && intakeHand == IntakeHand.IH_LEFT) {
 
                         intakeState = IntakeState.IS_RESET_L;
 
-                    } else if (gamepad1.right_trigger != 0) {
+                    } else if (gamepad1.right_trigger != 0 && intakeHand == IntakeHand.IH_RIGHT) {
 
                         intakeState = IntakeState.IS_RESET_R;
 
@@ -510,11 +510,13 @@ public class RoboDrive extends LinearOpMode {
 
                             if (bucketSensor.alpha() > 200) {
 
+                                bucket.setPosition(bucket_down);
                                 leftIntake.setPower(0);
                                 intakeState = IntakeState.IS_COMPLETE;
 
                             } else if (colorSensor_left.alpha() < 2000) {
 
+                                bucket.setPosition(bucket_down);
                                 leftIntake.setPower(0);
                                 intakeState = IntakeState.IS_SETUP;
                             }
@@ -527,11 +529,13 @@ public class RoboDrive extends LinearOpMode {
 
                             if (bucketSensor.alpha() > 200) {
 
+                                bucket.setPosition(bucket_down);
                                 rightIntake.setPower(0);
                                 intakeState = IntakeState.IS_COMPLETE;
 
                             } else if (colorSensor_right.alpha() < 2000) {
 
+                                bucket.setPosition(bucket_down);
                                 rightIntake.setPower(0);
                                 intakeState = IntakeState.IS_SETUP;
                             }
