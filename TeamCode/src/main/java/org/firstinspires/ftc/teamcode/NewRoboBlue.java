@@ -1417,6 +1417,8 @@ public class NewRoboBlue extends LinearOpMode {
                     leftFrontPower, leftBackPower, rightFrontPower, rightBackPower);
             telemetry.addData("Left Sensor: ", colorSensor_left.alpha());
             telemetry.addData("Right Sensor: ", colorSensor_right.alpha());
+            telemetry.addData("Dist - Left", colorSensor_left.getDistance(DistanceUnit.CM));
+            telemetry.addData("Dist - Right", colorSensor_right.getDistance(DistanceUnit.CM));
             telemetry.addData("BucketSensor: ", bucketSensor.alpha());
             telemetry.addData("Intake State: ", intakeState);
             telemetry.addData("C_Left: ", c_Left.getPower());
