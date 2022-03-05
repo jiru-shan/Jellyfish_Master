@@ -241,14 +241,14 @@ public class RoboDrive extends LinearOpMode {
         colorSensor_right = hardwareMap.get(ColorRangeSensor.class, "colorSensor_right");
         bucketSensor = hardwareMap.get(ColorRangeSensor.class, "bucketSensor");
 
-        double i_minRange_topLeft = 0.15;   // 0.08
-        double i_maxRange_topLeft = 0.92;
-        double i_minRange_bottomLeft = 0.90;   // 0.92
-        double i_maxRange_bottomLeft = 0.13;
-        double i_minRange_topRight = 0.87;   // 0.94
-        double i_maxRange_topRight = 0.16;
-        double i_minRange_bottomRight = 0.16;   // 0.08
-        double i_maxRange_bottomRight = 0.87;
+        double i_minRange_topLeft = 0.15;
+        double i_maxRange_topLeft = 0.96;
+        double i_minRange_bottomLeft = 0.90;
+        double i_maxRange_bottomLeft = 0.09;
+        double i_minRange_topRight = 0.90;
+        double i_maxRange_topRight = 0.09;
+        double i_minRange_bottomRight = 0.16;
+        double i_maxRange_bottomRight = 0.97;
 
         // Intake
         double highSweepPower = 0.8;
