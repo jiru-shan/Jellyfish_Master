@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDriveCancelable;
 
 public class TrajectoryGen
 {
+    //maybe increase acceleration
     SampleMecanumDriveCancelable drive;
     double cappedVel;
     public TrajectoryGen(SampleMecanumDriveCancelable drive, double vel)
@@ -31,6 +32,8 @@ public class TrajectoryGen
                 .splineTo(new Vector2d(x1, y1), Math.toRadians(ang1))
                 .splineTo(new Vector2d(x2, y2), Math.toRadians(ang2), SampleMecanumDriveCancelable.getVelocityConstraint(cappedVel,
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .splineTo(new Vector2d(x2+5, y2+0.3), Math.toRadians(ang2), SampleMecanumDriveCancelable.getVelocityConstraint(15,
+                        DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(10))
                 //.lineToSplineHeading(new Pose2d(73, -2.25, Math.toRadians(-10)))
                 .build();
         return firstGoingTraj;
@@ -68,8 +71,8 @@ public class TrajectoryGen
     public Trajectory realReturnTrajectory()
     {
         Trajectory realReturn=drive.trajectoryBuilder(drive.getPoseEstimate())
-                .lineToSplineHeading(new Pose2d(0, 13, Math.toRadians(0)), SampleMecanumDriveCancelable.getVelocityConstraint(95,
-                        DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(45))
+                .lineToSplineHeading(new Pose2d(0, 13, Math.toRadians(0)), SampleMecanumDriveCancelable.getVelocityConstraint(100,
+                        DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(80))
                 .build();
         return realReturn;
     }

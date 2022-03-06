@@ -24,6 +24,7 @@ public class SensorTesting extends LinearOpMode
 
         waitForStart();
         sensorController.closeIntakeSensor();
+
         while(opModeIsActive())
         {
             loopTime.reset();
@@ -32,6 +33,8 @@ public class SensorTesting extends LinearOpMode
             packet.put("deposit ", pain[1]);
             packet.put("drive left ", pain[2]);
             packet.put("drive right ", pain[3]);
+            packet.put("drive left raw ", pain[4]);
+            packet.put("drive right raw ", pain[5]);
             //packet.put("white line: ", sensorController.onColor());
             packet.put("loop time", loopTime.milliseconds());
             dashboard.sendTelemetryPacket(packet);

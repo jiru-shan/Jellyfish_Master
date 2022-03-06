@@ -41,8 +41,10 @@ public class MeepMeepTesting
 
                                 //.splineTo(new Vector2d(49, 13), Math.toRadians(180))
 
-                                .splineTo(new Vector2d(49, -1), Math.toRadians(-5))
-                                .splineTo(new Vector2d(65, -2.6), Math.toRadians(-7.4))
+                                .splineTo(new Vector2d(30, -1), Math.toRadians(-5))
+                                //.setReversed(true)
+                                //.setReversed(false)
+                                .lineToSplineHeading(new Pose2d(0, 13, Math.toRadians(0)))
                                 //.lineToSplineHeading(new Pose2d(49, 13, Math.toRadians(0)))
 
                                 //.splineTo(new Vector2d(0, 13), Math.toRadians(180))
