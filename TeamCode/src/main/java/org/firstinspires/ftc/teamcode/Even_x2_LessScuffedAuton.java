@@ -47,7 +47,7 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
         RESET, GOING, RETURNING, DEPOSITING
     }
     //static variables for positions
-    final static int LIFT_EXTENDED=330;
+    final static int LIFT_EXTENDED=310;
 
     //changing variables that are used for stuff
     int cubePos;
@@ -107,7 +107,7 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
         lift=new LiftAsync(hardwareMap, 0);
         sensorController=new SensorController(hardwareMap, SensorController.Side.LEFT);
         servoControl=new ServoControl(hardwareMap, ServoControl.Side.LEFT);
-        trajGen=new TrajectoryGen(drive, 70);
+        trajGen=new TrajectoryGen(drive, 50);
 
         globalTimer=new ElapsedTime();
         latencyTimer=new ElapsedTime();
@@ -158,7 +158,7 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
                         case GETTING:
                             double temp=sensorController.intakeDistance();
                             leftIntake.setPower(1);
-                            if(temp<55)
+                            if(temp<18)
                             {
                                 tempTarget= SystemClock.uptimeMillis()+250;
                                 GState=GrabbingState.HAS_CUBE;
@@ -208,8 +208,8 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
                                 sensorController.closeIntakeSensor();
                                 servoControl.openDepositIntake();
                                 IState=IntakeState.INTO_DEPOSIT;
-                                drive.setPoseEstimate(new Pose2d(drive.getPoseEstimate().getX()-25, drive.getPoseEstimate().getY(), drive.getPoseEstimate().getHeading()));
-                                offset=true;
+                                //drive.setPoseEstimate(new Pose2d(drive.getPoseEstimate().getX()-25, drive.getPoseEstimate().getY(), drive.getPoseEstimate().getHeading()));
+                                //offset=true;
                                 drive.followTrajectoryAsync(trajGen.realReturnTrajectory());
                                 GState=GrabbingState.DONE;
                                 OState=OverallState.RETURNING;
@@ -298,7 +298,7 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
             packet.put("Line", gotLine);
             packet.put("latency", latencyTimer.milliseconds());
             packet.put("Help", timeStamp1);
-            packet.put("mental damage", drive.getWheelVelocities());
+            //packet.put("mental damage", drive.getWheelVelocities());
 
             packet.put("lift pos 1", lift.getPos1());
             packet.put("lift pos 2", lift.getPos2());
@@ -317,7 +317,7 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
         Trajectory park;
         if(offset)
         {
-            Pose2d temp=new Pose2d(drive.getPoseEstimate().getX()-25, drive.getPoseEstimate().getY(), drive.getPoseEstimate().getHeading());
+            Pose2d temp=new Pose2d(drive.getPoseEstimate().getX()+25, drive.getPoseEstimate().getY(), drive.getPoseEstimate().getHeading());
             park=drive.trajectoryBuilder(temp)
                     .lineToSplineHeading(new Pose2d(60, drive.getPoseEstimate().getY(), Math.toRadians(0)))
                     .build();

@@ -312,6 +312,21 @@ public class NewRoboBlue extends LinearOpMode {
                 module.clearBulkCache();
             }
 
+            if (gamepad2.touchpad || gamepad2.x) {
+
+                liftLeft.setPower(0);
+                liftRight.setPower(0);
+
+                liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
+                liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+                liftState = LiftState.LS_STATIONARY;
+
+                turret.setPosition(turret_center);
+                arm.setPosition(arm_backward);
+                bucket.setPosition(bucket_down);
+            }
+
             switch (intakeState) {
 
                 case IS_STATIONARY:
@@ -1397,20 +1412,7 @@ public class NewRoboBlue extends LinearOpMode {
                     break;
             }
 
-            if (gamepad2.touchpad || gamepad2.x) {
 
-                turret.setPosition(turret_center);
-                arm.setPosition(arm_backward);
-                bucket.setPosition(bucket_down);
-
-                liftLeft.setPower(0);
-                liftRight.setPower(0);
-
-                liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
-                liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-                liftState = LiftState.LS_STATIONARY;
-            }
 
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "leftFront (%.2f), leftBack (%.2f), rightFront (%.2f), rightBack (%.2f)",

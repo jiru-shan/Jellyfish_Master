@@ -42,7 +42,7 @@ public class SensorController
     public boolean hasBlock()
     {
 
-        if (intakeRange.getDistance(DistanceUnit.MM) < 55)
+        if (intakeRange.getDistance(DistanceUnit.CM) < 14)
         {
             return true;
         }
@@ -50,7 +50,7 @@ public class SensorController
     }
     public double intakeDistance()
     {
-        return intakeRange.getDistance(DistanceUnit.MM);
+        return intakeRange.getDistance(DistanceUnit.CM);
     }
 
     public boolean onColor()
@@ -94,7 +94,7 @@ public class SensorController
     public double[] getData()
     {
         updateDepositValue();
-        double[] pain={intakeRange.getDistance(DistanceUnit.MM), depositValue, 0, 0, driveLeft.getRawLightDetected(), driveRight.getRawLightDetected()};
+        double[] pain={intakeRange.getDistance(DistanceUnit.CM), depositValue, 0, 0, driveLeft.getRawLightDetected(), driveRight.getRawLightDetected()};
         return pain;
     }
     public void closeIntakeSensor()
