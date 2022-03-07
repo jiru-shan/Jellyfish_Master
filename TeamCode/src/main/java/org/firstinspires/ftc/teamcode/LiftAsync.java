@@ -37,8 +37,6 @@ public class LiftAsync
         this.motor1=hwMap.get(DcMotorEx.class, "liftLeft");
         this.motor2=hwMap.get(DcMotorEx.class, "liftRight");
 
-        //motor1.setDirection(DcMotorSimple.Direction.REVERSE);
-
         motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -56,7 +54,10 @@ public class LiftAsync
         targetPos=target;
         timer.reset();
         previousPosition=Math.abs(motor1.getCurrentPosition());
-        motorPower=1000;
+        motor1.setTargetPosition(targetPos);
+        motor2.setTargetPosition(targetPos);
+        motorPower=1;
+        //motorPower=1000;
     }
     public void setPosition(int target, double vel)
     {
@@ -64,23 +65,35 @@ public class LiftAsync
         targetPos=target;
         timer.reset();
         previousPosition=Math.abs(motor1.getCurrentPosition());
+        motor1.setTargetPosition(targetPos);
+        motor2.setTargetPosition(targetPos);
         motorPower=vel;
     }
     public double getVelocity()
     {
         //motor1.setVelocity(300);
         return motor1.getVelocity(AngleUnit.DEGREES);
-
     }
     public void adjustLift()
     {
-        float dir=Math.signum(targetPos-Math.abs(motor1.getCurrentPosition()));
+        int dir;
+        if(targetPos==0)
+        {
+            dir=-1;
+        }
+        else
+            {
+                dir=1;
+            }
+
         updateBrake();
         if(!brake)
         {
             //motor1.get
-            motor1.setVelocity(dir*-motorPower);
-            motor2.setVelocity(dir*motorPower);
+            //motor1.setVelocity(dir*motorPower);
+            //motor2.setVelocity(dir*motorPower);
+            motor1.setPower(dir*motorPower);
+            motor2.setPower(dir*motorPower);
         }
         else
             {
@@ -110,12 +123,12 @@ public class LiftAsync
     {
         if(targetPos==0)
         {
-            if(Math.abs(motor2.getCurrentPosition())<15)
+            if(Math.abs(motor2.getCurrentPosition())<10)
             {
                 brake=true;
             }
         }
-        else if(Math.abs(motor2.getCurrentPosition())>targetPos)
+        else if(Math.abs(motor2.getCurrentPosition())>targetPos-10)
         {
             brake=true;
         }

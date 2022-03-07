@@ -320,6 +320,21 @@ public class NewRoboBlue extends LinearOpMode {
                 module.clearBulkCache();
             }
 
+            if (gamepad2.touchpad || gamepad2.x) {
+
+                liftLeft.setPower(0);
+                liftRight.setPower(0);
+
+                liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
+                liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+                liftState = LiftState.LS_STATIONARY;
+
+                turret.setPosition(turret_center);
+                arm.setPosition(arm_backward);
+                bucket.setPosition(bucket_down);
+            }
+
             switch (intakeState) {
 
                 case IS_STATIONARY:
@@ -1482,20 +1497,7 @@ public class NewRoboBlue extends LinearOpMode {
                     break;
             }
 
-            if (gamepad2.touchpad || gamepad2.x) {
 
-                turret.setPosition(turret_center);
-                arm.setPosition(arm_backward);
-                bucket.setPosition(bucket_down);
-
-                liftLeft.setPower(0);
-                liftRight.setPower(0);
-
-                liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
-                liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-                liftState = LiftState.LS_STATIONARY;
-            }
 
             if (gamepad2.dpad_right) {
 
@@ -1507,6 +1509,8 @@ public class NewRoboBlue extends LinearOpMode {
                     leftFrontPower, leftBackPower, rightFrontPower, rightBackPower);
             telemetry.addData("Left Sensor: ", colorSensor_left.alpha());
             telemetry.addData("Right Sensor: ", colorSensor_right.alpha());
+            telemetry.addData("Dist - Left", colorSensor_left.getDistance(DistanceUnit.CM));
+            telemetry.addData("Dist - Right", colorSensor_right.getDistance(DistanceUnit.CM));
             telemetry.addData("BucketSensor: ", bucketSensor.alpha());
             telemetry.addData("Intake State: ", intakeState);
             telemetry.addData("C_Left: ", c_Left.getPower());

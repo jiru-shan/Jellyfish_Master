@@ -189,6 +189,13 @@ public class SampleMecanumDriveCancelable extends MecanumDrive {
     public TrajectoryBuilder trajectoryBuilder(Pose2d startPose, double startHeading) {
         return new TrajectoryBuilder(startPose, startHeading, velConstraint, accelConstraint);
     }
+    public TrajectorySequenceBuilder trajectorySequenceBuilder(Pose2d startPose) {
+        return new TrajectorySequenceBuilder(
+                startPose,
+                velConstraint, accelConstraint,
+                MAX_ANG_VEL, MAX_ANG_ACCEL
+        );
+    }
 
 
     public void turnAsync(double angle) {
@@ -335,6 +342,27 @@ public class SampleMecanumDriveCancelable extends MecanumDrive {
     public boolean isBusy() {
         return mode != Mode.IDLE;
     }
+
+    public boolean isBusy2()
+    {
+        List<Double> temp=getWheelVelocities();
+        double avgWheelVeloc=0;
+        for(double i: temp)
+        {
+            avgWheelVeloc+=Math.abs(i);
+        }
+        avgWheelVeloc/=temp.size();
+
+        if(avgWheelVeloc<2.5)
+        {
+            return false;
+        }
+        else
+            {
+                return true;
+            }
+    }
+
 
     public void setMode(DcMotor.RunMode runMode) {
         for (DcMotorEx motor : motors) {

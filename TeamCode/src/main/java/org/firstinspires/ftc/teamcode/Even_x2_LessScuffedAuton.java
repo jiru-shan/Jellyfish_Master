@@ -47,7 +47,7 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
         RESET, GOING, RETURNING, DEPOSITING
     }
     //static variables for positions
-    final static int LIFT_EXTENDED=330;
+    final static int LIFT_EXTENDED=310;
 
     //changing variables that are used for stuff
     int cubePos;
@@ -55,6 +55,8 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
     double pathChange;
     double tempTarget;
     int gotLine;
+    double cutOff;
+    boolean offset;
 
     //instances of enums
     GrabbingState GState;
@@ -96,6 +98,7 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
 
         OState=OverallState.RESET;
         gotLine =0;
+        cutOff=3;
 
         dashboard=FtcDashboard.getInstance();
         packet=new TelemetryPacket();
@@ -104,7 +107,7 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
         lift=new LiftAsync(hardwareMap, 0);
         sensorController=new SensorController(hardwareMap, SensorController.Side.LEFT);
         servoControl=new ServoControl(hardwareMap, ServoControl.Side.LEFT);
-        trajGen=new TrajectoryGen(drive, 70);
+        trajGen=new TrajectoryGen(drive, 50);
 
         globalTimer=new ElapsedTime();
         latencyTimer=new ElapsedTime();
@@ -129,7 +132,7 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
         //drive.setPoseEstimate(new Pose2d(0, 0, 0));
         //visionDeposit(cubePos);
 
-        while(opModeIsActive()&&globalTimer.seconds()<27)
+        while(opModeIsActive()&&globalTimer.seconds()<30-cutOff)
         {
             latencyTimer.reset();
             switch(OState)
@@ -140,8 +143,10 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
                     servoControl.startingPos();
                     servoControl.lowerIntakes();
                     pathChange=0;
+                    offset=false;
                     OState=OverallState.GOING;
                     GState=GrabbingState.GETTING;
+                    IState=IntakeState.INTO_DEPOSIT;
 
                     drive.followTrajectoryAsync(trajGen.firstGoingTrajectory(49, -1, -5, 65, -2.6, -7.4));
                     timeStamp1=latencyTimer.milliseconds();
@@ -151,8 +156,9 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
                     switch(GState)
                     {
                         case GETTING:
+                            double temp=sensorController.intakeDistance();
                             leftIntake.setPower(1);
-                            if(sensorController.hasBlock())
+                            if(temp<18)
                             {
                                 tempTarget= SystemClock.uptimeMillis()+250;
                                 GState=GrabbingState.HAS_CUBE;
@@ -176,6 +182,14 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
                             }
                             break;
                         case RETURNING:
+                            leftIntake.setPower(1);
+                            if(sensorController.hasBlock())
+                            {
+                                tempTarget= SystemClock.uptimeMillis()+100;
+                                GState=GrabbingState.HAS_CUBE;
+                                servoControl.raiseIntakes();
+                                servoControl.openDepositIntake();
+                            }
                             if(!drive.isBusy())
                             {
                                 GState = GrabbingState.GETTING;
@@ -194,6 +208,8 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
                                 sensorController.closeIntakeSensor();
                                 servoControl.openDepositIntake();
                                 IState=IntakeState.INTO_DEPOSIT;
+                                //drive.setPoseEstimate(new Pose2d(drive.getPoseEstimate().getX()-25, drive.getPoseEstimate().getY(), drive.getPoseEstimate().getHeading()));
+                                //offset=true;
                                 drive.followTrajectoryAsync(trajGen.realReturnTrajectory());
                                 GState=GrabbingState.DONE;
                                 OState=OverallState.RETURNING;
@@ -216,14 +232,15 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
                             if(sensorController.onColor())
                             {
                                 gotLine++;
-                                drive.setPoseEstimate(new Pose2d(33.5, 7, drive.getPoseEstimate().getHeading()));
+                                drive.setPoseEstimate(new Pose2d(33.25, 7, drive.getPoseEstimate().getHeading()));
+                                offset=false;
+
                             }
-                            if(!drive.isBusy()&&IState==IntakeState.DONE)
+                            if(!drive.isBusy2()&&IState==IntakeState.DONE)
                             {
                                 OState=OverallState.DEPOSITING;
                                 RState=ReturningState.DONE;
                                 servoControl.openDeposit();
-                                tempTarget=SystemClock.uptimeMillis()+350;
                             }
                             break;
                         case DONE:
@@ -268,10 +285,9 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
                     break;
                 case DEPOSITING:
                     servoControl.openDeposit();
-                    if(SystemClock.uptimeMillis()>tempTarget)
+                    if(sensorController.depositNoCube())
                     {
                         OState=OverallState.RESET;
-                        //requestOpModeStop();
                     }
                     break;
             }
@@ -282,6 +298,7 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
             packet.put("Line", gotLine);
             packet.put("latency", latencyTimer.milliseconds());
             packet.put("Help", timeStamp1);
+            //packet.put("mental damage", drive.getWheelVelocities());
 
             packet.put("lift pos 1", lift.getPos1());
             packet.put("lift pos 2", lift.getPos2());
@@ -290,15 +307,29 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
             lift.adjustLift();
             drive.update();
         }
-
+        while(IState==IntakeState.DONE&&!sensorController.depositNoCube())
+        {
+            servoControl.openDeposit();
+        }
         lift.setPosition(0);
         servoControl.raiseAllIntakes();
         servoControl.startingPos();
-        Trajectory park=drive.trajectoryBuilder(drive.getPoseEstimate())
-                .lineToSplineHeading(new Pose2d(60, drive.getPoseEstimate().getY(), Math.toRadians(0)))
-                .build();
+        Trajectory park;
+        if(offset)
+        {
+            Pose2d temp=new Pose2d(drive.getPoseEstimate().getX()+25, drive.getPoseEstimate().getY(), drive.getPoseEstimate().getHeading());
+            park=drive.trajectoryBuilder(temp)
+                    .lineToSplineHeading(new Pose2d(60, drive.getPoseEstimate().getY(), Math.toRadians(0)))
+                    .build();
+        }
+        else
+            {
+                park = drive.trajectoryBuilder(drive.getPoseEstimate())
+                        .lineToSplineHeading(new Pose2d(60, drive.getPoseEstimate().getY(), Math.toRadians(0)))
+                        .build();
+            }
         drive.followTrajectoryAsync(park);
-        while(opModeIsActive()&&globalTimer.milliseconds()<29500&&(drive.isBusy()||lift.isBusy()))
+        while(opModeIsActive()&&globalTimer.milliseconds()<29800&&(drive.isBusy()||lift.isBusy()))
         {
             lift.adjustLift();
             drive.update();

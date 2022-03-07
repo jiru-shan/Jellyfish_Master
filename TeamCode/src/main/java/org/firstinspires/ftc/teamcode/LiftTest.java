@@ -15,6 +15,7 @@ public class LiftTest extends LinearOpMode
 {
     LiftAsync lift;
     ServoControl servoControl;
+    SensorController sensorControl;
     ElapsedTime timer;
     DcMotorEx motor1, motor2;
     public static int position=350;
@@ -31,13 +32,11 @@ public class LiftTest extends LinearOpMode
         motor2=hardwareMap.get(DcMotorEx.class, "liftRight");
         motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motor1.setDirection(DcMotorSimple.Direction.REVERSE);
-
-
 
         timer=new ElapsedTime();
         lift=new LiftAsync(hardwareMap, 0);
-        servoControl=new ServoControl(hardwareMap, ServoControl.Side.RIGHT);
+        servoControl=new ServoControl(hardwareMap, ServoControl.Side.LEFT);
+        sensorControl=new SensorController(hardwareMap, SensorController.Side.LEFT);
 
         servoControl.closeDeposit();
         servoControl.startingPos();
@@ -78,14 +77,15 @@ public class LiftTest extends LinearOpMode
         servoControl.openDeposit();
         lift.brake();
 
-        timer.reset();
-        while(timer.milliseconds()<350)
+
+        while(!sensorControl.depositNoCube())
         {
 
         }
-
+        packet.put("exited: ", "true");
+        dashboard.sendTelemetryPacket(packet);
         servoControl.startingPos();
-        lift.setPosition(0, 800);
+        lift.setPosition(0, 0.8);
         while(lift.isBusy())
         {
             if(lift.getPos2()<120)
@@ -93,7 +93,15 @@ public class LiftTest extends LinearOpMode
                 servoControl.returnArm();
             }
             lift.adjustLift();
+            packet.put("motor 1:", lift.getPos1());
+            packet.put("motor 2:", lift.getPos2());
+            packet.put("motor power: ", lift.getPower());
         }
+       // while(motor1.getCurrentPosition()<330)
+       // {
+         //   motor1.setPower(1);
+          //  motor2.setPower(1);
+       // }
         //lift.brake();
        /* lift.setPosition(position);
        // timer.reset();

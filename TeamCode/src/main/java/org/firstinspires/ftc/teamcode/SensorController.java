@@ -3,6 +3,9 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.I2cController;
+import com.qualcomm.robotcore.hardware.I2cControllerPortDeviceImpl;
+import com.qualcomm.robotcore.hardware.I2cDeviceImpl;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -19,6 +22,7 @@ public class SensorController
     
     public SensorController(HardwareMap map, Side side)
     {
+
         this.side=side;
         hwMap=map;
         if(side==Side.LEFT)
@@ -38,16 +42,20 @@ public class SensorController
     public boolean hasBlock()
     {
 
-        if (intakeRange.getDistance(DistanceUnit.MM) < 55)
+        if (intakeRange.getDistance(DistanceUnit.CM) < 14)
         {
             return true;
         }
         return false;
     }
+    public double intakeDistance()
+    {
+        return intakeRange.getDistance(DistanceUnit.CM);
+    }
 
     public boolean onColor()
     {
-        if(driveLeft.alpha()>400||driveRight.alpha()>400)
+        if(driveLeft.getRawLightDetected()>850||driveRight.getRawLightDetected()>850)
         {
             return true;
         }
@@ -57,11 +65,22 @@ public class SensorController
     public boolean depositCube()
     {
         updateDepositValue();
-        if(depositValue<100)
+        if(depositValue<85)
         {
             return true;
         }
         return false;
+    }
+    public boolean depositNoCube()
+    {
+        if(depositSensor.getDistance(DistanceUnit.MM)>85)
+        {
+            return true;
+        }
+        else
+            {
+                return false;
+            }
     }
     private void updateDepositValue()
     {
@@ -75,7 +94,7 @@ public class SensorController
     public double[] getData()
     {
         updateDepositValue();
-        double[] pain={0, depositValue, driveLeft.alpha(), driveRight.alpha()};
+        double[] pain={intakeRange.getDistance(DistanceUnit.CM), depositValue, 0, 0, driveLeft.getRawLightDetected(), driveRight.getRawLightDetected()};
         return pain;
     }
     public void closeIntakeSensor()
