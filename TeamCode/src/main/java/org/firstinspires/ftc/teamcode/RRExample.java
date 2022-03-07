@@ -51,7 +51,7 @@ public class RRExample extends LinearOpMode
 
         //move from reading vision to deposit place
         Trajectory trajectory=drive.trajectoryBuilder(drive.getPoseEstimate())
-                .forward(10, SampleMecanumDriveCancelable.getVelocityConstraint(50,
+                .forward(20, SampleMecanumDriveCancelable.getVelocityConstraint(50,
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
                 .build();
         drive.followTrajectory(trajectory);
@@ -60,6 +60,17 @@ public class RRExample extends LinearOpMode
         visionDeposit(cubePos);
 
         //move to carousel
+        drive.turn(Math.toRadians(180));
+        trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
+                .forward(40, SampleMecanumDriveCancelable.getVelocityConstraint(50,
+                        DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
+                .build();
+        drive.followTrajectory(trajectory);
+        drive.turn(Math.toRadians(45))
+        trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
+                .strafeRight(5, SampleMecanumDriveCancelable.getVelocityConstraint(50,
+                        DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
+                .build();
 
         //turn carousel
         double tempTarget= SystemClock.uptimeMillis()+2500;
@@ -70,7 +81,15 @@ public class RRExample extends LinearOpMode
         }
 
         //park
-
+        drive.turn(Math.toRadians(45));
+        trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
+                .strafeRight(5, SampleMecanumDriveCancelable.getVelocityConstraint(50,
+                        DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
+                .build();
+        trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
+                .forward(30, SampleMecanumDriveCancelable.getVelocityConstraint(50,
+                        DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
+                .build();
     }
 
     public void webcamInit()
