@@ -21,6 +21,8 @@ import java.util.List;
 @TeleOp
 public class NewRoboRed extends LinearOpMode {
 
+    // y, b - fast/slow left; x, a - fast/slow right
+
     // 8 Motors
     DcMotor leftFront;
     DcMotor leftBack;
@@ -180,17 +182,23 @@ public class NewRoboRed extends LinearOpMode {
         CDBS_PRESSED
     }
 
-    enum RobotState {
+    enum ObjectType {
 
-        RS_AUTO,
-        RS_MANUAL
+        OT_CUBE,
+        OT_BALL
     }
 
-    enum CheckRobotButtonState {
-
-        CRBS_STATIONARY,
-        CRBS_PRESSED
-    }
+//    enum RobotState {
+//
+//        RS_AUTO,
+//        RS_MANUAL
+//    }
+//
+//    enum CheckRobotButtonState {
+//
+//        CRBS_STATIONARY,
+//        CRBS_PRESSED
+//    }
 
     enum FieldSide {
 
@@ -212,6 +220,7 @@ public class NewRoboRed extends LinearOpMode {
     CarouselHand carouselHand = CarouselHand.CH_LEFT;
     CheckDepositButtonState checkDepositButtonState = CheckDepositButtonState.CDBS_STATIONARY;
     FieldSide fieldSide = FieldSide.FS_RED;
+    ObjectType objectType = ObjectType.OT_CUBE;
 
     public void runOpMode() throws InterruptedException {
 
@@ -249,6 +258,7 @@ public class NewRoboRed extends LinearOpMode {
         double bucket_left = 0.17;
         double bucket_right = 0.81;
         double arm_forward_alliance = 0.35;
+        double arm_forward_middle = 0.15;
         double arm_forward_shared = 0.10;
         double arm_intermediate = 0.70;
         double arm_backward = 0.90;  // 0.92
@@ -268,8 +278,8 @@ public class NewRoboRed extends LinearOpMode {
 
         // Lift Positions
         int TARGET_TIPPED = 450;
-        int TARGET_BALANCED = 400;
-        int TARGET_MIDDLE = 210;
+        int TARGET_BALANCED = 415;
+        int TARGET_MIDDLE = 300;
         int TARGET_NEAR = 50;
         int TARGET_CENTER = 130;
         int TARGET_FAR = 210;
@@ -450,6 +460,18 @@ public class NewRoboRed extends LinearOpMode {
 
                             leftCaptureTimer.reset();
 
+                            if (colorSensor_left.blue() > 1000) {
+
+                                objectType = ObjectType.OT_BALL;
+
+                                gamepad1.rumble(100);
+                                gamepad2.rumble(100);
+
+                            } else {
+
+                                objectType = ObjectType.OT_CUBE;
+                            }
+
                             intakeState = IntakeState.IS_CAPTURE;
 
                         } else if (fieldSide == FieldSide.FS_BLUE && gamepad1.right_bumper) {
@@ -481,6 +503,18 @@ public class NewRoboRed extends LinearOpMode {
                             i_bottomRight.setPosition(i_maxRange_bottomRight);
 
                             rightCaptureTimer.reset();
+
+                            if (colorSensor_right.blue() > 1000) {
+
+                                objectType = ObjectType.OT_BALL;
+
+                                gamepad1.rumble(100);
+                                gamepad2.rumble(100);
+
+                            } else {
+
+                                objectType = ObjectType.OT_CUBE;
+                            }
 
                             intakeState = IntakeState.IS_CAPTURE;
 
@@ -562,7 +596,7 @@ public class NewRoboRed extends LinearOpMode {
 
                     if (bucketSensor.alpha() > 200)
 
-                        bucket.setPosition(bucket_down); // p sure this line actually does nothing but imma jsut add it here
+                        bucket.setPosition(bucket_down); // p sure this line actually does nothing but imma just add it here
 
                     if (intakeHand == IntakeHand.IH_LEFT) {
 
@@ -695,6 +729,14 @@ public class NewRoboRed extends LinearOpMode {
 
                         liftState = LiftState.LS_EXTENDING;
 
+                    } else if (gamepad2.dpad_down) {
+
+                        liftHand = liftHand.LH_MIDDLE;
+
+                        arm.setPosition(arm_forward_middle);
+
+                        liftState = LiftState.LS_EXTENDING;
+
                     } else if (gamepad2.y) {
 
                         liftHand = LiftHand.LH_FAR;
@@ -743,6 +785,18 @@ public class NewRoboRed extends LinearOpMode {
                         // Run lift
                         liftLeft.setTargetPosition(TARGET_BALANCED);
                         liftRight.setTargetPosition(TARGET_BALANCED);
+                        liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        liftLeft.setPower(1.0);
+                        liftRight.setPower(1.0);
+
+                        liftState = LiftState.LS_TARGET;
+
+                    } else if (liftHand == LiftHand.LH_MIDDLE) {
+
+                        // Run lift
+                        liftLeft.setTargetPosition(TARGET_MIDDLE);
+                        liftRight.setTargetPosition(TARGET_MIDDLE);
                         liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         liftLeft.setPower(1.0);
@@ -826,7 +880,7 @@ public class NewRoboRed extends LinearOpMode {
                         liftLeft.setPower(-1.0);
                         liftRight.setPower(-1.0);
 
-                    } else if (gamepad1.y) {
+                    } else if (gamepad1.x) {
 
                         bucketTimer.reset();
 
@@ -839,6 +893,11 @@ public class NewRoboRed extends LinearOpMode {
                             liftHand = LiftHand.LH_RETRACT_ALLIANCE;
 
                         } else if (liftHand == LiftHand.LH_BALANCED) {
+
+                            // Set state to depositing
+                            liftHand = LiftHand.LH_RETRACT_ALLIANCE;
+
+                        } else if (liftHand == LiftHand.LH_MIDDLE) {
 
                             // Set state to depositing
                             liftHand = LiftHand.LH_RETRACT_ALLIANCE;
@@ -861,11 +920,18 @@ public class NewRoboRed extends LinearOpMode {
 
                         liftState = LiftState.LS_RELEASED;
 
-                    } else if (gamepad1.b) {
+                    } else if (gamepad1.a) {
 
                         bucketTimer.reset();
 
-                        bucket.setPosition(0.6);
+                        if (objectType == ObjectType.OT_CUBE) {
+
+                            bucket.setPosition(0.65);
+
+                        } else if (objectType == ObjectType.OT_BALL) {
+
+                            bucket.setPosition(0.68);
+                        }
 
                         // Check if the lift has fully extended
                         if (liftHand == LiftHand.LH_TIPPED) {
@@ -874,6 +940,11 @@ public class NewRoboRed extends LinearOpMode {
                             liftHand = LiftHand.LH_RETRACT_ALLIANCE;
 
                         } else if (liftHand == LiftHand.LH_BALANCED) {
+
+                            // Set state to depositing
+                            liftHand = LiftHand.LH_RETRACT_ALLIANCE;
+
+                        } else if (liftHand == LiftHand.LH_MIDDLE) {
 
                             // Set state to depositing
                             liftHand = LiftHand.LH_RETRACT_ALLIANCE;
@@ -897,7 +968,7 @@ public class NewRoboRed extends LinearOpMode {
 
                         liftState = LiftState.LS_RELEASED_SLOW_RIGHT_HALF;
 
-                    } else if (gamepad1.x) {
+                    } else if (gamepad1.y) {
 
                         bucketTimer.reset();
 
@@ -910,6 +981,11 @@ public class NewRoboRed extends LinearOpMode {
                             liftHand = LiftHand.LH_RETRACT_ALLIANCE;
 
                         } else if (liftHand == LiftHand.LH_BALANCED) {
+
+                            // Set state to depositing
+                            liftHand = LiftHand.LH_RETRACT_ALLIANCE;
+
+                        } else if (liftHand == LiftHand.LH_MIDDLE) {
 
                             // Set state to depositing
                             liftHand = LiftHand.LH_RETRACT_ALLIANCE;
@@ -933,11 +1009,18 @@ public class NewRoboRed extends LinearOpMode {
 
                         liftState = LiftState.LS_RELEASED;
 
-                    } else if (gamepad1.a) {
+                    } else if (gamepad1.b) {
 
                         bucketTimer.reset();
 
-                        bucket.setPosition(0.4);
+                        if (objectType == ObjectType.OT_CUBE) {
+
+                            bucket.setPosition(0.31);
+
+                        } else if (objectType == ObjectType.OT_BALL) {
+
+                            bucket.setPosition(0.28);
+                        }
 
                         // Check if the lift has fully extended
                         if (liftHand == LiftHand.LH_TIPPED) {
@@ -946,6 +1029,11 @@ public class NewRoboRed extends LinearOpMode {
                             liftHand = LiftHand.LH_RETRACT_ALLIANCE;
 
                         } else if (liftHand == LiftHand.LH_BALANCED) {
+
+                            // Set state to depositing
+                            liftHand = LiftHand.LH_RETRACT_ALLIANCE;
+
+                        } else if (liftHand == LiftHand.LH_MIDDLE) {
 
                             // Set state to depositing
                             liftHand = LiftHand.LH_RETRACT_ALLIANCE;
@@ -959,7 +1047,6 @@ public class NewRoboRed extends LinearOpMode {
 
                             // Set state to depositing
                             liftHand = LiftHand.LH_RETRACT_SHARED;
-
 
                         } else if (liftHand == LiftHand.LH_NEAR) {
 
@@ -975,7 +1062,7 @@ public class NewRoboRed extends LinearOpMode {
 
                 case LS_RELEASED_SLOW_RIGHT_HALF:
 
-                    if (bucketTimer.milliseconds() > 500) {
+                    if (bucketTimer.milliseconds() > 250) {
 
                         bucket.setPosition(bucket_right);
 
@@ -987,7 +1074,7 @@ public class NewRoboRed extends LinearOpMode {
 
                 case LS_RELEASED_SLOW_RIGHT_DUMP:
 
-                    if (bucketTimer.milliseconds() > 1000) {
+                    if (bucketTimer.milliseconds() > 500) {
 
                         bucket.setPosition(bucket_down);
 
@@ -998,7 +1085,7 @@ public class NewRoboRed extends LinearOpMode {
 
                 case LS_RELEASED_SLOW_LEFT_HALF:
 
-                    if (bucketTimer.milliseconds() > 500) {
+                    if (bucketTimer.milliseconds() > 250) {
 
                         bucket.setPosition(bucket_left);
 
@@ -1010,7 +1097,7 @@ public class NewRoboRed extends LinearOpMode {
 
                 case LS_RELEASED_SLOW_LEFT_DUMP:
 
-                    if (bucketTimer.milliseconds() > 1000) {
+                    if (bucketTimer.milliseconds() > 500) {
 
                         bucket.setPosition(bucket_down);
 
@@ -1095,7 +1182,7 @@ public class NewRoboRed extends LinearOpMode {
                         liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                         liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                         liftLeft.setPower(-1.0);
-                        liftLeft.setPower(-1.0);
+                        liftRight.setPower(-1.0);
 
                         // Set lift state to retracting
                         liftState = LiftState.LS_IDLE;
@@ -1108,6 +1195,8 @@ public class NewRoboRed extends LinearOpMode {
 
                     // Check if lift is fully retracted
                     if (Math.abs(liftLeft.getCurrentPosition()) < 5) {
+
+                        gamepad2.rumble(100);
 
                         turret.setPosition(turret_center);
                         arm.setPosition(arm_backward);
@@ -1282,7 +1371,7 @@ public class NewRoboRed extends LinearOpMode {
 
             double y = -gamepad1.right_stick_x; // Reversed
             double x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
-            double rx = -gamepad1.left_stick_y; // Forward/Backward
+            double rx = gamepad1.left_stick_y; // Forward/Backward
 
             /** Denominator is the largest motor power (absolute value) or 1
              * This ensures all the powers maintain the same ratio, but only when
@@ -1412,6 +1501,11 @@ public class NewRoboRed extends LinearOpMode {
                 liftState = LiftState.LS_STATIONARY;
             }
 
+            if (gamepad2.dpad_right) {
+
+                liftState = LiftState.LS_RETRACTING;
+            }
+
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "leftFront (%.2f), leftBack (%.2f), rightFront (%.2f), rightBack (%.2f)",
                     leftFrontPower, leftBackPower, rightFrontPower, rightBackPower);
@@ -1432,6 +1526,8 @@ public class NewRoboRed extends LinearOpMode {
             telemetry.addData("Bucket Position: ", bucket.getPosition());
             telemetry.addData("TopRight: ", i_topRight.getPosition());
             telemetry.addData("BottomRight: ", i_bottomRight.getPosition());
+            telemetry.addData("Blue Values - L: ", colorSensor_left.blue());
+            telemetry.addData("Blue Values - R: ", colorSensor_right.blue());
             telemetry.update();
         }
     }
