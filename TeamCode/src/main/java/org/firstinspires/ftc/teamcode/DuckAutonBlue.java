@@ -20,7 +20,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 @Autonomous
-public class RRExample extends LinearOpMode
+public class DuckAutonBlue extends LinearOpMode
 {
     CRServo carousel, carousel2;
 
@@ -39,7 +39,7 @@ public class RRExample extends LinearOpMode
 
 
         drive=new SampleMecanumDriveCancelable(hardwareMap);
-        Pose2d startPose= new Pose2d(0, 0, 0);
+        Pose2d startPose= new Pose2d(-34, 62, 0);
         drive.setPoseEstimate(startPose);
         webcamInit();
 
@@ -60,15 +60,18 @@ public class RRExample extends LinearOpMode
         visionDeposit(cubePos);
 
         //move to carousel
-        drive.turn(Math.toRadians(180));
         trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
-                .forward(40, SampleMecanumDriveCancelable.getVelocityConstraint(50,
+                .back(40, SampleMecanumDriveCancelable.getVelocityConstraint(50,
+                        DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
+                .build();
+        trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
+                .strafeRight(3, SampleMecanumDriveCancelable.getVelocityConstraint(50,
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
                 .build();
         drive.followTrajectory(trajectory);
-        drive.turn(Math.toRadians(45))
+        drive.turn(Math.toRadians(-45))
         trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
-                .strafeRight(5, SampleMecanumDriveCancelable.getVelocityConstraint(50,
+                .strafeRight(3, SampleMecanumDriveCancelable.getVelocityConstraint(50,
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
                 .build();
 
@@ -81,13 +84,13 @@ public class RRExample extends LinearOpMode
         }
 
         //park
-        drive.turn(Math.toRadians(45));
+        drive.turn(Math.toRadians(-45));
         trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
-                .strafeRight(5, SampleMecanumDriveCancelable.getVelocityConstraint(50,
+                .strafeRight(3, SampleMecanumDriveCancelable.getVelocityConstraint(50,
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
                 .build();
         trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
-                .forward(30, SampleMecanumDriveCancelable.getVelocityConstraint(50,
+                .back(22, SampleMecanumDriveCancelable.getVelocityConstraint(50,
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
                 .build();
     }
