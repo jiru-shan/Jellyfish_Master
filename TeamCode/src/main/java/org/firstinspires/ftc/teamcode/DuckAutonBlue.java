@@ -69,7 +69,7 @@ public class DuckAutonBlue extends LinearOpMode
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
                 .build();
         drive.followTrajectory(trajectory);
-        drive.turn(Math.toRadians(45))
+        drive.turn(Math.toRadians(45));
         trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
                 .strafeLeft(5, SampleMecanumDriveCancelable.getVelocityConstraint(50,
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
