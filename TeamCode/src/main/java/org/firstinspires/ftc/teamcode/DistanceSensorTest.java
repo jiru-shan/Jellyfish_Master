@@ -19,9 +19,7 @@ import java.util.List;
 
 @Config
 @TeleOp
-public class NewRoboRed extends LinearOpMode {
-
-    // y, b - fast/slow left; x, a - fast/slow right
+public class DistanceSensorTest extends LinearOpMode {
 
     // 8 Motors
     DcMotor leftFront;
@@ -219,7 +217,7 @@ public class NewRoboRed extends LinearOpMode {
     CarouselState carouselState = CarouselState.CS_STATIONARY;
     CarouselHand carouselHand = CarouselHand.CH_LEFT;
     CheckDepositButtonState checkDepositButtonState = CheckDepositButtonState.CDBS_STATIONARY;
-    FieldSide fieldSide = FieldSide.FS_RED;
+    FieldSide fieldSide = FieldSide.FS_BLUE;
     ObjectType objectType = ObjectType.OT_CUBE;
 
     public void runOpMode() throws InterruptedException {
@@ -251,14 +249,14 @@ public class NewRoboRed extends LinearOpMode {
         bucketSensor = hardwareMap.get(ColorRangeSensor.class, "bucketSensor");
 
         // Intake
-        double highSweepPower = 0.8;
+        double highSweepPower = 1.0;
 
         // Deposit servo positions
         double bucket_down = 0.48;
         double bucket_left = 0.17;
         double bucket_right = 0.81;
         double arm_forward_alliance = 0.35;
-        double arm_forward_middle = 0.15;
+        double arm_forward_middle = 0.10;
         double arm_forward_shared = 0.10;
         double arm_intermediate = 0.70;
         double arm_backward = 0.90;  // 0.92
@@ -279,10 +277,10 @@ public class NewRoboRed extends LinearOpMode {
         // Lift Positions
         int TARGET_TIPPED = 450;
         int TARGET_BALANCED = 415;
-        int TARGET_MIDDLE = 300;
-        int TARGET_NEAR = 10;  // shared hub positions are different from blue
-        int TARGET_CENTER = 100;
-        int TARGET_FAR = 190;
+        int TARGET_MIDDLE = 325;
+        int TARGET_NEAR = 50;
+        int TARGET_CENTER = 130;
+        int TARGET_FAR = 210;
 
         double captureDistance = 6.0;
 
@@ -858,7 +856,7 @@ public class NewRoboRed extends LinearOpMode {
                         liftLeft.setPower(-1.0);
                         liftRight.setPower(-1.0);
 
-                    } else if (gamepad1.x) {
+                    } else if (gamepad1.y) {
 
                         bucketTimer.reset();
 
@@ -898,7 +896,7 @@ public class NewRoboRed extends LinearOpMode {
 
                         liftState = LiftState.LS_RELEASED;
 
-                    } else if (gamepad1.a) {
+                    } else if (gamepad1.b) {
 
                         bucketTimer.reset();
 
@@ -946,7 +944,7 @@ public class NewRoboRed extends LinearOpMode {
 
                         liftState = LiftState.LS_RELEASED_SLOW_RIGHT_HALF;
 
-                    } else if (gamepad1.y) {
+                    } else if (gamepad1.x) {
 
                         bucketTimer.reset();
 
@@ -987,7 +985,7 @@ public class NewRoboRed extends LinearOpMode {
 
                         liftState = LiftState.LS_RELEASED;
 
-                    } else if (gamepad1.b) {
+                    } else if (gamepad1.a) {
 
                         bucketTimer.reset();
 
@@ -1174,8 +1172,6 @@ public class NewRoboRed extends LinearOpMode {
                     // Check if lift is fully retracted
                     if (Math.abs(liftLeft.getCurrentPosition()) < 5) {
 
-                        gamepad2.rumble(100);
-
                         turret.setPosition(turret_center);
                         arm.setPosition(arm_backward);
 
@@ -1348,8 +1344,8 @@ public class NewRoboRed extends LinearOpMode {
             /** Drivetrain **/
 
             double y = -gamepad1.right_stick_x; // Reversed
-            double x = -gamepad1.left_stick_x * 1.1; // Strafing + Precision
-            double rx = gamepad1.left_stick_y; // Forward/Backward
+            double x = gamepad1.left_stick_x * 1.1; // Strafing + Precision
+            double rx = -gamepad1.left_stick_y; // Forward/Backward
 
             /** Denominator is the largest motor power (absolute value) or 1
              * This ensures all the powers maintain the same ratio, but only when
@@ -1464,23 +1460,7 @@ public class NewRoboRed extends LinearOpMode {
                     break;
             }
 
-            if (gamepad2.touchpad || gamepad2.x) {
-
-                turret.setPosition(turret_center);
-                arm.setPosition(arm_backward);
-                bucket.setPosition(bucket_down);
-
-                liftLeft.setPower(0);
-                liftRight.setPower(0);
-
-                liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
-                liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-                liftState = LiftState.LS_STATIONARY;
-            }
-
             if (gamepad2.dpad_right) {
-
 
                 turret.setPosition(turret_center);
 
@@ -1494,7 +1474,21 @@ public class NewRoboRed extends LinearOpMode {
 
                 // Set lift state to retracting
                 liftState = LiftState.LS_IDLE;
+            }
 
+            if (gamepad2.touchpad || gamepad2.x) {
+
+                liftLeft.setPower(0);
+                liftRight.setPower(0);
+
+                liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
+                liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+                liftState = LiftState.LS_STATIONARY;
+
+                turret.setPosition(turret_center);
+                arm.setPosition(arm_backward);
+                bucket.setPosition(bucket_down);
             }
 
             if (gamepad1.dpad_right) {
@@ -1512,9 +1506,13 @@ public class NewRoboRed extends LinearOpMode {
                 intakeState = IntakeState.IS_STATIONARY;
             }
 
+
+
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "leftFront (%.2f), leftBack (%.2f), rightFront (%.2f), rightBack (%.2f)",
                     leftFrontPower, leftBackPower, rightFrontPower, rightBackPower);
+            telemetry.addData("Dist - Left", colorSensor_left.getDistance(DistanceUnit.CM));
+            telemetry.addData("Dist - Right", colorSensor_right.getDistance(DistanceUnit.CM));
             telemetry.addData("BucketSensor: ", bucketSensor.getDistance(DistanceUnit.CM));
             telemetry.addData("Intake State: ", intakeState);
             telemetry.addData("C_Left: ", c_Left.getPower());
