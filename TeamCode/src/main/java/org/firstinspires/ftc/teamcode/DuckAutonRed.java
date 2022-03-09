@@ -65,13 +65,13 @@ public class DuckAutonRed extends LinearOpMode
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
                 .build();
         trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
-                .strafeLeft(3, SampleMecanumDriveCancelable.getVelocityConstraint(50,
+                .strafeLeft(7, SampleMecanumDriveCancelable.getVelocityConstraint(50,
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
                 .build();
         drive.followTrajectory(trajectory);
-        drive.turn(Math.toRadians(45))
+        drive.turn(Math.toRadians(-45))
         trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
-                .strafeLeft(3, SampleMecanumDriveCancelable.getVelocityConstraint(50,
+                .strafeRight(5, SampleMecanumDriveCancelable.getVelocityConstraint(50,
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
                 .build();
 
@@ -86,11 +86,11 @@ public class DuckAutonRed extends LinearOpMode
         //park
         drive.turn(Math.toRadians(45));
         trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
-                .strafeLeft(3, SampleMecanumDriveCancelable.getVelocityConstraint(50,
+                .back(3, SampleMecanumDriveCancelable.getVelocityConstraint(50,
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
                 .build();
         trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
-                .forward(22, SampleMecanumDriveCancelable.getVelocityConstraint(50,
+                .strafeLeft(22, SampleMecanumDriveCancelable.getVelocityConstraint(50,
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
                 .build();
     }
