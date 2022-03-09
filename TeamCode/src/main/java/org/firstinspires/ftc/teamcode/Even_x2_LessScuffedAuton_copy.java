@@ -126,7 +126,7 @@ public class Even_x2_LessScuffedAuton_copy extends OpMode
                 pathChange=0;
                 OState=OverallState.GOING;
                 GState=GrabbingState.GETTING;
-                drive.followTrajectoryAsync(trajGen.firstGoingTrajectory(49, -1, -5, 73, -2.25, -10));
+               // drive.followTrajectoryAsync(trajGen.firstGoingTrajectory(49, -1, -5, 73, -2.25, -10));
                 break;
 
             case GOING:
@@ -175,7 +175,7 @@ public class Even_x2_LessScuffedAuton_copy extends OpMode
                             leftIntake.setPower(0);
                             servoControl.openDepositIntake();
                             IState=IntakeState.INTO_DEPOSIT;
-                            drive.followTrajectoryAsync(trajGen.realReturnTrajectory(49, 13, 0));
+                           // drive.followTrajectoryAsync(trajGen.realReturnTrajectory(49, 13, 0));
                             GState=GrabbingState.DONE;
                             OState=OverallState.RETURNING;
                             RState=ReturningState.LING;
