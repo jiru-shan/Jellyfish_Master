@@ -21,7 +21,7 @@ import java.util.List;
 
 @Config
 @TeleOp
-public class NewRoboBlue extends LinearOpMode {
+public class DistanceSensorTest extends LinearOpMode {
 
     // 8 Motors
     DcMotor leftFront;
@@ -328,35 +328,41 @@ public class NewRoboBlue extends LinearOpMode {
 
                 case IS_STATIONARY:
 
-                    if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+                    try {
 
-                        intakeState = IntakeState.IS_COMPLETE_SPECIAL;
+                        if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
 
-                    } else if (fieldSide == FieldSide.FS_BLUE && gamepad1.left_bumper) {
+                            intakeState = IntakeState.IS_COMPLETE_SPECIAL;
 
-                        intakeHand = IntakeHand.IH_LEFT;
+                        } else if (fieldSide == FieldSide.FS_BLUE && gamepad1.left_bumper) {
 
-                        intakeState = IntakeState.IS_SETUP;
+                            intakeHand = IntakeHand.IH_LEFT;
 
-                    } else if (fieldSide == FieldSide.FS_RED && gamepad1.left_bumper) {
+                            intakeState = IntakeState.IS_SETUP;
 
-                        intakeHand = IntakeHand.IH_RIGHT;
+                        } else if (fieldSide == FieldSide.FS_RED && gamepad1.left_bumper) {
 
-                        intakeState = IntakeState.IS_SETUP;
+                            intakeHand = IntakeHand.IH_RIGHT;
 
-                    } else if (fieldSide == FieldSide.FS_BLUE && gamepad1.right_bumper) {
+                            intakeState = IntakeState.IS_SETUP;
 
-                        intakeHand = IntakeHand.IH_RIGHT;
+                        } else if (fieldSide == FieldSide.FS_BLUE && gamepad1.right_bumper) {
 
-                        intakeState = IntakeState.IS_SETUP;
+                            intakeHand = IntakeHand.IH_RIGHT;
 
-                    } else if (fieldSide == FieldSide.FS_RED && gamepad1.right_bumper) {
+                            intakeState = IntakeState.IS_SETUP;
 
-                        intakeHand = IntakeHand.IH_LEFT;
+                        } else if (fieldSide == FieldSide.FS_RED && gamepad1.right_bumper) {
 
-                        intakeState = IntakeState.IS_SETUP;
+                            intakeHand = IntakeHand.IH_LEFT;
+
+                            intakeState = IntakeState.IS_SETUP;
+                        }
+
+                    } catch (Exception e) {
+
+                        Log.println(Log.INFO, "Bucket Sensor Error", e.getMessage());
                     }
-
 
                     break;
 
@@ -455,25 +461,31 @@ public class NewRoboBlue extends LinearOpMode {
                             intakeState = IntakeState.IS_INTAKE;
                         }
 
-                        if (colorSensor_left.getDistance(DistanceUnit.CM) < captureDistance) {
+                        try {
+                            if (colorSensor_left.getDistance(DistanceUnit.CM) < captureDistance) {
 
-                            // left intake flips up
-                            i_topLeft.setPosition(i_maxRange_topLeft);
-                            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+                                // left intake flips up
+                                i_topLeft.setPosition(i_maxRange_topLeft);
+                                i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
-                            leftCaptureTimer.reset();
+                                leftCaptureTimer.reset();
 
-                            intakeState = IntakeState.IS_CAPTURE;
+                                intakeState = IntakeState.IS_CAPTURE;
 
-                        } else if (fieldSide == FieldSide.FS_BLUE && gamepad1.right_bumper) {
+                            } else if (fieldSide == FieldSide.FS_BLUE && gamepad1.right_bumper) {
 
-                            intakeHand = IntakeHand.IH_RIGHT;
-                            intakeState = IntakeState.IS_SETUP;
+                                intakeHand = IntakeHand.IH_RIGHT;
+                                intakeState = IntakeState.IS_SETUP;
 
-                        } else if (fieldSide == FieldSide.FS_RED && gamepad1.left_bumper) {
+                            } else if (fieldSide == FieldSide.FS_RED && gamepad1.left_bumper) {
 
-                            intakeHand = IntakeHand.IH_RIGHT;
-                            intakeState = IntakeState.IS_SETUP;
+                                intakeHand = IntakeHand.IH_RIGHT;
+                                intakeState = IntakeState.IS_SETUP;
+                            }
+
+                        } catch (Exception e) {
+
+                            Log.println(Log.INFO, "L Color Sensor Error", e.getMessage());
                         }
 
                     } else if (intakeHand == IntakeHand.IH_RIGHT) {
@@ -487,25 +499,32 @@ public class NewRoboBlue extends LinearOpMode {
                             intakeState = IntakeState.IS_INTAKE;
                         }
 
-                        if (colorSensor_right.getDistance(DistanceUnit.CM) < captureDistance) {
+                        try {
 
-                            // left intake flips up
-                            i_topRight.setPosition(i_maxRange_topRight);
-                            i_bottomRight.setPosition(i_maxRange_bottomRight);
+                            if (colorSensor_right.getDistance(DistanceUnit.CM) < captureDistance) {
 
-                            rightCaptureTimer.reset();
+                                // left intake flips up
+                                i_topRight.setPosition(i_maxRange_topRight);
+                                i_bottomRight.setPosition(i_maxRange_bottomRight);
 
-                            intakeState = IntakeState.IS_CAPTURE;
+                                rightCaptureTimer.reset();
 
-                        } else if (fieldSide == FieldSide.FS_BLUE && gamepad1.left_bumper) {
+                                intakeState = IntakeState.IS_CAPTURE;
 
-                            intakeHand = IntakeHand.IH_LEFT;
-                            intakeState = IntakeState.IS_SETUP;
+                            } else if (fieldSide == FieldSide.FS_BLUE && gamepad1.left_bumper) {
 
-                        } else if (fieldSide == FieldSide.FS_RED & gamepad1.right_bumper) {
+                                intakeHand = IntakeHand.IH_LEFT;
+                                intakeState = IntakeState.IS_SETUP;
 
-                            intakeHand = IntakeHand.IH_LEFT;
-                            intakeState = IntakeState.IS_SETUP;
+                            } else if (fieldSide == FieldSide.FS_RED & gamepad1.right_bumper) {
+
+                                intakeHand = IntakeHand.IH_LEFT;
+                                intakeState = IntakeState.IS_SETUP;
+                            }
+
+                        } catch (Exception e) {
+
+                            Log.println(Log.INFO, "R Color Sensor Error", e.getMessage());
                         }
                     }
 
@@ -573,52 +592,69 @@ public class NewRoboBlue extends LinearOpMode {
 
                 case IS_OUT:
 
-                    if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+                    try {
 
-                        gamepad1.rumble(100);
+                        if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
 
-                        bucket.setPosition(bucket_down);
+                            gamepad1.rumble(100);
 
+                            bucket.setPosition(bucket_down);
+
+                        }
+
+                    } catch (Exception e) {
+
+                        Log.println(Log.INFO, "Bucket Sensor Error", e.getMessage());
                     }
 
                     if (intakeHand == IntakeHand.IH_LEFT) {
 
                         if (leftIntakeTimer.milliseconds() > 500 || bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
 
-                            if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+                            try {
+                                if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
 
-                                gamepad1.rumble(100);
+                                    gamepad1.rumble(100);
 
-                                bucket.setPosition(bucket_down);
-                                leftIntake.setPower(0);
-                                intakeState = IntakeState.IS_COMPLETE;
+                                    bucket.setPosition(bucket_down);
+                                    leftIntake.setPower(0);
+                                    intakeState = IntakeState.IS_COMPLETE;
 
-                            } else if (colorSensor_left.getDistance(DistanceUnit.CM) > captureDistance) {
+                                } else if (colorSensor_left.getDistance(DistanceUnit.CM) > captureDistance) {
 
-                                bucket.setPosition(bucket_down);
-                                leftIntake.setPower(0);
-                                intakeState = IntakeState.IS_SETUP;
+                                    bucket.setPosition(bucket_down);
+                                    leftIntake.setPower(0);
+                                    intakeState = IntakeState.IS_SETUP;
+                                }
+                            } catch (Exception e) {
+
+                                Log.println(Log.INFO, "B/L Sensor Error", e.getMessage());
                             }
-
                         }
+                    }
 
-                    } else if (intakeHand == IntakeHand.IH_RIGHT) {
+                    if (intakeHand == IntakeHand.IH_RIGHT) {
 
                         if (rightIntakeTimer.milliseconds() > 500 || bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
 
-                            if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+                            try {
+                                if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
 
-                                gamepad1.rumble(100);
+                                    gamepad1.rumble(100);
 
-                                bucket.setPosition(bucket_down);
-                                rightIntake.setPower(0);
-                                intakeState = IntakeState.IS_COMPLETE;
+                                    bucket.setPosition(bucket_down);
+                                    rightIntake.setPower(0);
+                                    intakeState = IntakeState.IS_COMPLETE;
 
-                            } else if (colorSensor_right.getDistance(DistanceUnit.CM) > captureDistance) {
+                                } else if (colorSensor_right.getDistance(DistanceUnit.CM) > captureDistance) {
 
-                                bucket.setPosition(bucket_down);
-                                rightIntake.setPower(0);
-                                intakeState = IntakeState.IS_SETUP;
+                                    bucket.setPosition(bucket_down);
+                                    rightIntake.setPower(0);
+                                    intakeState = IntakeState.IS_SETUP;
+                                }
+                            } catch (Exception e) {
+
+                                Log.println(Log.INFO, "B/R Sensor Error", e.getMessage());
                             }
                         }
                     }
@@ -646,9 +682,15 @@ public class NewRoboBlue extends LinearOpMode {
 
                 case IS_COMPLETE_SPECIAL:
 
-                    if (bucketSensor.getDistance(DistanceUnit.CM) > captureDistance) {
+                    try {
 
-                        intakeState = IntakeState.IS_STATIONARY;
+                        if (bucketSensor.getDistance(DistanceUnit.CM) > captureDistance) {
+
+                            intakeState = IntakeState.IS_STATIONARY;
+                        }
+                    } catch (Exception e) {
+
+                        Log.println(Log.INFO, "Bucket Sensor Error", e.getMessage());
                     }
 
                     break;
