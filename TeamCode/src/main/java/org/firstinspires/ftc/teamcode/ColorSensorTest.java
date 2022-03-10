@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.util.Log;
-
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
@@ -21,7 +19,7 @@ import java.util.List;
 
 @Config
 @TeleOp
-public class DistanceSensorTest extends LinearOpMode {
+public class ColorSensorTest extends LinearOpMode {
 
     // 8 Motors
     DcMotor leftFront;
@@ -284,8 +282,6 @@ public class DistanceSensorTest extends LinearOpMode {
         int TARGET_CENTER = 130;
         int TARGET_FAR = 210;
 
-        double captureDistance = 6.0;
-
         // Reset encoders
         liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
         liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -328,40 +324,33 @@ public class DistanceSensorTest extends LinearOpMode {
 
                 case IS_STATIONARY:
 
-                    try {
+                    if (bucketSensor.alpha() > 70) {
 
-                        if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+                        intakeState = IntakeState.IS_COMPLETE_SPECIAL;
 
-                            intakeState = IntakeState.IS_COMPLETE_SPECIAL;
+                    } else if (fieldSide == FieldSide.FS_BLUE && gamepad1.left_bumper) {
 
-                        } else if (fieldSide == FieldSide.FS_BLUE && gamepad1.left_bumper) {
+                        intakeHand = IntakeHand.IH_LEFT;
 
-                            intakeHand = IntakeHand.IH_LEFT;
+                        intakeState = IntakeState.IS_SETUP;
 
-                            intakeState = IntakeState.IS_SETUP;
+                    } else if (fieldSide == FieldSide.FS_RED && gamepad1.left_bumper) {
 
-                        } else if (fieldSide == FieldSide.FS_RED && gamepad1.left_bumper) {
+                        intakeHand = IntakeHand.IH_RIGHT;
 
-                            intakeHand = IntakeHand.IH_RIGHT;
+                        intakeState = IntakeState.IS_SETUP;
 
-                            intakeState = IntakeState.IS_SETUP;
+                    } else if (fieldSide == FieldSide.FS_BLUE && gamepad1.right_bumper) {
 
-                        } else if (fieldSide == FieldSide.FS_BLUE && gamepad1.right_bumper) {
+                        intakeHand = IntakeHand.IH_RIGHT;
 
-                            intakeHand = IntakeHand.IH_RIGHT;
+                        intakeState = IntakeState.IS_SETUP;
 
-                            intakeState = IntakeState.IS_SETUP;
+                    } else if (fieldSide == FieldSide.FS_RED && gamepad1.right_bumper) {
 
-                        } else if (fieldSide == FieldSide.FS_RED && gamepad1.right_bumper) {
+                        intakeHand = IntakeHand.IH_LEFT;
 
-                            intakeHand = IntakeHand.IH_LEFT;
-
-                            intakeState = IntakeState.IS_SETUP;
-                        }
-
-                    } catch (Exception e) {
-
-                        Log.println(Log.INFO, "Bucket Sensor Error", e.getMessage());
+                        intakeState = IntakeState.IS_SETUP;
                     }
 
                     break;
@@ -461,31 +450,37 @@ public class DistanceSensorTest extends LinearOpMode {
                             intakeState = IntakeState.IS_INTAKE;
                         }
 
-                        try {
-                            if (colorSensor_left.getDistance(DistanceUnit.CM) < captureDistance) {
+                        if (colorSensor_left.alpha() > 800) {
 
-                                // left intake flips up
-                                i_topLeft.setPosition(i_maxRange_topLeft);
-                                i_bottomLeft.setPosition(i_maxRange_bottomLeft);
+                            // left intake flips up
+                            i_topLeft.setPosition(i_maxRange_topLeft);
+                            i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
-                                leftCaptureTimer.reset();
+                            leftCaptureTimer.reset();
 
-                                intakeState = IntakeState.IS_CAPTURE;
+                            if (colorSensor_left.blue() > 1000) {
 
-                            } else if (fieldSide == FieldSide.FS_BLUE && gamepad1.right_bumper) {
+                                objectType = ObjectType.OT_BALL;
 
-                                intakeHand = IntakeHand.IH_RIGHT;
-                                intakeState = IntakeState.IS_SETUP;
+                                gamepad1.rumble(100);
+                                gamepad2.rumble(100);
 
-                            } else if (fieldSide == FieldSide.FS_RED && gamepad1.left_bumper) {
+                            } else {
 
-                                intakeHand = IntakeHand.IH_RIGHT;
-                                intakeState = IntakeState.IS_SETUP;
+                                objectType = ObjectType.OT_CUBE;
                             }
 
-                        } catch (Exception e) {
+                            intakeState = IntakeState.IS_CAPTURE;
 
-                            Log.println(Log.INFO, "L Color Sensor Error", e.getMessage());
+                        } else if (fieldSide == FieldSide.FS_BLUE && gamepad1.right_bumper) {
+
+                            intakeHand = IntakeHand.IH_RIGHT;
+                            intakeState = IntakeState.IS_SETUP;
+
+                        } else if (fieldSide == FieldSide.FS_RED && gamepad1.left_bumper) {
+
+                            intakeHand = IntakeHand.IH_RIGHT;
+                            intakeState = IntakeState.IS_SETUP;
                         }
 
                     } else if (intakeHand == IntakeHand.IH_RIGHT) {
@@ -499,32 +494,37 @@ public class DistanceSensorTest extends LinearOpMode {
                             intakeState = IntakeState.IS_INTAKE;
                         }
 
-                        try {
+                        if (colorSensor_right.alpha() > 800) {
 
-                            if (colorSensor_right.getDistance(DistanceUnit.CM) < captureDistance) {
+                            // left intake flips up
+                            i_topRight.setPosition(i_maxRange_topRight);
+                            i_bottomRight.setPosition(i_maxRange_bottomRight);
 
-                                // left intake flips up
-                                i_topRight.setPosition(i_maxRange_topRight);
-                                i_bottomRight.setPosition(i_maxRange_bottomRight);
+                            rightCaptureTimer.reset();
 
-                                rightCaptureTimer.reset();
+                            if (colorSensor_right.blue() > 1000) {
 
-                                intakeState = IntakeState.IS_CAPTURE;
+                                objectType = ObjectType.OT_BALL;
 
-                            } else if (fieldSide == FieldSide.FS_BLUE && gamepad1.left_bumper) {
+                                gamepad1.rumble(100);
+                                gamepad2.rumble(100);
 
-                                intakeHand = IntakeHand.IH_LEFT;
-                                intakeState = IntakeState.IS_SETUP;
+                            } else {
 
-                            } else if (fieldSide == FieldSide.FS_RED & gamepad1.right_bumper) {
-
-                                intakeHand = IntakeHand.IH_LEFT;
-                                intakeState = IntakeState.IS_SETUP;
+                                objectType = ObjectType.OT_CUBE;
                             }
 
-                        } catch (Exception e) {
+                            intakeState = IntakeState.IS_CAPTURE;
 
-                            Log.println(Log.INFO, "R Color Sensor Error", e.getMessage());
+                        } else if (fieldSide == FieldSide.FS_BLUE && gamepad1.left_bumper) {
+
+                            intakeHand = IntakeHand.IH_LEFT;
+                            intakeState = IntakeState.IS_SETUP;
+
+                        } else if (fieldSide == FieldSide.FS_RED & gamepad1.right_bumper) {
+
+                            intakeHand = IntakeHand.IH_LEFT;
+                            intakeState = IntakeState.IS_SETUP;
                         }
                     }
 
@@ -569,7 +569,7 @@ public class DistanceSensorTest extends LinearOpMode {
 
                         leftIntake.setPower(-highSweepPower);
 
-                        if (transferTimer.milliseconds() > 250 || bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+                        if (transferTimer.milliseconds() > 250 || bucketSensor.alpha() > 200) {
 
                             leftIntakeTimer.reset();
                             intakeState = IntakeState.IS_OUT;
@@ -580,7 +580,7 @@ public class DistanceSensorTest extends LinearOpMode {
 
                         rightIntake.setPower(-highSweepPower);
 
-                        if (transferTimer.milliseconds() > 250 || bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+                        if (transferTimer.milliseconds() > 250 || bucketSensor.alpha() > 200) {
 
                             rightIntakeTimer.reset();
                             intakeState = IntakeState.IS_OUT;
@@ -592,69 +592,44 @@ public class DistanceSensorTest extends LinearOpMode {
 
                 case IS_OUT:
 
-                    try {
+                    if (bucketSensor.alpha() > 200)
 
-                        if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
-
-                            gamepad1.rumble(100);
-
-                            bucket.setPosition(bucket_down);
-
-                        }
-
-                    } catch (Exception e) {
-
-                        Log.println(Log.INFO, "Bucket Sensor Error", e.getMessage());
-                    }
+                        bucket.setPosition(bucket_down); // p sure this line actually does nothing but imma just add it here
 
                     if (intakeHand == IntakeHand.IH_LEFT) {
 
-                        if (leftIntakeTimer.milliseconds() > 500 || bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+                        if (leftIntakeTimer.milliseconds() > 500 || bucketSensor.alpha() > 200) {
 
-                            try {
-                                if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+                            if (bucketSensor.alpha() > 200) {
 
-                                    gamepad1.rumble(100);
+                                bucket.setPosition(bucket_down);
+                                leftIntake.setPower(0);
+                                intakeState = IntakeState.IS_COMPLETE;
 
-                                    bucket.setPosition(bucket_down);
-                                    leftIntake.setPower(0);
-                                    intakeState = IntakeState.IS_COMPLETE;
+                            } else if (colorSensor_left.alpha() < 1200) {
 
-                                } else if (colorSensor_left.getDistance(DistanceUnit.CM) > captureDistance) {
-
-                                    bucket.setPosition(bucket_down);
-                                    leftIntake.setPower(0);
-                                    intakeState = IntakeState.IS_SETUP;
-                                }
-                            } catch (Exception e) {
-
-                                Log.println(Log.INFO, "B/L Sensor Error", e.getMessage());
+                                bucket.setPosition(bucket_down);
+                                leftIntake.setPower(0);
+                                intakeState = IntakeState.IS_SETUP;
                             }
+
                         }
-                    }
 
-                    if (intakeHand == IntakeHand.IH_RIGHT) {
+                    } else if (intakeHand == IntakeHand.IH_RIGHT) {
 
-                        if (rightIntakeTimer.milliseconds() > 500 || bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+                        if (rightIntakeTimer.milliseconds() > 500 || bucketSensor.alpha() > 200) {
 
-                            try {
-                                if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+                            if (bucketSensor.alpha() > 200) {
 
-                                    gamepad1.rumble(100);
+                                bucket.setPosition(bucket_down);
+                                rightIntake.setPower(0);
+                                intakeState = IntakeState.IS_COMPLETE;
 
-                                    bucket.setPosition(bucket_down);
-                                    rightIntake.setPower(0);
-                                    intakeState = IntakeState.IS_COMPLETE;
+                            } else if (colorSensor_right.alpha() < 1200) {
 
-                                } else if (colorSensor_right.getDistance(DistanceUnit.CM) > captureDistance) {
-
-                                    bucket.setPosition(bucket_down);
-                                    rightIntake.setPower(0);
-                                    intakeState = IntakeState.IS_SETUP;
-                                }
-                            } catch (Exception e) {
-
-                                Log.println(Log.INFO, "B/R Sensor Error", e.getMessage());
+                                bucket.setPosition(bucket_down);
+                                rightIntake.setPower(0);
+                                intakeState = IntakeState.IS_SETUP;
                             }
                         }
                     }
@@ -682,15 +657,9 @@ public class DistanceSensorTest extends LinearOpMode {
 
                 case IS_COMPLETE_SPECIAL:
 
-                    try {
+                    if (bucketSensor.alpha() < 70) {
 
-                        if (bucketSensor.getDistance(DistanceUnit.CM) > captureDistance) {
-
-                            intakeState = IntakeState.IS_STATIONARY;
-                        }
-                    } catch (Exception e) {
-
-                        Log.println(Log.INFO, "Bucket Sensor Error", e.getMessage());
+                        intakeState = IntakeState.IS_STATIONARY;
                     }
 
                     break;
@@ -1253,138 +1222,138 @@ public class DistanceSensorTest extends LinearOpMode {
                     }
             }
 
-//            // Manual Lift
-//
-//            switch (manualLiftState) {
-//
-//                case MLS_STATIONARY:
-//
-//                    if (gamepad2.right_trigger > 0.0) {
-//
-//                        manualLiftState = ManualLiftState.MLS_EXTENDING;
-//                    }
-//
-//                    break;
-//
-//                case MLS_EXTENDING:
-//
-//                    float c = gamepad2.right_trigger;
-//
-//                    if (c > 0.0) {
-//
-//                        int d = (int) (450 * c);
-//
-//                        turret.setPosition(turret_center);
-//                        arm.setPosition(arm_forward_alliance);
-//
-//                        if (liftLeft.getCurrentPosition() != d) {
-//
-//                            liftLeft.setTargetPosition(d);
-//                            liftRight.setTargetPosition(d);
-//                            liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                            liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                            liftLeft.setPower(1.0);
-//                            liftRight.setPower(1.0);
-//
-//                        }
-//
-//                    } else if (c == 0.0) {
-//
-//                        turret.setPosition(turret_center);
-//                        arm.setPosition(arm_intermediate);
-//
-//                        manualLiftState = ManualLiftState.MLS_RETRACTING;
-//
-//                    }
-//
-//                    break;
-//
-//                case MLS_RETRACTING:
-//
-//                    turret.setPosition(turret_center);
-//
-//                    liftLeft.setTargetPosition(0);
-//                    liftRight.setTargetPosition(0);
-//                    liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    liftRight.setPower(-1.0);
-//                    liftLeft.setPower(-1.0);
-//
-//                    manualLiftState = ManualLiftState.MLS_ARM_CHECK;
-//
-//                    break;
-//
-//                case MLS_ARM_CHECK:
-//
-//                    turret.setPosition(turret_center);
-//
-//                    if (liftLeft.getCurrentPosition() < 10) {
-//
-//                        arm.setPosition(arm_backward);
-//
-//                        manualLiftState = ManualLiftState.MLS_IDLE;
-//                    }
-//
-//                    break;
-//
-//                case MLS_IDLE:
-//
-//                    liftLeft.setPower(0);
-//                    liftRight.setPower(0);
-//
-//                    manualLiftState = ManualLiftState.MLS_STATIONARY;
-//
-//                    break;
-//            }
+            // Manual Lift
 
-//            switch (depositState) {
-//
-//                case DS_STATIONARY:
-//
-//                    bucketTimer.reset();
-//
-//                    if (gamepad1.x) {
-//
-//                        depositHand = DepositHand.DH_LEFT;
-//
-//                        bucket.setPosition(bucket_left);
-//
-//                        depositState = DepositState.DS_TURNED;
-//
-//                    } else if (gamepad1.b) {
-//
-//                        depositHand = DepositHand.DH_RIGHT;
-//
-//                        bucket.setPosition(bucket_right);
-//
-//                        depositState = DepositState.DS_TURNED;
-//                    }
-//
-//                    break;
-//
-//                case DS_TURNED:
-//
-//                    if (depositHand == DepositHand.DH_LEFT) {
-//
-//                        if (bucketTimer.milliseconds() > 500) {
-//
-//                            bucket.setPosition(bucket_down);
-//                            depositHand = DepositHand.DH_STATIONARY;
-//                            depositState = DepositState.DS_STATIONARY;
-//                        }
-//
-//                    } else if (depositHand == DepositHand.DH_RIGHT) {
-//
-//                        if (bucketTimer.milliseconds() > 500) {
-//
-//                            bucket.setPosition(bucket_down);
-//                            depositHand = DepositHand.DH_STATIONARY;
-//                            depositState = DepositState.DS_STATIONARY;
-//                        }
-//                    }
-//
-//                    break;
-//            }
+            switch (manualLiftState) {
+
+                case MLS_STATIONARY:
+
+                    if (gamepad2.right_trigger > 0.0) {
+
+                        manualLiftState = ManualLiftState.MLS_EXTENDING;
+                    }
+
+                    break;
+
+                case MLS_EXTENDING:
+
+                    float c = gamepad2.right_trigger;
+
+                    if (c > 0.0) {
+
+                        int d = (int) (450 * c);
+
+                        turret.setPosition(turret_center);
+                        arm.setPosition(arm_forward_alliance);
+
+                        if (liftLeft.getCurrentPosition() != d) {
+
+                            liftLeft.setTargetPosition(d);
+                            liftRight.setTargetPosition(d);
+                            liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            liftLeft.setPower(1.0);
+                            liftRight.setPower(1.0);
+
+                        }
+
+                    } else if (c == 0.0) {
+
+                        turret.setPosition(turret_center);
+                        arm.setPosition(arm_intermediate);
+
+                        manualLiftState = ManualLiftState.MLS_RETRACTING;
+
+                    }
+
+                    break;
+
+                case MLS_RETRACTING:
+
+                    turret.setPosition(turret_center);
+
+                    liftLeft.setTargetPosition(0);
+                    liftRight.setTargetPosition(0);
+                    liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    liftRight.setPower(-1.0);
+                    liftLeft.setPower(-1.0);
+
+                    manualLiftState = ManualLiftState.MLS_ARM_CHECK;
+
+                    break;
+
+                case MLS_ARM_CHECK:
+
+                    turret.setPosition(turret_center);
+
+                    if (liftLeft.getCurrentPosition() < 10) {
+
+                        arm.setPosition(arm_backward);
+
+                        manualLiftState = ManualLiftState.MLS_IDLE;
+                    }
+
+                    break;
+
+                case MLS_IDLE:
+
+                    liftLeft.setPower(0);
+                    liftRight.setPower(0);
+
+                    manualLiftState = ManualLiftState.MLS_STATIONARY;
+
+                    break;
+            }
+
+            switch (depositState) {
+
+                case DS_STATIONARY:
+
+                    bucketTimer.reset();
+
+                    if (gamepad1.x) {
+
+                        depositHand = DepositHand.DH_LEFT;
+
+                        bucket.setPosition(bucket_left);
+
+                        depositState = DepositState.DS_TURNED;
+
+                    } else if (gamepad1.b) {
+
+                        depositHand = DepositHand.DH_RIGHT;
+
+                        bucket.setPosition(bucket_right);
+
+                        depositState = DepositState.DS_TURNED;
+                    }
+
+                    break;
+
+                case DS_TURNED:
+
+                    if (depositHand == DepositHand.DH_LEFT) {
+
+                        if (bucketTimer.milliseconds() > 500) {
+
+                            bucket.setPosition(bucket_down);
+                            depositHand = DepositHand.DH_STATIONARY;
+                            depositState = DepositState.DS_STATIONARY;
+                        }
+
+                    } else if (depositHand == DepositHand.DH_RIGHT) {
+
+                        if (bucketTimer.milliseconds() > 500) {
+
+                            bucket.setPosition(bucket_down);
+                            depositHand = DepositHand.DH_STATIONARY;
+                            depositState = DepositState.DS_STATIONARY;
+                        }
+                    }
+
+                    break;
+            }
 
             float g = (float) (((gamepad2.left_stick_y) + 1.0) / 2.0);
 
@@ -1544,27 +1513,16 @@ public class DistanceSensorTest extends LinearOpMode {
                 bucket.setPosition(bucket_down);
             }
 
-            if (gamepad1.dpad_right) {
 
-                leftIntake.setPower(0);
-                rightIntake.setPower(0);
 
-                i_topLeft.setPosition(i_maxRange_topLeft);
-                i_bottomLeft.setPosition(i_maxRange_bottomLeft);
-                i_topRight.setPosition(i_maxRange_topRight);
-                i_bottomRight.setPosition(i_maxRange_bottomRight);
-
-                bucket.setPosition(bucket_down);
-
-                intakeState = IntakeState.IS_STATIONARY;
-            }
-            
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "leftFront (%.2f), leftBack (%.2f), rightFront (%.2f), rightBack (%.2f)",
                     leftFrontPower, leftBackPower, rightFrontPower, rightBackPower);
+            telemetry.addData("Left Sensor: ", colorSensor_left.alpha());
+            telemetry.addData("Right Sensor: ", colorSensor_right.alpha());
             telemetry.addData("Dist - Left", colorSensor_left.getDistance(DistanceUnit.CM));
             telemetry.addData("Dist - Right", colorSensor_right.getDistance(DistanceUnit.CM));
-            telemetry.addData("BucketSensor: ", bucketSensor.getDistance(DistanceUnit.CM));
+            telemetry.addData("BucketSensor: ", bucketSensor.alpha());
             telemetry.addData("Intake State: ", intakeState);
             telemetry.addData("C_Left: ", c_Left.getPower());
             telemetry.addData("C_Right: ", c_Right.getPower());
@@ -1579,6 +1537,8 @@ public class DistanceSensorTest extends LinearOpMode {
             telemetry.addData("Bucket Position: ", bucket.getPosition());
             telemetry.addData("TopRight: ", i_topRight.getPosition());
             telemetry.addData("BottomRight: ", i_bottomRight.getPosition());
+            telemetry.addData("Blue Values - L: ", colorSensor_left.blue());
+            telemetry.addData("Blue Values - R: ", colorSensor_right.blue());
             telemetry.update();
         }
     }

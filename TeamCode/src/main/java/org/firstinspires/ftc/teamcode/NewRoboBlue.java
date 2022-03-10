@@ -285,6 +285,7 @@ public class NewRoboBlue extends LinearOpMode {
         int TARGET_FAR = 210;
 
         double captureDistance = 6.0;
+        boolean IS_IN = false;
 
         // Reset encoders
         liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
@@ -546,11 +547,20 @@ public class NewRoboBlue extends LinearOpMode {
 
                 case IS_TRANSFER:
 
+                    if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+
+                        IS_IN = true;
+
+                    } else {
+
+                        IS_IN = false;
+                    }
+
                     if (intakeHand == IntakeHand.IH_LEFT) {
 
                         leftIntake.setPower(-highSweepPower);
 
-                        if (transferTimer.milliseconds() > 250 || bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+                        if (transferTimer.milliseconds() > 250 || IS_IN == true) {
 
                             leftIntakeTimer.reset();
                             intakeState = IntakeState.IS_OUT;
@@ -561,7 +571,7 @@ public class NewRoboBlue extends LinearOpMode {
 
                         rightIntake.setPower(-highSweepPower);
 
-                        if (transferTimer.milliseconds() > 250 || bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+                        if (transferTimer.milliseconds() > 250 || IS_IN == true) {
 
                             rightIntakeTimer.reset();
                             intakeState = IntakeState.IS_OUT;
@@ -573,19 +583,26 @@ public class NewRoboBlue extends LinearOpMode {
 
                 case IS_OUT:
 
+//                    if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance)
+//
+//                        gamepad1.rumble(100);
+//
+//                        bucket.setPosition(bucket_down);
+
                     if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
 
-                        gamepad1.rumble(100);
+                        IS_IN = true;
 
-                        bucket.setPosition(bucket_down);
+                    } else {
 
+                        IS_IN = false;
                     }
 
                     if (intakeHand == IntakeHand.IH_LEFT) {
 
-                        if (leftIntakeTimer.milliseconds() > 500 || bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+                        if (leftIntakeTimer.milliseconds() > 500 || IS_IN == true) {
 
-                            if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+                            if (IS_IN == true) {
 
                                 gamepad1.rumble(100);
 
@@ -593,7 +610,7 @@ public class NewRoboBlue extends LinearOpMode {
                                 leftIntake.setPower(0);
                                 intakeState = IntakeState.IS_COMPLETE;
 
-                            } else if (colorSensor_left.getDistance(DistanceUnit.CM) > captureDistance) {
+                            } else if (colorSensor_left.getDistance(DistanceUnit.CM) < captureDistance && IS_IN == false) {
 
                                 bucket.setPosition(bucket_down);
                                 leftIntake.setPower(0);
@@ -604,9 +621,9 @@ public class NewRoboBlue extends LinearOpMode {
 
                     } else if (intakeHand == IntakeHand.IH_RIGHT) {
 
-                        if (rightIntakeTimer.milliseconds() > 500 || bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+                        if (rightIntakeTimer.milliseconds() > 500 || IS_IN == true) {
 
-                            if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+                            if (IS_IN == true) {
 
                                 gamepad1.rumble(100);
 
@@ -614,7 +631,7 @@ public class NewRoboBlue extends LinearOpMode {
                                 rightIntake.setPower(0);
                                 intakeState = IntakeState.IS_COMPLETE;
 
-                            } else if (colorSensor_right.getDistance(DistanceUnit.CM) > captureDistance) {
+                            } else if (colorSensor_right.getDistance(DistanceUnit.CM) > captureDistance && IS_IN == false) {
 
                                 bucket.setPosition(bucket_down);
                                 rightIntake.setPower(0);
@@ -627,7 +644,7 @@ public class NewRoboBlue extends LinearOpMode {
 
                 case IS_COMPLETE:
 
-                    if (intakeHand == IntakeHand.IH_LEFT) {
+                      if (intakeHand == IntakeHand.IH_LEFT) {
 
                         bucket.setPosition(bucket_down);
                         bucketHand = BucketHand.BH_CENTER;
