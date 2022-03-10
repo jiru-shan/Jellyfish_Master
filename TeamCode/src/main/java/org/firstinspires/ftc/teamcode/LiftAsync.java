@@ -128,7 +128,7 @@ public class LiftAsync
                 brake=true;
             }
         }
-        else if(Math.abs(motor2.getCurrentPosition())>targetPos-10)
+        else if(Math.abs(motor2.getCurrentPosition())>targetPos-5)
         {
             brake=true;
         }

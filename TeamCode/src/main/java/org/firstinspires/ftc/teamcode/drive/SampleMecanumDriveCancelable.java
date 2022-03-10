@@ -189,14 +189,6 @@ public class SampleMecanumDriveCancelable extends MecanumDrive {
     public TrajectoryBuilder trajectoryBuilder(Pose2d startPose, double startHeading) {
         return new TrajectoryBuilder(startPose, startHeading, velConstraint, accelConstraint);
     }
-    public TrajectorySequenceBuilder trajectorySequenceBuilder(Pose2d startPose) {
-        return new TrajectorySequenceBuilder(
-                startPose,
-                velConstraint, accelConstraint,
-                MAX_ANG_VEL, MAX_ANG_ACCEL
-        );
-    }
-
 
     public void turnAsync(double angle) {
         double heading = getPoseEstimate().getHeading();
@@ -217,6 +209,15 @@ public class SampleMecanumDriveCancelable extends MecanumDrive {
     public void turn(double angle) {
         turnAsync(angle);
         waitForIdle();
+    }
+
+    public boolean getIdle()
+    {
+        if(mode==Mode.IDLE)
+        {
+            return true;
+        }
+        return false;
     }
 
     public void followTrajectoryAsync(Trajectory trajectory) {
@@ -353,7 +354,7 @@ public class SampleMecanumDriveCancelable extends MecanumDrive {
         }
         avgWheelVeloc/=temp.size();
 
-        if(avgWheelVeloc<2)
+        if(avgWheelVeloc<1)
         {
             return false;
         }

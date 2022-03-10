@@ -55,7 +55,7 @@ public class SensorController
 
     public boolean onColor()
     {
-        if(driveLeft.getRawLightDetected()>850||driveRight.getRawLightDetected()>850)
+        if(driveLeft.alpha()>450||driveRight.alpha()>450)
         {
             return true;
         }
@@ -94,7 +94,7 @@ public class SensorController
     public double[] getData()
     {
         updateDepositValue();
-        double[] pain={intakeRange.getDistance(DistanceUnit.CM), depositValue, 0, 0, driveLeft.getRawLightDetected(), driveRight.getRawLightDetected()};
+        double[] pain={intakeRange.getDistance(DistanceUnit.CM), depositValue, 0, 0, driveLeft.alpha(), driveRight.alpha()};
         return pain;
     }
     public void closeIntakeSensor()
