@@ -106,7 +106,7 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
         lift=new LiftAsync(hardwareMap, 0);
         sensorController=new SensorController(hardwareMap, SensorController.Side.LEFT);
         servoControl=new ServoControl(hardwareMap, ServoControl.Side.LEFT);
-        trajGen=new TrajectoryGen(drive, 35);
+        trajGen=new TrajectoryGen(drive, 30);
 
         globalTimer=new ElapsedTime();
         latencyTimer=new ElapsedTime();
@@ -147,7 +147,7 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
                     GState=GrabbingState.GETTING;
                     IState=IntakeState.INTO_DEPOSIT;
 
-                    drive.followTrajectoryAsync(trajGen.firstGoingTrajectory(44, -0.5, -2, 65, -1.8-(0.75*pathChangeReal), -6-(1.5*pathChangeReal), false));
+                    drive.followTrajectoryAsync(trajGen.firstGoingTrajectory(42, -0.5, -2, 65, -1.8-(0.75*pathChangeReal), -6-(1.5*pathChangeReal), false));
                     timeStamp1=latencyTimer.milliseconds();
                     break;
 
