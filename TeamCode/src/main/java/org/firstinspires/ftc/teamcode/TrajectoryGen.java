@@ -56,7 +56,7 @@ public class TrajectoryGen
     {
         Trajectory realReturn=drive.trajectoryBuilder(drive.getPoseEstimate())
                 .lineToSplineHeading(new Pose2d(0, 13, Math.toRadians(0)), SampleMecanumDriveCancelable.getVelocityConstraint(100,
-                        DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(80))
+                        DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(100))
                 .build();
         return realReturn;
     }

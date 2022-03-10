@@ -43,7 +43,7 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
         RESET, GOING, RETURNING, DEPOSITING
     }
     //static variables for positions
-    final static int LIFT_EXTENDED=350;
+    final static int LIFT_EXTENDED=335;
 
     //changing variables that are used for stuff
     int cubePos;
@@ -106,7 +106,7 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
         lift=new LiftAsync(hardwareMap, 0);
         sensorController=new SensorController(hardwareMap, SensorController.Side.LEFT);
         servoControl=new ServoControl(hardwareMap, ServoControl.Side.LEFT);
-        trajGen=new TrajectoryGen(drive, 30);
+        trajGen=new TrajectoryGen(drive, 40);
 
         globalTimer=new ElapsedTime();
         latencyTimer=new ElapsedTime();
@@ -147,7 +147,7 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
                     GState=GrabbingState.GETTING;
                     IState=IntakeState.INTO_DEPOSIT;
 
-                    drive.followTrajectoryAsync(trajGen.firstGoingTrajectory(42, -0.5, -2, 65, -1.8-(0.75*pathChangeReal), -6-(1.5*pathChangeReal), false));
+                    drive.followTrajectoryAsync(trajGen.firstGoingTrajectory(36, -0.5, -2, 65, -1.8-(0.4*pathChangeReal), -6-(0.75*pathChangeReal), false));
                     timeStamp1=latencyTimer.milliseconds();
                     break;
 
@@ -159,7 +159,7 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
                             leftIntake.setPower(1);
                             if(temp<10)
                             {
-                                tempTarget= SystemClock.uptimeMillis()+500;
+                                tempTarget= SystemClock.uptimeMillis()+250;
                                 GState=GrabbingState.HAS_CUBE;
                                 servoControl.raiseIntakes();
                                 servoControl.openDepositIntake();
