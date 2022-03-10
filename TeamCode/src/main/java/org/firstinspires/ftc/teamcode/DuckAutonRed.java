@@ -65,15 +65,20 @@ public class DuckAutonRed extends LinearOpMode
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
                 .build();
         trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
-                .strafeRight(7, SampleMecanumDriveCancelable.getVelocityConstraint(50,
+                .strafeRight(20, SampleMecanumDriveCancelable.getVelocityConstraint(50,
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
                 .build();
         drive.followTrajectory(trajectory);
-        drive.turn(Math.toRadians(45));
         trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
-                .strafeLeft(5, SampleMecanumDriveCancelable.getVelocityConstraint(50,
+                .forward(10, SampleMecanumDriveCancelable.getVelocityConstraint(50,
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
                 .build();
+        drive.followTrajectory(trajectory);
+        trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
+                .strafeLeft(15, SampleMecanumDriveCancelable.getVelocityConstraint(50,
+                        DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
+                .build();
+        drive.followTrajectory(trajectory);
 
         //turn carousel
         double tempTarget= SystemClock.uptimeMillis()+2500;
@@ -84,15 +89,12 @@ public class DuckAutonRed extends LinearOpMode
         }
 
         //park
-        drive.turn(Math.toRadians(-45));
-        trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
-                .forward(3, SampleMecanumDriveCancelable.getVelocityConstraint(50,
-                        DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
-                .build();
         trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
                 .strafeRight(22, SampleMecanumDriveCancelable.getVelocityConstraint(50,
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
                 .build();
+        drive.followTrajectory(trajectory);
+
     }
 
     public void webcamInit()
