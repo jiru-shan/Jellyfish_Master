@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.util.Log;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
@@ -355,6 +357,7 @@ public class NewRoboBlue extends LinearOpMode {
                         intakeState = IntakeState.IS_SETUP;
                     }
 
+
                     break;
 
                 case IS_SETUP:
@@ -570,15 +573,21 @@ public class NewRoboBlue extends LinearOpMode {
 
                 case IS_OUT:
 
-                    if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance)
+                    if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
 
-                        bucket.setPosition(bucket_down); // p sure this line actually does nothing but imma just add it here
+                        gamepad1.rumble(100);
+
+                        bucket.setPosition(bucket_down);
+
+                    }
 
                     if (intakeHand == IntakeHand.IH_LEFT) {
 
                         if (leftIntakeTimer.milliseconds() > 500 || bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
 
                             if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+
+                                gamepad1.rumble(100);
 
                                 bucket.setPosition(bucket_down);
                                 leftIntake.setPower(0);
@@ -598,6 +607,8 @@ public class NewRoboBlue extends LinearOpMode {
                         if (rightIntakeTimer.milliseconds() > 500 || bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
 
                             if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+
+                                gamepad1.rumble(100);
 
                                 bucket.setPosition(bucket_down);
                                 rightIntake.setPower(0);
@@ -1032,7 +1043,7 @@ public class NewRoboBlue extends LinearOpMode {
 
                         liftState = LiftState.LS_RELEASED_SLOW_LEFT_HALF;
                     }
-                    
+
                     break;
 
 
@@ -1473,7 +1484,7 @@ public class NewRoboBlue extends LinearOpMode {
                 liftRight.setPower(-1.0);
 
                 // Set lift state to retracting
-                liftState = LiftState.LS_IDLE;  
+                liftState = LiftState.LS_IDLE;
             }
 
             if (gamepad2.touchpad || gamepad2.x) {

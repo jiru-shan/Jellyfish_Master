@@ -574,6 +574,8 @@ public class NewRoboRed extends LinearOpMode {
 
                     if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance)
 
+                        gamepad1.rumble(100);
+
                         bucket.setPosition(bucket_down); // p sure this line actually does nothing but imma just add it here
 
                     if (intakeHand == IntakeHand.IH_LEFT) {
@@ -581,6 +583,8 @@ public class NewRoboRed extends LinearOpMode {
                         if (leftIntakeTimer.milliseconds() > 500 || bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
 
                             if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+
+                                gamepad1.rumble(100);
 
                                 bucket.setPosition(bucket_down);
                                 leftIntake.setPower(0);
@@ -600,6 +604,8 @@ public class NewRoboRed extends LinearOpMode {
                         if (rightIntakeTimer.milliseconds() > 500 || bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
 
                             if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+
+                                gamepad1.rumble(100);
 
                                 bucket.setPosition(bucket_down);
                                 rightIntake.setPower(0);
