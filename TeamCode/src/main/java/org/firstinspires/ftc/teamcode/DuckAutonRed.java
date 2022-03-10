@@ -64,6 +64,7 @@ public class DuckAutonRed extends LinearOpMode
                 .forward(40, SampleMecanumDriveCancelable.getVelocityConstraint(50,
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
                 .build();
+        drive.followTrajectory(trajectory);
         trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
                 .strafeRight(20, SampleMecanumDriveCancelable.getVelocityConstraint(50,
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
