@@ -254,23 +254,23 @@ public class NewRoboRed extends LinearOpMode {
         double highSweepPower = 0.8;
 
         // Deposit servo positions
-        double bucket_down = 0.48;
+        double bucket_down = 0.44; // 0.48
         double bucket_left = 0.17;
         double bucket_right = 0.81;
         double arm_forward_alliance = 0.35;
         double arm_forward_middle = 0.15;
         double arm_forward_shared = 0.10;
         double arm_intermediate = 0.70;
-        double arm_backward = 0.90;  // 0.92
+        double arm_backward = 0.88;  // 0.92
         double turret_center = 0.51;
         double turret_targetBlue = 0.35;
         double turret_targetRed = 0.61;
 
         // Servo positions
         double i_minRange_topLeft = 0.15;
-        double i_maxRange_topLeft = 0.96;
+        double i_maxRange_topLeft = 0.91;
         double i_minRange_bottomLeft = 0.90;
-        double i_maxRange_bottomLeft = 0.09;
+        double i_maxRange_bottomLeft = 0.14;
         double i_minRange_topRight = 0.90;
         double i_maxRange_topRight = 0.09;
         double i_minRange_bottomRight = 0.16;
@@ -280,9 +280,9 @@ public class NewRoboRed extends LinearOpMode {
         int TARGET_TIPPED = 450;
         int TARGET_BALANCED = 415;
         int TARGET_MIDDLE = 300;
-        int TARGET_NEAR = 10;  // shared hub positions are different from blue
-        int TARGET_CENTER = 100;
-        int TARGET_FAR = 190;
+        int TARGET_NEAR = 5;  // shared hub positions are different from blue
+        int TARGET_CENTER = 80;
+        int TARGET_FAR = 170;
 
         // Reset encoders
         liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
@@ -372,7 +372,7 @@ public class NewRoboRed extends LinearOpMode {
 
                         leftIntake.setPower(highSweepPower);
 
-                        if (liftLeft.getCurrentPosition() < 5) {
+                        if (liftLeft.getCurrentPosition() < 10 && arm.getPosition() == arm_backward) {
 
                             // turn bucket left
                             bucket.setPosition(bucket_left);
@@ -403,7 +403,7 @@ public class NewRoboRed extends LinearOpMode {
                         // start right intake
                         rightIntake.setPower(highSweepPower);
 
-                        if (liftLeft.getCurrentPosition() < 5) {
+                        if (liftLeft.getCurrentPosition() < 10 && arm.getPosition() == arm_backward) {
 
                             // turn bucket left
                             bucket.setPosition(bucket_right);
@@ -443,7 +443,7 @@ public class NewRoboRed extends LinearOpMode {
 
                     } else if (intakeHand == IntakeHand.IH_LEFT) {
 
-                        if (liftLeft.getCurrentPosition() < 5) {
+                        if (liftLeft.getCurrentPosition() < 10 && arm.getPosition() == arm_backward) {
 
                             bucket.setPosition(bucket_left);
 
@@ -453,6 +453,8 @@ public class NewRoboRed extends LinearOpMode {
                         }
 
                         if (colorSensor_left.alpha() > 800) {
+
+                            bucket.setPosition(bucket_left);
 
                             // left intake flips up
                             i_topLeft.setPosition(i_maxRange_topLeft);
@@ -487,7 +489,7 @@ public class NewRoboRed extends LinearOpMode {
 
                     } else if (intakeHand == IntakeHand.IH_RIGHT) {
 
-                        if (liftLeft.getCurrentPosition() < 5) {
+                        if (liftLeft.getCurrentPosition() < 10 && arm.getPosition() == arm_backward) {
 
                             bucket.setPosition(bucket_right);
 
@@ -497,6 +499,8 @@ public class NewRoboRed extends LinearOpMode {
                         }
 
                         if (colorSensor_right.alpha() > 800) {
+
+                            bucket.setPosition(bucket_right);
 
                             // left intake flips up
                             i_topRight.setPosition(i_maxRange_topRight);
