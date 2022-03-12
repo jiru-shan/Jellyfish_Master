@@ -59,27 +59,10 @@ public class RRTest extends LinearOpMode
 
         pain=false;
         i=0;
-        drive.followTrajectoryAsync(trajectory);
-        while(opModeIsActive()) {
-            if(!pain)
-            {
-                drive.update();
-            }
-           if(sensorController.hasBlock()&&i==0)
-           {
-               i=1;
-               servoControl.raiseIntakes();
-               intakeSpeed=0.7;
-               tempTarget=SystemClock.uptimeMillis()+250;
-               servoControl.openDepositIntake();
-           }
-           if(SystemClock.uptimeMillis()>tempTarget)
-           {
-               intakeSpeed=-1;
-               pain=true;
-               drive.cancelFollowing();
-           }
-            leftIntake.setPower(intakeSpeed);
+        //drive.followTrajectoryAsync(trajectory);
+        double tempTarget=SystemClock.uptimeMillis()+5000;
+        while(SystemClock.uptimeMillis()<tempTarget) {
+            drive.setMotorPowers(0.2, 0.2, 0.2, 0.2);
 
         }
     }

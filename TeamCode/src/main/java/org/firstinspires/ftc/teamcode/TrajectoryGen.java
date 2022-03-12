@@ -40,14 +40,15 @@ public class TrajectoryGen
         {
             Trajectory goingTraj = drive.trajectoryBuilder(drive.getPoseEstimate())
                     .lineToSplineHeading(new Pose2d(x, y, ang), SampleMecanumDriveCancelable.getVelocityConstraint(cappedVel,
-                            DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                            DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(60))
                     .build();
             return goingTraj;
         }
     public Trajectory returningTrajectory(double x, double y, double ang)
     {
         Trajectory returningTraj = drive.trajectoryBuilder(drive.getPoseEstimate())
-                .lineToSplineHeading(new Pose2d(x, y, Math.toRadians(ang)))
+                .lineToSplineHeading(new Pose2d(x, y, Math.toRadians(ang)), SampleMecanumDriveCancelable.getVelocityConstraint(cappedVel,
+                        DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(80))
                 .build();
         return returningTraj;
     }
@@ -55,8 +56,8 @@ public class TrajectoryGen
     public Trajectory realReturnTrajectory()
     {
         Trajectory realReturn=drive.trajectoryBuilder(drive.getPoseEstimate())
-                .lineToSplineHeading(new Pose2d(0, 13, Math.toRadians(0)), SampleMecanumDriveCancelable.getVelocityConstraint(100,
-                        DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(100))
+                .lineToSplineHeading(new Pose2d(2, 13, Math.toRadians(-5)), SampleMecanumDriveCancelable.getVelocityConstraint(80,
+                        DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(70))
                 .build();
         return realReturn;
     }

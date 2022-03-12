@@ -36,13 +36,13 @@ public class ServoControl
     public static double d_open_deposit_right=0.21;
 
     double d_arm_default=0.91;
-    double d_arm_middle_level=0.85;
+    public static double d_arm_middle_level=0.99;
     public static double d_arm_medium=0.72;
     public static double d_arm_out=0.30;
 
 
     public static double d_turret_center=0.52;
-    double d_turret_open_left=0.32;
+    public static double d_turret_open_left=0.25;
     public static double d_turret_open_right=0.72;
 
     public ServoControl(HardwareMap map, Side side)

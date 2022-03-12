@@ -192,12 +192,15 @@ public class VisionPipeline_RED_SCUFF extends OpenCvPipeline
         //int redValue = 0, greenValue = 0, blueValue = 0
         for(int i = 0; i < REGION_HEIGHT; i++) {
             for (int j = 0; j < REGION_WIDTH; j++) {
+                counter1 += region1_Red.get(i, j)[0];
+                counter2 += region2_Red.get(i, j)[0];
+                counter3 += region3_Red.get(i, j)[0];
                 //if(region1_Red.get(i, j)[0] < 125 && region1_Green.get(i, j)[1] > 95 && region1_Blue.get(i, j)[2] > 70) counter1++;
                 //if(region2_Red.get(i, j)[0] > 150 && region2_Green.get(i, j)[1] < 100 && region2_Blue.get(i, j)[2] > 135) counter2++;
                 //if(region3_Red.get(i, j)[0] > 150 && region3_Green.get(i, j)[1] < 100 && region3_Blue.get(i, j)[2] > 135) counter3++;
-                if (region1_Blue.get(i, j)[0] > region1_Green.get(i, j)[0] + region1_Red.get(i, j)[0] && region1_Blue.get(i, j)[0] > 100) counter1++;
-                if (region2_Blue.get(i, j)[0] > region2_Green.get(i, j)[0] + region2_Red.get(i, j)[0] && region2_Blue.get(i, j)[0] > 100) counter2++;
-                if (region3_Blue.get(i, j)[0] > region3_Green.get(i, j)[0] + region3_Red.get(i, j)[0] && region3_Blue.get(i, j)[0] > 100) counter3++;
+                //if (region1_Blue.get(i, j)[0] > region1_Green.get(i, j)[0] + region1_Red.get(i, j)[0] && region1_Blue.get(i, j)[0] > 100) counter1++;
+                //if (region2_Blue.get(i, j)[0] > region2_Green.get(i, j)[0] + region2_Red.get(i, j)[0] && region2_Blue.get(i, j)[0] > 100) counter2++;
+                //if (region3_Blue.get(i, j)[0] > region3_Green.get(i, j)[0] + region3_Red.get(i, j)[0] && region3_Blue.get(i, j)[0] > 100) counter3++;
 
                 //if(region1_Red.get(i, j, region1_Red))
             }
