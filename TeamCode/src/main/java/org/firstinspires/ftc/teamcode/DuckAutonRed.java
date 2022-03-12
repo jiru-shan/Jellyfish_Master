@@ -88,8 +88,8 @@ public class DuckAutonRed extends LinearOpMode
         double tempTarget= SystemClock.uptimeMillis()+3500;
         while(SystemClock.uptimeMillis()<tempTarget)
         {
-            carousel.setPower(-0.25);
-            carousel2.setPower(-0.25);
+            carousel.setPower(0.25);
+            carousel2.setPower(0.25);
         }
 
         carousel.setPower(0);
