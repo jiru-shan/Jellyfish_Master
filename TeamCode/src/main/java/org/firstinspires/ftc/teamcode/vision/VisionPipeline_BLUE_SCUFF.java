@@ -36,7 +36,7 @@ public class VisionPipeline_BLUE_SCUFF extends OpenCvPipeline
      * The core values which define the location and size of the sample regions
      */
     static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(0,120);
-    static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(120,120);
+    static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(130,120);
     static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(260,120);
     static final int REGION_WIDTH = 60;
     static final int REGION_HEIGHT = 90;
