@@ -60,10 +60,13 @@ public class RRTest extends LinearOpMode
         pain=false;
         i=0;
         //drive.followTrajectoryAsync(trajectory);
-        double tempTarget=SystemClock.uptimeMillis()+5000;
-        while(SystemClock.uptimeMillis()<tempTarget) {
-            drive.setMotorPowers(0.2, 0.2, 0.2, 0.2);
 
+        while(opModeIsActive()) {
+            packet.put("pose estimate", drive.getPoseEstimate().getHeading());
+            packet.put("external", drive.getExternalHeading());
+            packet.put("external degrees", drive.getRawExternalHeadingDegrees());
+            dashboard.sendTelemetryPacket(packet);
+            //drive.setMotorPowers(-0.2, -0.2, 0.2, 0.2);
         }
     }
 }

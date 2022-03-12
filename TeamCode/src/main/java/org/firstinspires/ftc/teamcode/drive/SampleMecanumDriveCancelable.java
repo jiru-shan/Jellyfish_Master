@@ -354,7 +354,7 @@ public class SampleMecanumDriveCancelable extends MecanumDrive {
         }
         avgWheelVeloc/=temp.size();
 
-        if(avgWheelVeloc<2)
+        if(avgWheelVeloc<0.75)
         {
             return false;
         }
@@ -437,6 +437,11 @@ public class SampleMecanumDriveCancelable extends MecanumDrive {
     @Override
     public double getRawExternalHeading() {
         return imu.getAngularOrientation().firstAngle;
+    }
+
+    public double getRawExternalHeadingDegrees()
+    {
+        return Math.toDegrees(imu.getAngularOrientation().firstAngle);
     }
 
     @Override

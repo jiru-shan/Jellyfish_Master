@@ -13,7 +13,7 @@ public class ServoTest extends LinearOpMode
     @Override
     public void runOpMode() throws InterruptedException
     {
-        servoControl=new ServoControl(hardwareMap, ServoControl.Side.RIGHT);
+        servoControl=new ServoControl(hardwareMap, ServoControl.Side.LEFT);
         servoControl.prepDeposit();
         //servoControl.openDeposit();
         //servoControl.openDeposit();

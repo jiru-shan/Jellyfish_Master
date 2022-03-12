@@ -28,7 +28,7 @@ public class ServoControl
     double i_maxRange_bottomRight = 0.97;
 
     double d_open_center=0.48;
-    double d_open_partial_left=0.55;
+    public static double d_open_partial_left=0.5;
     public static double d_open_left=0.17;
     public static double d_open_partial_right=0.41;
     public static double d_open_right=0.79;

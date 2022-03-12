@@ -27,7 +27,8 @@ public class SensorTesting extends LinearOpMode
     int cubePos;
 
     OpenCvWebcam camera;
-    VisionPipeline_RED_SCUFF pipeline;
+    VisionPipeline_BLUE_SCUFF pipeline;
+
 
     @Override
     public void runOpMode() throws InterruptedException
@@ -39,6 +40,7 @@ public class SensorTesting extends LinearOpMode
 
         webcamInit();
         waitForStart();
+        dashboard.startCameraStream(camera, 30);
         sensorController.closeIntakeSensor();
 
         while(opModeIsActive())
@@ -63,7 +65,7 @@ public class SensorTesting extends LinearOpMode
     {
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam"), cameraMonitorViewId);
-        pipeline=new VisionPipeline_RED_SCUFF(telemetry);
+        pipeline=new VisionPipeline_BLUE_SCUFF(telemetry);
         camera.setPipeline(pipeline);
         camera.setMillisecondsPermissionTimeout(2500); // Timeout for obtaining permission is configurable. Set before opening.
         camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
