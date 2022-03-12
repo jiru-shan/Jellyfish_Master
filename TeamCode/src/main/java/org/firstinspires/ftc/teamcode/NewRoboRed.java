@@ -284,8 +284,6 @@ public class NewRoboRed extends LinearOpMode {
         int TARGET_CENTER = 100;
         int TARGET_FAR = 190;
 
-        double captureDistance = 6.0;
-
         // Reset encoders
         liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);   // set motor ticks to 0
         liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -328,7 +326,7 @@ public class NewRoboRed extends LinearOpMode {
 
                 case IS_STATIONARY:
 
-                    if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+                    if (bucketSensor.alpha() > 70) {
 
                         intakeState = IntakeState.IS_COMPLETE_SPECIAL;
 
@@ -454,13 +452,25 @@ public class NewRoboRed extends LinearOpMode {
                             intakeState = IntakeState.IS_INTAKE;
                         }
 
-                        if (colorSensor_left.getDistance(DistanceUnit.CM) < captureDistance) {
+                        if (colorSensor_left.alpha() > 800) {
 
                             // left intake flips up
                             i_topLeft.setPosition(i_maxRange_topLeft);
                             i_bottomLeft.setPosition(i_maxRange_bottomLeft);
 
                             leftCaptureTimer.reset();
+
+                            if (colorSensor_left.blue() > 1000) {
+
+                                objectType = ObjectType.OT_BALL;
+
+                                gamepad1.rumble(100);
+                                gamepad2.rumble(100);
+
+                            } else {
+
+                                objectType = ObjectType.OT_CUBE;
+                            }
 
                             intakeState = IntakeState.IS_CAPTURE;
 
@@ -486,13 +496,25 @@ public class NewRoboRed extends LinearOpMode {
                             intakeState = IntakeState.IS_INTAKE;
                         }
 
-                        if (colorSensor_right.getDistance(DistanceUnit.CM) < captureDistance) {
+                        if (colorSensor_right.alpha() > 800) {
 
                             // left intake flips up
                             i_topRight.setPosition(i_maxRange_topRight);
                             i_bottomRight.setPosition(i_maxRange_bottomRight);
 
                             rightCaptureTimer.reset();
+
+                            if (colorSensor_right.blue() > 1000) {
+
+                                objectType = ObjectType.OT_BALL;
+
+                                gamepad1.rumble(100);
+                                gamepad2.rumble(100);
+
+                            } else {
+
+                                objectType = ObjectType.OT_CUBE;
+                            }
 
                             intakeState = IntakeState.IS_CAPTURE;
 
@@ -549,7 +571,7 @@ public class NewRoboRed extends LinearOpMode {
 
                         leftIntake.setPower(-highSweepPower);
 
-                        if (transferTimer.milliseconds() > 250 || bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+                        if (transferTimer.milliseconds() > 250 || bucketSensor.alpha() > 200) {
 
                             leftIntakeTimer.reset();
                             intakeState = IntakeState.IS_OUT;
@@ -560,7 +582,7 @@ public class NewRoboRed extends LinearOpMode {
 
                         rightIntake.setPower(-highSweepPower);
 
-                        if (transferTimer.milliseconds() > 250 || bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+                        if (transferTimer.milliseconds() > 250 || bucketSensor.alpha() > 200) {
 
                             rightIntakeTimer.reset();
                             intakeState = IntakeState.IS_OUT;
@@ -572,25 +594,21 @@ public class NewRoboRed extends LinearOpMode {
 
                 case IS_OUT:
 
-                    if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance)
-
-                        gamepad1.rumble(100);
+                    if (bucketSensor.alpha() > 200)
 
                         bucket.setPosition(bucket_down); // p sure this line actually does nothing but imma just add it here
 
                     if (intakeHand == IntakeHand.IH_LEFT) {
 
-                        if (leftIntakeTimer.milliseconds() > 500 || bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+                        if (leftIntakeTimer.milliseconds() > 500 || bucketSensor.alpha() > 200) {
 
-                            if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
-
-                                gamepad1.rumble(100);
+                            if (bucketSensor.alpha() > 200) {
 
                                 bucket.setPosition(bucket_down);
                                 leftIntake.setPower(0);
                                 intakeState = IntakeState.IS_COMPLETE;
 
-                            } else if (colorSensor_left.getDistance(DistanceUnit.CM) > captureDistance) {
+                            } else if (colorSensor_left.alpha() < 1200) {
 
                                 bucket.setPosition(bucket_down);
                                 leftIntake.setPower(0);
@@ -601,17 +619,15 @@ public class NewRoboRed extends LinearOpMode {
 
                     } else if (intakeHand == IntakeHand.IH_RIGHT) {
 
-                        if (rightIntakeTimer.milliseconds() > 500 || bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
+                        if (rightIntakeTimer.milliseconds() > 500 || bucketSensor.alpha() > 200) {
 
-                            if (bucketSensor.getDistance(DistanceUnit.CM) < captureDistance) {
-
-                                gamepad1.rumble(100);
+                            if (bucketSensor.alpha() > 200) {
 
                                 bucket.setPosition(bucket_down);
                                 rightIntake.setPower(0);
                                 intakeState = IntakeState.IS_COMPLETE;
 
-                            } else if (colorSensor_right.getDistance(DistanceUnit.CM) > captureDistance) {
+                            } else if (colorSensor_right.alpha() < 1200) {
 
                                 bucket.setPosition(bucket_down);
                                 rightIntake.setPower(0);
@@ -643,7 +659,7 @@ public class NewRoboRed extends LinearOpMode {
 
                 case IS_COMPLETE_SPECIAL:
 
-                    if (bucketSensor.getDistance(DistanceUnit.CM) > captureDistance) {
+                    if (bucketSensor.alpha() < 70) {
 
                         intakeState = IntakeState.IS_STATIONARY;
                     }
@@ -1503,25 +1519,12 @@ public class NewRoboRed extends LinearOpMode {
 
             }
 
-            if (gamepad1.dpad_right) {
-
-                leftIntake.setPower(0);
-                rightIntake.setPower(0);
-
-                i_topLeft.setPosition(i_maxRange_topLeft);
-                i_bottomLeft.setPosition(i_maxRange_bottomLeft);
-                i_topRight.setPosition(i_maxRange_topRight);
-                i_bottomRight.setPosition(i_maxRange_bottomRight);
-
-                bucket.setPosition(bucket_down);
-
-                intakeState = IntakeState.IS_STATIONARY;
-            }
-
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "leftFront (%.2f), leftBack (%.2f), rightFront (%.2f), rightBack (%.2f)",
                     leftFrontPower, leftBackPower, rightFrontPower, rightBackPower);
-            telemetry.addData("BucketSensor: ", bucketSensor.getDistance(DistanceUnit.CM));
+            telemetry.addData("Left Sensor: ", colorSensor_left.alpha());
+            telemetry.addData("Right Sensor: ", colorSensor_right.alpha());
+            telemetry.addData("BucketSensor: ", bucketSensor.alpha());
             telemetry.addData("Intake State: ", intakeState);
             telemetry.addData("C_Left: ", c_Left.getPower());
             telemetry.addData("C_Right: ", c_Right.getPower());
@@ -1536,6 +1539,8 @@ public class NewRoboRed extends LinearOpMode {
             telemetry.addData("Bucket Position: ", bucket.getPosition());
             telemetry.addData("TopRight: ", i_topRight.getPosition());
             telemetry.addData("BottomRight: ", i_bottomRight.getPosition());
+            telemetry.addData("Blue Values - L: ", colorSensor_left.blue());
+            telemetry.addData("Blue Values - R: ", colorSensor_right.blue());
             telemetry.update();
         }
     }
