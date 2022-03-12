@@ -73,7 +73,7 @@ public class SensorController
     }
     public boolean depositNoCube()
     {
-        if(depositSensor.getDistance(DistanceUnit.MM)>85)
+        if(depositSensor.getDistance(DistanceUnit.MM)>275)
         {
             return true;
         }
@@ -91,15 +91,22 @@ public class SensorController
         }
     }
 
-    public double[] getData()
-    {
+    public double[] getData() {
         updateDepositValue();
-        double[] pain={intakeRange.getDistance(DistanceUnit.CM), depositValue, 0, 0, driveLeft.alpha(), driveRight.alpha()};
+        double[] pain = {intakeRange.getDistance(DistanceUnit.CM), depositValue, 0, 0, driveLeft.alpha(), driveRight.alpha()};
         return pain;
     }
     public void closeIntakeSensor()
     {
         intakeRange.close();
+    }
+    public boolean test()
+    {
+        if(intakeRange.getDistance(DistanceUnit.CM)<10000)
+        {
+            return true;
+        }
+        return false;
     }
 
 }

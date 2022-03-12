@@ -354,7 +354,7 @@ public class SampleMecanumDriveCancelable extends MecanumDrive {
         }
         avgWheelVeloc/=temp.size();
 
-        if(avgWheelVeloc<1.5)
+        if(avgWheelVeloc<2)
         {
             return false;
         }

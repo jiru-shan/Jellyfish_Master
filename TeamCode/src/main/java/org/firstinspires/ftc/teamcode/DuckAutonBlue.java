@@ -46,12 +46,12 @@ public class DuckAutonBlue extends LinearOpMode
         //read vision place
         waitForStart();
         cubePos= pipeline.getAnalysis();
-        camera.stopStreaming();
-        camera.closeCameraDevice();
+        //camera.stopStreaming();
+        //camera.closeCameraDevice();
 
         //move from reading vision to deposit place
         Trajectory trajectory=drive.trajectoryBuilder(drive.getPoseEstimate())
-                .forward(20, SampleMecanumDriveCancelable.getVelocityConstraint(50,
+                .forward(22, SampleMecanumDriveCancelable.getVelocityConstraint(50,
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
                 .build();
         drive.followTrajectory(trajectory);
@@ -61,40 +61,42 @@ public class DuckAutonBlue extends LinearOpMode
 
         //move to carousel
         trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
-                .back(40, SampleMecanumDriveCancelable.getVelocityConstraint(50,
+                .back(37, SampleMecanumDriveCancelable.getVelocityConstraint(50,
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
                 .build();
         drive.followTrajectory(trajectory);
 
         trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
-                .strafeRight(20, SampleMecanumDriveCancelable.getVelocityConstraint(50,
+                .strafeRight(16, SampleMecanumDriveCancelable.getVelocityConstraint(50,
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
                 .build();
         drive.followTrajectory(trajectory);
 
         trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
-                .back(10, SampleMecanumDriveCancelable.getVelocityConstraint(50,
+                .back(13, SampleMecanumDriveCancelable.getVelocityConstraint(50,
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
                 .build();
         drive.followTrajectory(trajectory);
 
         trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
-                .strafeLeft(15, SampleMecanumDriveCancelable.getVelocityConstraint(50,
-                        DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
+                .strafeLeft(11, SampleMecanumDriveCancelable.getVelocityConstraint(20,
+                        DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(10))
                 .build();
         drive.followTrajectory(trajectory);
 
         //turn carousel
-        double tempTarget= SystemClock.uptimeMillis()+2500;
+        double tempTarget= SystemClock.uptimeMillis()+3500;
         while(SystemClock.uptimeMillis()<tempTarget)
         {
-            carousel.setPower(1);
-            carousel2.setPower(1);
+            carousel.setPower(-0.25);
+            carousel2.setPower(-0.25);
         }
 
+        carousel.setPower(0);
+        carousel2.setPower(0);
         //park
         trajectory =drive.trajectoryBuilder(drive.getPoseEstimate())
-                .strafeRight(22, SampleMecanumDriveCancelable.getVelocityConstraint(50,
+                .strafeRight(26, SampleMecanumDriveCancelable.getVelocityConstraint(50,
                         DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH), SampleMecanumDriveCancelable.getAccelerationConstraint(30))
                 .build();
         drive.followTrajectory(trajectory);

@@ -18,7 +18,7 @@ public class LiftTest extends LinearOpMode
     SensorController sensorControl;
     ElapsedTime timer;
     DcMotorEx motor1, motor2;
-    public static int position=350;
+    public static int position=380;
     public static double turretPos=0.35;
     FtcDashboard dashboard;
     TelemetryPacket packet;
@@ -44,8 +44,9 @@ public class LiftTest extends LinearOpMode
         servoControl.raiseAllIntakes();
         waitForStart();
 
-        servoControl.flipOut();
+        //servoControl.flipMedium();
         servoControl.prepDeposit();
+
         timer.reset();
 
         lift.setPosition(position);
@@ -53,10 +54,11 @@ public class LiftTest extends LinearOpMode
         int i=0;
         while(lift.isBusy())
         {
-            //if(lift.getPos2()>100)
-            //{
-              //  servoControl.openTurret();
-            //}
+            if(lift.getPos2()>100)
+            {
+                servoControl.openTurret();
+                servoControl.flipMiddle_level();
+            }
             i++;
             lift.adjustLift();
 
@@ -72,16 +74,20 @@ public class LiftTest extends LinearOpMode
             telemetry.addData(">2: ", lift.getPos2());
             telemetry.update();
         }
+       // servoControl.openTurret();
         packet.put("is busy?: ", lift.isBusy());
         dashboard.sendTelemetryPacket(packet);
         servoControl.openDeposit();
-        lift.brake();
 
-
-        while(!sensorControl.depositNoCube())
+        boolean b=true;
+        while(b)
         {
-
+            if(sensorControl.depositNoCube())
+            {
+                b=false;
+            }
         }
+        servoControl.startingPos();
         packet.put("exited: ", "true");
         dashboard.sendTelemetryPacket(packet);
         servoControl.startingPos();
