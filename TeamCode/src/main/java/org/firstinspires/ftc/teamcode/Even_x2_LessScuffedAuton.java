@@ -45,6 +45,7 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
     }
     //static variables for positions
     final static int LIFT_EXTENDED=340;
+    final static int LIFT_MIDDLE=430;
 
     //changing variables that are used for stuff
     int cubePos;
@@ -148,7 +149,8 @@ public class Even_x2_LessScuffedAuton extends LinearOpMode
                     GState=GrabbingState.GETTING;
                     IState=IntakeState.INTO_DEPOSIT;
 
-                    drive.followTrajectoryAsync(trajGen.firstGoingTrajectory(54+pathChangeReal*2, -1, -3, 65+pathChangeReal*2.5, -1.6-(0.5*pathChangeReal), -8.4-(3.5*pathChangeReal), false));
+                    //54 for x1, and 3.5 for increment on ang 2
+                    drive.followTrajectoryAsync(trajGen.firstGoingTrajectory(51+pathChangeReal*2, -1, -3, 65+pathChangeReal*2.5, -1.6-(0.5*pathChangeReal), -8.4-(3*pathChangeReal), false));
                     //drive.followTrajectoryAsync(trajGen.firstGoingTrajectory(45, -0.25, -1, 73, -0.9-(0.2*pathChangeReal), -2.5-(0.5*pathChangeReal), false));
                     timeStamp1=latencyTimer.milliseconds();
                     break;
