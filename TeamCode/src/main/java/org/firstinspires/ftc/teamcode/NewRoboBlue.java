@@ -277,8 +277,8 @@ public class NewRoboBlue extends LinearOpMode {
         // Lift Positions
         int TARGET_TIPPED = 450;
         int TARGET_BALANCED = 415;
-        int TARGET_MIDDLE = 300;
-        int TARGET_NEAR = 50;
+        int TARGET_MIDDLE = 375;
+        int TARGET_NEAR = 20;
         int TARGET_CENTER = 110;
         int TARGET_FAR = 190;
 
@@ -1310,55 +1310,6 @@ public class NewRoboBlue extends LinearOpMode {
                     break;
             }
 
-//            switch (depositState) {
-//
-//                case DS_STATIONARY:
-//
-//                    bucketTimer.reset();
-//
-//                    if (gamepad1.x) {
-//
-//                        depositHand = DepositHand.DH_LEFT;
-//
-//                        bucket.setPosition(bucket_left);
-//
-//                        depositState = DepositState.DS_TURNED;
-//
-//                    } else if (gamepad1.b) {
-//
-//                        depositHand = DepositHand.DH_RIGHT;
-//
-//                        bucket.setPosition(bucket_right);
-//
-//                        depositState = DepositState.DS_TURNED;
-//                    }
-//
-//                    break;
-//
-//                case DS_TURNED:
-//
-//                    if (depositHand == DepositHand.DH_LEFT) {
-//
-//                        if (bucketTimer.milliseconds() > 500) {
-//
-//                            bucket.setPosition(bucket_down);
-//                            depositHand = DepositHand.DH_STATIONARY;
-//                            depositState = DepositState.DS_STATIONARY;
-//                        }
-//
-//                    } else if (depositHand == DepositHand.DH_RIGHT) {
-//
-//                        if (bucketTimer.milliseconds() > 500) {
-//
-//                            bucket.setPosition(bucket_down);
-//                            depositHand = DepositHand.DH_STATIONARY;
-//                            depositState = DepositState.DS_STATIONARY;
-//                        }
-//                    }
-//
-//                    break;
-//            }
-
             float g = (float) (((gamepad2.left_stick_y) + 1.0) / 2.0);
 
             if (gamepad2.left_stick_y != 0) {
@@ -1417,17 +1368,20 @@ public class NewRoboBlue extends LinearOpMode {
 
                 case CS_STATIONARY:
 
-                    if (gamepad2.left_bumper) {
+                    if (gamepad2.right_stick_y == 0) {
 
-                        carouselTimer.reset();
-                        carouselHand = CarouselHand.CH_LEFT;
-                        carouselState = CarouselState.CS_TURNING;
+                        if (gamepad2.left_bumper) {
 
-                    } else if (gamepad2.right_bumper) {
+                            carouselTimer.reset();
+                            carouselHand = CarouselHand.CH_LEFT;
+                            carouselState = CarouselState.CS_TURNING;
 
-                        carouselTimer.reset();
-                        carouselHand = CarouselHand.CH_RIGHT;
-                        carouselState = CarouselState.CS_TURNING;
+                        } else if (gamepad2.right_bumper) {
+
+                            carouselTimer.reset();
+                            carouselHand = CarouselHand.CH_RIGHT;
+                            carouselState = CarouselState.CS_TURNING;
+                        }
                     }
 
                     break;
@@ -1517,15 +1471,11 @@ public class NewRoboBlue extends LinearOpMode {
                 bucket.setPosition(bucket_down);
             }
 
-
-
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "leftFront (%.2f), leftBack (%.2f), rightFront (%.2f), rightBack (%.2f)",
                     leftFrontPower, leftBackPower, rightFrontPower, rightBackPower);
             telemetry.addData("Left Sensor: ", colorSensor_left.alpha());
             telemetry.addData("Right Sensor: ", colorSensor_right.alpha());
-            telemetry.addData("Dist - Left", colorSensor_left.getDistance(DistanceUnit.CM));
-            telemetry.addData("Dist - Right", colorSensor_right.getDistance(DistanceUnit.CM));
             telemetry.addData("BucketSensor: ", bucketSensor.alpha());
             telemetry.addData("Intake State: ", intakeState);
             telemetry.addData("C_Left: ", c_Left.getPower());
