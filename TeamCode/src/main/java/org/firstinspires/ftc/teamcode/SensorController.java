@@ -32,8 +32,8 @@ public class SensorController
         else {
             intakeRange = hwMap.get(ColorRangeSensor.class, "colorSensor_right");
         }
-        driveLeft=hwMap.get(ColorRangeSensor.class, "driveSensor1");
-        driveRight=hwMap.get(ColorRangeSensor.class, "driveSensor2");
+        driveLeft=hwMap.get(ColorRangeSensor.class, "driveLeft");
+        driveRight=hwMap.get(ColorRangeSensor.class, "driveRight");
         depositSensor=hwMap.get(ColorRangeSensor.class, "bucketSensor");
 
         depositTimer=new ElapsedTime();
@@ -73,7 +73,7 @@ public class SensorController
     }
     public boolean depositNoCube()
     {
-        if(depositSensor.getDistance(DistanceUnit.MM)>275)
+        if(depositSensor.getDistance(DistanceUnit.MM)>500)
         {
             return true;
         }

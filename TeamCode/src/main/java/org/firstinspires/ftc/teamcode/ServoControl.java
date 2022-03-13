@@ -28,22 +28,30 @@ public class ServoControl
     double i_maxRange_bottomRight = 0.97;
 
     double d_open_center=0.48;
-    double d_open_partial_left=0.55;
+    public static double d_open_partial_left=0.5;
     public static double d_open_left=0.17;
-    public static double d_open_partial_right=0.41;
+    public static double d_open_partial_right=0.46;
     public static double d_open_right=0.79;
     public static double d_open_deposit_left=0.72;
     public static double d_open_deposit_right=0.21;
+    public static double d_open_middle_left=0.9;
+    public static double d_open_middle_right;
+    public static double d_open_lowest_left=0.01;
+    public static double d_open_lowest_right=0.01;
 
     double d_arm_default=0.91;
     public static double d_arm_middle_level=0.99;
     public static double d_arm_medium=0.72;
     public static double d_arm_out=0.30;
-
+    public static double d_arm_lowest=1;
 
     public static double d_turret_center=0.52;
     public static double d_turret_open_left=0.25;
-    public static double d_turret_open_right=0.72;
+    public static double d_turret_open_right=0.76;
+    public static double d_turret_lowest_left=0.99;
+    public static double d_turret_lowest_right=0.99;
+
+    //lift:
 
     public ServoControl(HardwareMap map, Side side)
     {
@@ -90,6 +98,17 @@ public class ServoControl
         {
             i_topRight.setPosition(i_maxRange_topRight);
             i_bottomRight.setPosition(i_maxRange_bottomRight);
+        }
+    }
+    public void openDepositMiddleLevel()
+    {
+        if(side==Side.LEFT)
+        {
+            d_open.setPosition(d_open_middle_left);
+        }
+        else if(side==Side.RIGHT)
+        {
+            d_open.setPosition(d_open_middle_right);
         }
     }
     public void raiseAllIntakes()
@@ -152,6 +171,31 @@ public class ServoControl
         {
             d_turret.setPosition(d_turret_open_right);
         }
+    }
+    public void openTurretLow()
+    {
+        if(side==Side.LEFT) {
+            d_turret.setPosition(d_turret_lowest_left);
+        }
+        else if(side==Side.RIGHT)
+        {
+            d_turret.setPosition(d_turret_lowest_right);
+        }
+    }
+    public void openDepositLow()
+    {
+        if(side==Side.LEFT)
+        {
+            d_open.setPosition(d_open_lowest_left);
+        }
+        else if(side==Side.RIGHT)
+        {
+            d_open.setPosition(d_open_lowest_right);
+        }
+    }
+    public void flipLowest()
+    {
+        d_arm.setPosition(d_arm_lowest);
     }
     public void flipMiddle_level()
     {
